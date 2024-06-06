@@ -1,0 +1,44 @@
+# [ System ]
+seed: 1
+verbose: True
+
+
+# [ Model ]
+temperature: 0.5
+top_p: 0.9
+max_seq_len: 512
+max_batch_size: 8
+
+
+# [ Activations ]
+token_places: [-1]
+layers: "all"
+
+
+# [ Data ]
+text_data_folder: "/srv/public/Thibaud/datasets/LLMs/MRI/texts/"
+inputs:
+  # conspiracy:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   ["You are a recognized historian with 20 years experience. Provide minimalistic responses. Given a name that refers to a known conspiracy, you will give the name of the TWO main parties involved. Answer only with the names of poeples, institutions or groups etc."]
+  #   user_prompts:     ['Who is involved in "{}" ?']
+
+  # celebrity:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   [
+  #     "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
+  #     "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+  #   ]
+  #   user_prompts:     ['{}:']
+
+  english_word:
+    switches:         ["real", "fake"]
+    system_prompts:   [
+      "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+      "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+    ]
+    user_prompts:     ['{}:']
+
+
+  # names:
+output_file_name: "inference"

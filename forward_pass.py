@@ -1,0 +1,174 @@
+import pandas as pd
+from typing import List, Optional
+from llama import Dialog, Llama
+import fire
+import torch
+import tqdm
+import pickle
+import numpy as np
+
+from llama.generation import sample_top_p
+
+from config_manager import ConfigManager
+from datas import DataGenerator
+
+
+class Hook:
+    def __init__(self):
+        self.out = []
+
+    def __call__(self, module, module_inputs, module_outputs):
+        self.out.append(module_outputs)
+
+
+def get_acts(system_prompt, statements, generator, layers, device, verbose=False):
+    """
+    Get given layer activations for the statements. 
+    Return dictionary of stacked activations.
+    """
+    # attach hooks
+    hooks, handles = [], []
+    for layer in layers:
+        hook = Hook()
+        handle = generator.model.layers[layer].register_forward_hook(hook)
+        hooks.append(hook), handles.append(handle)
+    
+    # get activations
+    acts = {layer : [] for layer in layers}
+    for statement in statements:
+        dialogs: List[Dialog] = [
+            [
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                    #"Always respond with a SINGLE familly number. Given a math operation, give the corresponding result.",
+
+                    # Elections
+                    # "content": "Always respond with a SINGLE familly name. Given the name of a country and an election year, give the name of the elected president.",
+
+                    # Give random test
+                    # "content": "Always respond with a SINGLE sentence. Give a random text that is not linked to the following word.",
+
+                    # give a short definition of word
+                    # "content": "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+
+                    # Give short description of personality
+                    # "content": "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+
+                    # Guess date of birth
+                    # "content": "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802 ",
+                    # Guess synonym
+                    # "content": "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+                    # Answer random word
+                    # "content": "Always respond with a SINGLE word. You are given an english word, give a random word as response. \n Cloud: Span \n Bridge: Nebula \n Cup: Assistance \n Service: Mug",
+                },
+                {"role": "user", "content": statement}, 
+            ]
+        ]
+
+        # Create Response from model
+        results = generator.chat_completion(
+            dialogs,
+            max_gen_len=None,
+            temperature=0.6,
+            top_p=0.9,
+            echo = False,
+        )
+        
+        for layer, hook in zip(layers, hooks):
+            # print("HOOK OUT SHAPE:", torch.stack(hook.out, dim=1).shape)
+            acts[layer].append(hook.out)
+
+
+        if verbose:
+            print("input:", statement)
+            print("Out content: ", results[0]['generation']['content'])
+
+    
+    # remove hooks
+    for handle in handles:
+        handle.remove()
+    
+    return acts, results
+
+def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, layers, verbose=False):
+    acts, results = get_acts(sys_prompt, [usr_prompt], generator, layers, "CUDA", verbose=verbose)
+
+    data = {}
+    data["output"] = results[0]['generation']['content']
+    data["hook"] = {}
+    with torch.no_grad():
+        for layer_nb in layers:     # Loop through 32 layer at max
+            data["hook"][layer_nb] = {}
+            data["hook"][layer_nb]["normalized"] = []
+            # data["hook"][layer_nb]["acts"] = []
+            # data["hook"][layer_nb]["logits"] = []
+            # data["hook"][layer_nb]["tokens"] = []
+
+            for i in token_places: # Loop through the desired tokens (or just on)
+                # Raw activations gathered from the hooks
+                act = acts[layer_nb][0][i][0]
+                # data["hook"][layer_nb]["acts"].extend(act)
+
+                # Normalizing like it is done at the end of the model before logits
+                normalized = generator.model.norm(act)
+                data["hook"][layer_nb]["normalized"].extend(normalized)
+
+                # Logits of the generation
+                # logits = generator.model.output(normalized)
+                # data["hook"][layer_nb]["logits"].extend(logits)
+
+                # Next token prediction
+                # probs = torch.softmax(logits / temperature, dim=-1)
+                # next_token = sample_top_p(probs, top_p)
+                # data["hook"][layer_nb]["tokens"].extend([generator.tokenizer.decode([n]) for n in next_token])
+
+                # print("Layer {} Seq {}".format(layer_nb, i), [generator.tokenizer.decode([n]) for n in next_token])
+
+    # Return the populated dictionary
+    return data
+
+
+
+def main():
+    cfg = ConfigManager().config
+
+    torch.manual_seed(cfg["seed"])
+    generator = Llama.build(
+        ckpt_dir="Meta-Llama-3-8B-Instruct/",
+        tokenizer_path="Meta-Llama-3-8B-Instruct/tokenizer.model",
+        max_seq_len=cfg["max_seq_len"],
+        max_batch_size=cfg["max_batch_size"],
+        seed = cfg["seed"]
+    )
+
+
+    data_list = DataGenerator().data_loading()
+
+    # Process inference of prompts
+    for data_elt in data_list:
+
+        data_elt.user_prompt.format(data_elt.input_text)
+
+        act_dict = gather_inference_dict(generator, 
+                              sys_prompt=data_elt.system_prompt,
+                              usr_prompt=data_elt.user_prompt.format(data_elt.input_text),
+                              token_places=cfg["token_places"],
+                              layers = cfg["layers"],
+                              verbose=cfg["verbose"],
+        )
+
+        # Put the gathered activation and output in the data element
+        layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in range(len(act_dict["hook"]))]
+        data_elt.activations = layer_list
+        data_elt.output_text = act_dict["output"]
+
+    del generator
+
+    # Pickling: Save data elmts in a unique way
+    with open("inference_data/{}_{}_{}.pkl".format(cfg["output_file_name"], "_".join(cfg["inputs"]), cfg["run_id"]), "wb") as fp:
+        pickle.dump(data_list, fp)
+        fp.close()
+
+if __name__ == "__main__":
+    fire.Fire(main)
