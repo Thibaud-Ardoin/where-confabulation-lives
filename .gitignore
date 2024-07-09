@@ -1,3 +1,7 @@
 inference_data/
 Meta*
 *__pycache__*
+__pycache__/
+__pycache__/*
+text-data/
+*.pyc

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 import os
+from dateutil import parser
 
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -11,12 +12,16 @@ from config_manager import ConfigManager
 class MyData:
     label: int = None
     user_prompt: str = None
+    user_prompt_id : int = None
     system_prompt: str = None
+    system_prompt_id : int = None
     switch_name: str = None
     id: int = None
     input_text: str = None
     activation: Optional[list] = None
     output_text: str = None
+    sufix: str = None
+    input_token_length: int = None
 
 
 class conspiracy(MyData):
@@ -29,8 +34,16 @@ class celebrity(MyData):
 class english_word(MyData):
     synonym: str = None
 
+class date(MyData):
+    date : datetime = None 
 
+class election(MyData):
+    winner: str = None
+    date: datetime = None
+    country: str = None
 
+class character(MyData):
+    description: str
 
 """
     Matching each data type to a special formating to fit the desired data structure
@@ -65,6 +78,30 @@ class DataGenerator():
                     input_text = word
                 )
 
+            case "date":
+                d = text.split(" ")[-1]
+                return date(
+                    input_text = d
+                )
+            
+            case "election":
+                infos = text.split(",")
+                assert len(infos)==3
+                parsed_date = parser.parse(infos[1])
+                return election(
+                    country = infos[0],
+                    input_text = "{} in {}".format(infos[0], parsed_date.year),
+                    date = parsed_date,
+                    winner = infos[2],
+                )
+
+            case "character":
+                infos = text.split(" - ")
+                return character(
+                    description = infos[-1],
+                    input_text = infos[0],
+                )
+
             case _ :
                 raise "DataGenerator -> data.py \n Looks like this type of data is not recognised"
 
@@ -86,6 +123,8 @@ class DataGenerator():
                                     data_elmt.switch_name = switch
                                     data_elmt.user_prompt = user_prompt
                                     data_elmt.system_prompt = system_prompt
+                                    if "sufix" in self.cfg["inputs"][type_name]:
+                                        data_elmt.sufix = self.cfg["inputs"][type_name]["sufix"]
                                     # int
                                     data_elmt.label = i
                                     data_elmt.id = self.global_id

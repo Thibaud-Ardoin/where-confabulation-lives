@@ -11,34 +11,60 @@ max_batch_size: 8
 
 
 # [ Activations ]
-token_places: [-1]
-layers: "all"
+prompt_token: True
+token_places: "all" #[-1]
+layers: [16] #"all"
 
 
 # [ Data ]
-text_data_folder: "/srv/public/Thibaud/datasets/LLMs/MRI/texts/"
+text_data_folder: "text-data"
 inputs:
   # conspiracy:
   #   switches:         ["real", "fake"]
-  #   system_prompts:   ["You are a recognized historian with 20 years experience. Provide minimalistic responses. Given a name that refers to a known conspiracy, you will give the name of the TWO main parties involved. Answer only with the names of poeples, institutions or groups etc."]
-  #   user_prompts:     ['Who is involved in "{}" ?']
+  #   system_prompts:   ["Always respond with a SINGLE sentence. You are given a conspiracy name, give me a short description."]
+  #   user_prompts:     ['{}:']
+  #   sufix: "horizontal"
 
   # celebrity:
   #   switches:         ["real", "fake"]
   #   system_prompts:   [
+  #     # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
   #     "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
-  #     "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+  #     # "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
   #   ]
   #   user_prompts:     ['{}:']
+  # #   # sufix: "random"
+  #   sufix: "horizontal"
 
-  english_word:
+
+  # english_word:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   [
+  #     "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+  #     # "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+  #   ]
+  #   user_prompts:     ['{}:']
+  #   sufix: "horizontal"
+
+  # date:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   [
+  #     "Always respond only YES or NO.",
+  #   ]
+  #   user_prompts:     ['Does {} end with a 1?']
+
+  # election:
+  #   switches:         ["2024", "2022", "2010"]
+  #   system_prompts:   [
+  #     "Always respond only YES or NO.",
+  #   ]
+  #   user_prompts:     ['Could you list events that happend during the presidential election of {}?']
+  #   sufix: "yes-no"
+
+  character:
     switches:         ["real", "fake"]
-    system_prompts:   [
-      "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-      "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
-    ]
+    system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
     user_prompts:     ['{}:']
+    sufix: "horizontal"
 
-
-  # names:
 output_file_name: "inference"

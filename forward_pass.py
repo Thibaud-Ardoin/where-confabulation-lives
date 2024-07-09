@@ -91,11 +91,21 @@ def get_acts(system_prompt, statements, generator, layers, device, verbose=False
     
     return acts, results
 
-def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, layers, verbose=False):
+def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_promt_act, layers, verbose=False):
+    # Get activation from forward pass
     acts, results = get_acts(sys_prompt, [usr_prompt], generator, layers, "CUDA", verbose=verbose)
+
+    input_token_length = len(generator.tokenizer.encode(" ".join([sys_prompt, usr_prompt]), bos=True, eos=False)) + 2
+
+    # Adjust the selected token positions
+    if token_places == "all":
+        token_places = list(range(len(acts[layers[0]][0])))
+    elif take_promt_act :
+        token_places.append(0)
 
     data = {}
     data["output"] = results[0]['generation']['content']
+    data["input_token_length"] = input_token_length
     data["hook"] = {}
     with torch.no_grad():
         for layer_nb in layers:     # Loop through 32 layer at max
@@ -103,12 +113,13 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, layer
             data["hook"][layer_nb]["normalized"] = []
             # data["hook"][layer_nb]["acts"] = []
             # data["hook"][layer_nb]["logits"] = []
-            # data["hook"][layer_nb]["tokens"] = []
-
+            data["hook"][layer_nb]["tokens"] = []
             for i in token_places: # Loop through the desired tokens (or just on)
                 # Raw activations gathered from the hooks
                 act = acts[layer_nb][0][i][0]
                 # data["hook"][layer_nb]["acts"].extend(act)
+                if i==0 and take_promt_act: # Activation of the whole prompt
+                    data["prompt_token_length"] = len(act)
 
                 # Normalizing like it is done at the end of the model before logits
                 normalized = generator.model.norm(act)
@@ -119,11 +130,12 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, layer
                 # data["hook"][layer_nb]["logits"].extend(logits)
 
                 # Next token prediction
-                # probs = torch.softmax(logits / temperature, dim=-1)
-                # next_token = sample_top_p(probs, top_p)
+                # probs = torch.softmax(logits / 0.5, dim=-1)
+                # next_token = sample_top_p(probs, 0.9)
                 # data["hook"][layer_nb]["tokens"].extend([generator.tokenizer.decode([n]) for n in next_token])
 
                 # print("Layer {} Seq {}".format(layer_nb, i), [generator.tokenizer.decode([n]) for n in next_token])
+
 
     # Return the populated dictionary
     return data
@@ -154,14 +166,18 @@ def main():
                               sys_prompt=data_elt.system_prompt,
                               usr_prompt=data_elt.user_prompt.format(data_elt.input_text),
                               token_places=cfg["token_places"],
+                              take_promt_act=cfg["prompt_token"],
                               layers = cfg["layers"],
                               verbose=cfg["verbose"],
         )
 
         # Put the gathered activation and output in the data element
-        layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in range(len(act_dict["hook"]))]
+        layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in cfg["layers"]]
         data_elt.activations = layer_list
         data_elt.output_text = act_dict["output"]
+        data_elt.input_token_length = act_dict["input_token_length"]
+        data_elt.input_token_length = act_dict["prompt_token_length"]
+
 
     del generator
 
@@ -169,6 +185,7 @@ def main():
     with open("inference_data/{}_{}_{}.pkl".format(cfg["output_file_name"], "_".join(cfg["inputs"]), cfg["run_id"]), "wb") as fp:
         pickle.dump(data_list, fp)
         fp.close()
+    print("End of run {}".format(cfg["run_id"]))
 
 if __name__ == "__main__":
     fire.Fire(main)
