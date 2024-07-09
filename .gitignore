@@ -4,4 +4,5 @@ Meta*
 __pycache__/
 __pycache__/*
 text-data/
+text-data
 *.pyc
