@@ -14,6 +14,16 @@ max_batch_size: 8
 prompt_token: True
 token_places: "all" #[-1]
 layers: [16] #"all"
+save_input_token: True
+
+
+# [ Manipulated ]
+manipulation: 
+  switch: False
+  additive_vector_path: "LLMs/mri_llm/inference_data/proj.pkl" 
+  PCA_projection_path: "LLMs/mri_llm/inference_data/unit_delta.pkl" 
+  layer: 16
+
 
 
 # [ Data ]
@@ -21,7 +31,7 @@ text_data_folder: "text-data"
 inputs:
   # conspiracy:
   #   switches:         ["real", "fake"]
-  #   system_prompts:   ["Always respond with a SINGLE sentence. You are given a conspiracy name, give me a short description."]
+  #   system_prompts:   ["Always respond with a SINGLE sentence. You are given a conspiracy name, give me a short description of some complietly unrelated historical facts."]
   #   user_prompts:     ['{}:']
   #   sufix: "horizontal"
 
@@ -29,22 +39,23 @@ inputs:
   #   switches:         ["real", "fake"]
   #   system_prompts:   [
   #     # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
-  #     "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
-  #     # "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+  #     # "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
+  #     "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
   #   ]
   #   user_prompts:     ['{}:']
   # #   # sufix: "random"
-  #   sufix: "horizontal"
+  #   sufix: "horizontal+token"
 
 
-  # english_word:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   [
-  #     "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-  #     # "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
-  #   ]
-  #   user_prompts:     ['{}:']
-  #   sufix: "horizontal"
+  english_word:
+    switches:         ["real", "fake"]
+    system_prompts:   [
+      # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+      "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+    ]
+    user_prompts:     ['{}:']
+    sufix: "horizontal+token"
+
 
   # date:
   #   switches:         ["real", "fake"]
@@ -61,10 +72,10 @@ inputs:
   #   user_prompts:     ['Could you list events that happend during the presidential election of {}?']
   #   sufix: "yes-no"
 
-  character:
-    switches:         ["real", "fake"]
-    system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
-    user_prompts:     ['{}:']
-    sufix: "horizontal"
+  # character:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
+  #   user_prompts:     ['{}:']
+  #   sufix: "horizontal"
 
 output_file_name: "inference"

@@ -20,6 +20,30 @@ class Hook:
     def __call__(self, module, module_inputs, module_outputs):
         self.out.append(module_outputs)
 
+class Hook_input:
+    def __init__(self):
+        self.input = None
+
+    def __call__(self, module, module_inputs, module_outputs):
+        self.input = module_inputs
+
+
+def token2string(generator, tokens):
+    """ 
+        Utilise the Generator parts to hack the string value of a given token. 
+        Could be pretty inaccurate compare to expected output, as it is sometimes intermmediate tokens
+    """
+    normalized = generator.model.norm(tokens)
+    logits = generator.model.output(normalized.clone())
+    probs = torch.softmax(logits / 0.5, dim=-1)
+    next_token = sample_top_p(probs[0], 0.9)
+    string_res = generator.tokenizer.decode([next_token])
+    return string_res
+
+
+
+
+
 
 def get_acts(system_prompt, statements, generator, layers, device, verbose=False):
     """
@@ -33,6 +57,10 @@ def get_acts(system_prompt, statements, generator, layers, device, verbose=False
         handle = generator.model.layers[layer].register_forward_hook(hook)
         hooks.append(hook), handles.append(handle)
     
+    input_hook = Hook_input()
+    input_handle = generator.model.layers[0].register_forward_hook(input_hook)
+
+
     # get activations
     acts = {layer : [] for layer in layers}
     for statement in statements:
@@ -76,9 +104,10 @@ def get_acts(system_prompt, statements, generator, layers, device, verbose=False
         )
         
         for layer, hook in zip(layers, hooks):
-            # print("HOOK OUT SHAPE:", torch.stack(hook.out, dim=1).shape)
             acts[layer].append(hook.out)
 
+        # String conversion of the "input hook". Looks like distorted from the original input.
+        strings1 = token2string(generator, input_hook.input[0])
 
         if verbose:
             print("input:", statement)
@@ -88,6 +117,7 @@ def get_acts(system_prompt, statements, generator, layers, device, verbose=False
     # remove hooks
     for handle in handles:
         handle.remove()
+    input_handle.remove()
     
     return acts, results
 
@@ -95,7 +125,8 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
     # Get activation from forward pass
     acts, results = get_acts(sys_prompt, [usr_prompt], generator, layers, "CUDA", verbose=verbose)
 
-    input_token_length = len(generator.tokenizer.encode(" ".join([sys_prompt, usr_prompt]), bos=True, eos=False)) + 2
+    input_tokens = generator.tokenizer.encode(" ".join([sys_prompt, usr_prompt]), bos=True, eos=False)
+    input_token_length = len(input_tokens) + 2
 
     # Adjust the selected token positions
     if token_places == "all":
@@ -106,6 +137,8 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
     data = {}
     data["output"] = results[0]['generation']['content']
     data["input_token_length"] = input_token_length
+    data["prompt_token_emb"] = generator.model.norm(generator.model.tok_embeddings(torch.tensor(results[0]['prompt_token_id'])))
+    data["gen_token_emb"] = generator.model.norm(generator.model.tok_embeddings(torch.tensor(results[0]['gen_token_id'])))
     data["hook"] = {}
     with torch.no_grad():
         for layer_nb in layers:     # Loop through 32 layer at max
@@ -122,8 +155,8 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
                     data["prompt_token_length"] = len(act)
 
                 # Normalizing like it is done at the end of the model before logits
-                normalized = generator.model.norm(act)
-                data["hook"][layer_nb]["normalized"].extend(normalized)
+                # normalized = generator.model.norm(act)
+                data["hook"][layer_nb]["normalized"].extend(act)#normalized)
 
                 # Logits of the generation
                 # logits = generator.model.output(normalized)
@@ -177,6 +210,8 @@ def main():
         data_elt.output_text = act_dict["output"]
         data_elt.input_token_length = act_dict["input_token_length"]
         data_elt.input_token_length = act_dict["prompt_token_length"]
+        data_elt.prompt_token_emb = act_dict["prompt_token_emb"]
+        data_elt.gen_token_emb = act_dict["gen_token_emb"]
 
 
     del generator
