@@ -1,0 +1,4 @@
+prepare:
+  seed: 1
+inference:
+  seed: 1

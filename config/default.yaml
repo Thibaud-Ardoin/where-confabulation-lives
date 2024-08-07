@@ -4,13 +4,17 @@ verbose: True
 
 
 # [ Model ]
+model_path: "models/Meta-Llama-3-8B-Instruct/"
+tokenizer_path: "models/Meta-Llama-3-8B-Instruct/tokenizer.model"
 temperature: 0.5
 top_p: 0.9
 max_seq_len: 512
 max_batch_size: 8
+generation_verbose: False
 
 
 # [ Activations ]
+inference_data_folder: "data/inference"
 prompt_token: True
 token_places: "all" #[-1]
 layers: [16] #"all"
@@ -27,7 +31,8 @@ manipulation:
 
 
 # [ Data ]
-text_data_folder: "text-data"
+text_data_folder: "data/text"
+prepared_data_folder: "data/prepared"
 inputs:
   conspiracy:
     switches:         ["real", "fake"]
@@ -35,58 +40,55 @@ inputs:
     user_prompts:     ['{}:']
     sufix: "horizontal+token"
 
-  # celebrity:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   [
-  #     # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
-  #     # "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
-  #     "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
-  #   ]
-  #   user_prompts:     ['{}:']
-  # #   # sufix: "random"
-  #   sufix: "horizontal+token"
+  celebrity:
+    switches:         ["real", "fake"]
+    system_prompts:   [
+      # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
+      "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
+      # "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+    ]
+    user_prompts:     ['{}:']
+  #   # sufix: "random"
+    sufix: "horizontal+token"
 
+  english_word:
+    switches:         ["real", "fake"]
+    system_prompts:   [
+      "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+      # "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+    ]
+    user_prompts:     ['{}:']
+    sufix: "horizontal+token"
 
-  # english_word:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   [
-  #     # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-  #     "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
-  #   ]
-  #   user_prompts:     ['{}:']
-  #   sufix: "horizontal+token"
+  french_word:
+    switches:         ["real", "fake"]
+    system_prompts:   [
+      # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+      "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet \n Outillage: Meteriel",
+      # "Repond toujours en une SEULE phrase. A partir d'un mot français, donne moi une courte definition.",
+    ]
+    user_prompts:     ['{}:']
+    sufix: "horizontal+token"
 
-  # french_word:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   [
-  #     # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-  #     "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet \n Outillage: Meteriel",
-  #     "Repond toujours en une SEULe phrase. A partir d'un mot français, donne moi une courte definition.",
-  #   ]
-  #   user_prompts:     ['{}:']
-  #   sufix: "horizontal+token"
+  date:
+    switches:         ["real", "fake"]
+    system_prompts:   [
+      "Always respond only YES or NO.",
+    ]
+    user_prompts:     ['Does {} end with a 1?']
 
+  election:
+    switches:         ["2024", "2022", "2010"]
+    system_prompts:   [
+      "Always respond only YES or NO.",
+    ]
+    user_prompts:     ['Could you list events that happend during the presidential election of {}?']
+    sufix: "yes-no"
 
-
-  # date:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   [
-  #     "Always respond only YES or NO.",
-  #   ]
-  #   user_prompts:     ['Does {} end with a 1?']
-
-  # election:
-  #   switches:         ["2024", "2022", "2010"]
-  #   system_prompts:   [
-  #     "Always respond only YES or NO.",
-  #   ]
-  #   user_prompts:     ['Could you list events that happend during the presidential election of {}?']
-  #   sufix: "yes-no"
-
-  # character:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
-  #   user_prompts:     ['{}:']
-  #   sufix: "horizontal"
+  character:
+    switches:         ["real", "fake"]
+    system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
+    user_prompts:     ['{}:']
+    sufix: "horizontal"
 
 output_file_name: "inference"

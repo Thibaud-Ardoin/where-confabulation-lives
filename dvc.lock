@@ -1,0 +1,66 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py english_word celebrity
+    deps:
+    - path: config/default.yaml
+      hash: md5
+      md5: 8f1c25b1d382411e05ed39448a433519
+      size: 3274
+    - path: data/text/celebrity_fake
+      hash: md5
+      md5: 06b9861afd9cb259288395b1e629f0df
+      size: 966
+    - path: data/text/celebrity_real
+      hash: md5
+      md5: 9e6f903511807735ba0e154689997211
+      size: 2960
+    - path: data/text/english_word_fake
+      hash: md5
+      md5: 384af22d3fa69ccf4968b1cef148f28d
+      size: 1096
+    - path: data/text/english_word_real
+      hash: md5
+      md5: 05c3d88b220b4fd67844410156e63d27
+      size: 991
+    - path: src/prepare.py
+      hash: md5
+      md5: 46d2913eac108d6886734543663a4940
+      size: 1218
+    params:
+      params.yaml:
+        prepare.seed: 1
+    outs:
+    - path: data/prepared
+      hash: md5
+      md5: 5406f01800694a27a75df1ade358b661.dir
+      size: 22878
+      nfiles: 2
+  inference:
+    cmd: torchrun src/inference.py english_word celebrity
+    deps:
+    - path: config/default.yaml
+      hash: md5
+      md5: 8f1c25b1d382411e05ed39448a433519
+      size: 3274
+    - path: data/prepared/celebrity.pkl
+      hash: md5
+      md5: 0f67246c1b00146520523778310e5fd2
+      size: 10849
+    - path: data/prepared/english_word.pkl
+      hash: md5
+      md5: 6f870fab4f54181214d3cb6a8ee9ab49
+      size: 12029
+    - path: src/inference.py
+      hash: md5
+      md5: 0fbe41e8c6e265419549ec2c5b828c1c
+      size: 7843
+    params:
+      params.yaml:
+        inference.seed: 1
+    outs:
+    - path: data/inference
+      hash: md5
+      md5: e90e8ab2d9afd817247cad9b115a5e07.dir
+      size: 12181069366
+      nfiles: 6

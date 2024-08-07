@@ -1,11 +1,12 @@
 import pandas as pd
 from typing import List, Optional
 from llama import Dialog, Llama
-import fire
 import torch
 import tqdm
 import pickle
 import numpy as np
+import sys
+import os
 
 from llama.generation import sample_top_p
 
@@ -69,26 +70,6 @@ def get_acts(system_prompt, statements, generator, layers, device, verbose=False
                 {
                     "role": "system",
                     "content": system_prompt,
-                    #"Always respond with a SINGLE familly number. Given a math operation, give the corresponding result.",
-
-                    # Elections
-                    # "content": "Always respond with a SINGLE familly name. Given the name of a country and an election year, give the name of the elected president.",
-
-                    # Give random test
-                    # "content": "Always respond with a SINGLE sentence. Give a random text that is not linked to the following word.",
-
-                    # give a short definition of word
-                    # "content": "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
-
-                    # Give short description of personality
-                    # "content": "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
-
-                    # Guess date of birth
-                    # "content": "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802 ",
-                    # Guess synonym
-                    # "content": "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-                    # Answer random word
-                    # "content": "Always respond with a SINGLE word. You are given an english word, give a random word as response. \n Cloud: Span \n Bridge: Nebula \n Cup: Assistance \n Service: Mug",
                 },
                 {"role": "user", "content": statement}, 
             ]
@@ -178,49 +159,61 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
 def main():
     cfg = ConfigManager().config
 
+    # Sanity check
+    if len(sys.argv) < 2:
+        sys.stderr.write("Arguments error. Usage:\n")
+        sys.stderr.write("\tpython inference.py data-type\n")
+        sys.exit(1)
+
+    # Load the prepared pickle data
+    prepared_data_list = []
+    print(sys.argv)
+    for input_type in sys.argv[1:]:
+        prepared_data_list.append(pickle.load(open(os.path.join(cfg["prepared_data_folder"], input_type + ".pkl"), "rb")))
+
+
     torch.manual_seed(cfg["seed"])
     generator = Llama.build(
-        ckpt_dir="Meta-Llama-3-8B-Instruct/",
-        tokenizer_path="Meta-Llama-3-8B-Instruct/tokenizer.model",
+        ckpt_dir=cfg["model_path"],
+        tokenizer_path=cfg["tokenizer_path"],
         max_seq_len=cfg["max_seq_len"],
         max_batch_size=cfg["max_batch_size"],
         seed = cfg["seed"]
     )
 
 
-    data_list = DataGenerator().data_loading()
+    sys.stderr.write("** Inference of the model! Can take a bit of time **\n")
 
-    # Process inference of prompts
-    for data_elt in data_list:
+    # Process inference of prompts and gather activations to populate the prepared data
+    for prepared_type in prepared_data_list:
+        for data_elt in prepared_type:
+            act_dict = gather_inference_dict(generator, 
+                                sys_prompt=data_elt.system_prompt,
+                                usr_prompt=data_elt.user_prompt.format(data_elt.input_text),
+                                token_places=cfg["token_places"],
+                                take_promt_act=cfg["prompt_token"],
+                                layers = cfg["layers"],
+                                verbose=cfg["verbose"] and cfg["generation_verbose"],
+            )
 
-        data_elt.user_prompt.format(data_elt.input_text)
+            # Put the gathered activation and output in the data element
+            layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in cfg["layers"]]
+            data_elt.activations = layer_list
+            data_elt.output_text = act_dict["output"]
+            data_elt.input_token_length = act_dict["input_token_length"]
+            data_elt.input_token_length = act_dict["prompt_token_length"]
+            data_elt.prompt_token_emb = act_dict["prompt_token_emb"]
+            data_elt.gen_token_emb = act_dict["gen_token_emb"]
 
-        act_dict = gather_inference_dict(generator, 
-                              sys_prompt=data_elt.system_prompt,
-                              usr_prompt=data_elt.user_prompt.format(data_elt.input_text),
-                              token_places=cfg["token_places"],
-                              take_promt_act=cfg["prompt_token"],
-                              layers = cfg["layers"],
-                              verbose=cfg["verbose"],
-        )
-
-        # Put the gathered activation and output in the data element
-        layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in cfg["layers"]]
-        data_elt.activations = layer_list
-        data_elt.output_text = act_dict["output"]
-        data_elt.input_token_length = act_dict["input_token_length"]
-        data_elt.input_token_length = act_dict["prompt_token_length"]
-        data_elt.prompt_token_emb = act_dict["prompt_token_emb"]
-        data_elt.gen_token_emb = act_dict["gen_token_emb"]
-
+        # save as pickle file the prepared type data lists
+        with open(os.path.join(cfg["inference_data_folder"], "{}.pkl".format(data_elt.__class__.__name__)), "wb") as fp:
+            pickle.dump(prepared_type, fp)
+            fp.close()
+        msg = "The Key type {}, with {} different entries is saved with inference\n"
+        sys.stderr.write(msg.format(data_elt.__class__.__name__, len(prepared_type)))
 
     del generator
 
-    # Pickling: Save data elmts in a unique way
-    with open("inference_data/{}_{}_{}.pkl".format(cfg["output_file_name"], "_".join(cfg["inputs"]), cfg["run_id"]), "wb") as fp:
-        pickle.dump(data_list, fp)
-        fp.close()
-    print("End of run {}".format(cfg["run_id"]))
 
 if __name__ == "__main__":
-    fire.Fire(main)
+    main()

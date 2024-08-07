@@ -6,3 +6,5 @@ __pycache__/*
 text-data/
 text-data
 *.pyc
+.dvc/config
+.dvc/cache

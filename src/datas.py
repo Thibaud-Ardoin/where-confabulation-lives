@@ -115,11 +115,17 @@ class DataGenerator():
                 raise "DataGenerator -> data.py \n Looks like this type of data is not recognised"
 
 
+
     # Global loop over all the files that needs to be converted in datasets
     def data_loading(self):
         generated_data = []
         for type_name in self.cfg["inputs"]:
-            for i, switch in enumerate(self.cfg["inputs"][type_name]["switches"]):
+            generated_data.extend(self.aggregate_type_data(type_name))
+        return generated_data
+
+    def aggregate_type_data(self, type_name):
+        generated_data = []
+        for i, switch in enumerate(self.cfg["inputs"][type_name]["switches"]):
                 file_name = os.path.join(self.cfg["text_data_folder"], "{}_{}".format(type_name, switch))
                 with open(file_name) as f:
                     for lin in f:
@@ -142,8 +148,8 @@ class DataGenerator():
                                     generated_data.append(data_elmt)
         return generated_data
 
-
-
+    def load_from_type(self, file_name):
+        return self.aggregate_type_data(file_name)
 
 
 if __name__ == "__main__": 
