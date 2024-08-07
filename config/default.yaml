@@ -29,11 +29,11 @@ manipulation:
 # [ Data ]
 text_data_folder: "text-data"
 inputs:
-  # conspiracy:
-  #   switches:         ["real", "fake"]
-  #   system_prompts:   ["Always respond with a SINGLE sentence. You are given a conspiracy name, give me a short description of some complietly unrelated historical facts."]
-  #   user_prompts:     ['{}:']
-  #   sufix: "horizontal"
+  conspiracy:
+    switches:         ["real", "fake"]
+    system_prompts:   ["Always respond with a SINGLE sentence. You are given the name of an historical phenomena, give me a short neutral description."]
+    user_prompts:     ['{}:']
+    sufix: "horizontal+token"
 
   # celebrity:
   #   switches:         ["real", "fake"]
@@ -47,14 +47,25 @@ inputs:
   #   sufix: "horizontal+token"
 
 
-  english_word:
-    switches:         ["real", "fake"]
-    system_prompts:   [
-      # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-      "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
-    ]
-    user_prompts:     ['{}:']
-    sufix: "horizontal+token"
+  # english_word:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   [
+  #     # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+  #     "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+  #   ]
+  #   user_prompts:     ['{}:']
+  #   sufix: "horizontal+token"
+
+  # french_word:
+  #   switches:         ["real", "fake"]
+  #   system_prompts:   [
+  #     # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+  #     "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet \n Outillage: Meteriel",
+  #     "Repond toujours en une SEULe phrase. A partir d'un mot français, donne moi une courte definition.",
+  #   ]
+  #   user_prompts:     ['{}:']
+  #   sufix: "horizontal+token"
+
 
 
   # date:

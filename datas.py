@@ -34,6 +34,9 @@ class celebrity(MyData):
 class english_word(MyData):
     synonym: str = None
 
+class french_word(MyData):
+    synonym: str = None
+
 class date(MyData):
     date : datetime = None 
 
@@ -75,6 +78,12 @@ class DataGenerator():
             case "english_word":
                 word = text.split(" ")[-1]
                 return english_word(
+                    input_text = word
+                )
+            
+            case "french_word":
+                word = text
+                return french_word(
                     input_text = word
                 )
 
