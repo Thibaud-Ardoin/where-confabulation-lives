@@ -77,22 +77,22 @@ stages:
       size: 88301909
     - path: src/detection.py
       hash: md5
-      md5: 3c104d8122db30500cadaed2a046988a
-      size: 3839
+      md5: f8a40230e6203f5fe49526290c73c770
+      size: 4336
     params:
       params.yaml:
         detection.seed: 1
     outs:
     - path: data/detection
       hash: md5
-      md5: 155bb7de743018bb0e6996b0aefa6b7a.dir
+      md5: bac7efb32d940b2afb878c2b64ad2544.dir
       size: 185864983
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: 19ce03607f1843a57f08030c5874a6bd.dir
-      size: 4325
-      nfiles: 1
+      md5: 15099e447ed6aa4ddd3023f690ecb358.dir
+      size: 98723
+      nfiles: 3
   projection:
     cmd: python src/projection.py english_word celebrity
     deps:

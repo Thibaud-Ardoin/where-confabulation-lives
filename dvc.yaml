@@ -46,3 +46,15 @@ stages:
     outs:
     - data/detection
     - models/detection
+
+  evaluation:
+    cmd: python src/evaluation.py english_word celebrity
+    deps:
+    - src/evaluation.py
+    - data/projected/english_word.pkl
+    - data/projected/celebrity.pkl
+    - models/detection
+    params:
+    - evaluation.seed
+    outs:
+    - data/evaluation

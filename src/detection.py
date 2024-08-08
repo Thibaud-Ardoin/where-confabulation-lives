@@ -7,6 +7,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA, FactorAnalysis
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.svm import SVC
+from sklearn.linear_model import SGDClassifier
+import xgboost as xgb
 
 import pickle
 import torch as t
@@ -21,16 +23,23 @@ class DetectionModel:
         self.cfg = conf
     def train(self, train_data):
         raise NotImplementedError("train method must be implemented in the subclass")
-    def evaluate(self, test_data):
-        raise NotImplementedError("evaluate method must be implemented in the subclass")
-    def project(self, data):
-        raise NotImplementedError("project method must be implemented in the subclass")
+    def evaluate(self, some_data):
+        accuracy = self.model.score(*self.data_to_numpy(some_data, labels=True))
+        return accuracy
+    def fwd(self, data):
+        return self.model.predict([data.activations])[0]
     def data_to_numpy(self, some_data, labels=False):
         X = np.array([data_elt.activations for data_elt in some_data])
         if labels:
             Y = np.array([data_elt.label for data_elt in some_data])
             return X, Y
         return X
+    def predict_proba(self, X):
+        return self.model.predict_proba(X)
+    def eval(self, X, Y):
+        self.score = self.model.score(X, Y)
+        if self.cfg["verbose"]:
+            sys.stderr.write(f"Model {self.model_type} trained with score {self.score}\n")
 
 class SVCDetectionModel(DetectionModel):
     """
@@ -40,25 +49,29 @@ class SVCDetectionModel(DetectionModel):
         X, Y = self.data_to_numpy(train_data, labels=True)
         self.model = SVC()
         self.model.fit(X, Y)
-        self.score = self.model.score(X, Y)
-
-    def evaluate(self, some_data):
-        accuracy = self.model.score(self.data_to_numpy(some_data, labels=True))
-        return accuracy
+        self.eval(X, Y)
     
-    def fwd(self, data):
-        return self.model.predict([data.activations])[0]
+class SGDDetectionModel(DetectionModel):
+    """
+        Stochastic Gradiant descent (SGD)
+    """
+    def train(self, train_data):
+        X, Y = self.data_to_numpy(train_data, labels=True)
+        self.model = SGDClassifier(loss="hinge", penalty="l2", 
+                                   max_iter=self.cfg["detection_models"]["SGDDetectionModel"]["max_iter"])
+        self.model.fit(X, Y)
+        self.eval(X, Y)
 
-class LogisticRegressionDetectionModel(DetectionModel):
-    def train(self, train_data, train_labels):
-        self.model = LogisticRegression()
-        self.model.fit(train_data, train_labels)
-
-    def evaluate(self, test_data):
-        accuracy = self.model.score(self.data_to_numpy(test_data, labels=True))
-
-    def project(self, data):
-        return self.model.predict(data)
+class XGBDetectionModel(DetectionModel):
+    """
+        XGBoost Classifier
+    """
+    def train(self, train_data):
+        X, Y = self.data_to_numpy(train_data, labels=True)
+        # XGBoost model with the parameters from the config file
+        self.model = xgb.XGBClassifier(**self.cfg["detection_models"]["XGBDetectionModel"])
+        self.model.fit(X, Y)
+        self.eval(X, Y)
 
 
 def load_data(folder, name):

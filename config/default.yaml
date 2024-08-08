@@ -25,7 +25,21 @@ detection_data_folder: "data/detection"
 detection_model_path: "models/detection/"
 detection_models:
   SVCDetectionModel:
-    what
+    max_iter: 100
+  SGDDetectionModel:
+    max_iter: 5
+  XGBDetectionModel:
+    n_estimators: 100
+    max_depth: 3
+    learning_rate: 0.1
+    subsample: 0.5
+    colsample_bytree: 0.5
+    gamma: 0
+    reg_alpha: 0
+    reg_lambda: 1
+    objective: "binary:logistic"
+    eval_metric: "logloss"
+    verbosity: 0
 
 # [ Projection ]
 projection_data_folder: "data/projected"

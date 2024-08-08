@@ -10,3 +10,5 @@ projection:
 detection:
   seed: 1
 
+evaluation:
+  seed: 1
