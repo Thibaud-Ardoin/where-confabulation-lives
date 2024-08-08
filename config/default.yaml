@@ -20,6 +20,19 @@ token_places: "all" #[-1]
 layers: [16] #"all"
 save_input_token: True
 
+# [ Detection ]
+detection_data_folder: "data/detection"
+detection_model_path: "models/detection/"
+detection_models:
+  SVCDetectionModel:
+    what
+
+# [ Projection ]
+projection_data_folder: "data/projected"
+projection_model_path: "models/projection/"
+projections:
+  PCAProjectionModel:
+    n_components: 2
 
 # [ Manipulated ]
 manipulation: 

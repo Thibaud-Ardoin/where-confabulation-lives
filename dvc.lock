@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/default.yaml
       hash: md5
-      md5: 8f1c25b1d382411e05ed39448a433519
-      size: 3274
+      md5: bb4c9b64e8ce23a517b570652b728937
+      size: 3458
     - path: data/text/celebrity_fake
       hash: md5
       md5: 06b9861afd9cb259288395b1e629f0df
@@ -41,8 +41,8 @@ stages:
     deps:
     - path: config/default.yaml
       hash: md5
-      md5: 8f1c25b1d382411e05ed39448a433519
-      size: 3274
+      md5: bb4c9b64e8ce23a517b570652b728937
+      size: 3458
     - path: data/prepared/celebrity.pkl
       hash: md5
       md5: 0f67246c1b00146520523778310e5fd2
@@ -53,14 +53,72 @@ stages:
       size: 12029
     - path: src/inference.py
       hash: md5
-      md5: 0fbe41e8c6e265419549ec2c5b828c1c
-      size: 7843
+      md5: f1a1bcbfc19cb83d5b7ee5a2785994d2
+      size: 7823
     params:
       params.yaml:
         inference.seed: 1
     outs:
     - path: data/inference
       hash: md5
-      md5: e90e8ab2d9afd817247cad9b115a5e07.dir
+      md5: d511bc11b680314e73bdb2a47abb9528.dir
       size: 12181069366
       nfiles: 6
+  detection:
+    cmd: python src/detection.py english_word celebrity
+    deps:
+    - path: data/projected/celebrity.pkl
+      hash: md5
+      md5: bc5bab161106afde635c0709199500de
+      size: 97555803
+    - path: data/projected/english_word.pkl
+      hash: md5
+      md5: dbd25cc1f01aa73d736f86e2afc31d2a
+      size: 88301909
+    - path: src/detection.py
+      hash: md5
+      md5: 3c104d8122db30500cadaed2a046988a
+      size: 3839
+    params:
+      params.yaml:
+        detection.seed: 1
+    outs:
+    - path: data/detection
+      hash: md5
+      md5: 155bb7de743018bb0e6996b0aefa6b7a.dir
+      size: 185864983
+      nfiles: 2
+    - path: models/detection
+      hash: md5
+      md5: 19ce03607f1843a57f08030c5874a6bd.dir
+      size: 4325
+      nfiles: 1
+  projection:
+    cmd: python src/projection.py english_word celebrity
+    deps:
+    - path: data/inference/celebrity.pkl
+      hash: md5
+      md5: 23e3584b5516797658ecdbf55e31da62
+      size: 7398122676
+    - path: data/inference/english_word.pkl
+      hash: md5
+      md5: de16042828ceecc800157447f1cf5682
+      size: 4782616978
+    - path: src/projection.py
+      hash: md5
+      md5: c24acdf65b61eec50de0ca4809378214
+      size: 4467
+    params:
+      params.yaml:
+        projection.seed: 1
+    outs:
+    - path: data/projected
+      hash: md5
+      md5: 8075baedcb01b6dcf314d179b5bab1b2.dir
+      size: 185857712
+      nfiles: 2
+    - path: models/projection
+      hash: md5
+      md5: 243bb4ee1c7153b302f240ee31f56d6d.dir
+      size: 134319532
+      nfiles: 1

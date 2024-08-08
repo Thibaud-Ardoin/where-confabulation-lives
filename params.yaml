@@ -1,4 +1,12 @@
 prepare:
   seed: 1
+
 inference:
   seed: 1
+
+projection:
+  seed: 1
+
+detection:
+  seed: 1
+

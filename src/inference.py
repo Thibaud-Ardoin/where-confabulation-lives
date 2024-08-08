@@ -167,7 +167,6 @@ def main():
 
     # Load the prepared pickle data
     prepared_data_list = []
-    print(sys.argv)
     for input_type in sys.argv[1:]:
         prepared_data_list.append(pickle.load(open(os.path.join(cfg["prepared_data_folder"], input_type + ".pkl"), "rb")))
 

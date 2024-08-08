@@ -1,10 +1,7 @@
 stages:
   prepare:
     cmd: python src/prepare.py english_word celebrity
-    outs:
-     - data/prepared 
     deps:
-    - config/default.yaml
     - src/prepare.py
     - data/text/english_word_fake 
     - data/text/english_word_real 
@@ -12,11 +9,12 @@ stages:
     - data/text/celebrity_real 
     params: 
     - prepare.seed
+    outs:
+     - data/prepared 
 
   inference:
     cmd: torchrun src/inference.py english_word celebrity
     deps:
-    - config/default.yaml
     - src/inference.py
     - data/prepared/english_word.pkl
     - data/prepared/celebrity.pkl
@@ -24,3 +22,27 @@ stages:
     - inference.seed
     outs:
     - data/inference
+
+  projection:
+    cmd: python src/projection.py english_word celebrity
+    deps:
+    - src/projection.py
+    - data/inference/english_word.pkl
+    - data/inference/celebrity.pkl
+    params:
+    - projection.seed
+    outs:
+    - data/projected
+    - models/projection
+
+  detection:
+    cmd: python src/detection.py english_word celebrity
+    deps:
+    - src/detection.py
+    - data/projected/english_word.pkl
+    - data/projected/celebrity.pkl
+    params:
+    - detection.seed
+    outs:
+    - data/detection
+    - models/detection
