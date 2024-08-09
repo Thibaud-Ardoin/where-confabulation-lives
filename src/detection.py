@@ -47,7 +47,7 @@ class SVCDetectionModel(DetectionModel):
     """
     def train(self, train_data):
         X, Y = self.data_to_numpy(train_data, labels=True)
-        self.model = SVC()
+        self.model = SVC(**self.cfg["detection_models"]["SVCDetectionModel"])
         self.model.fit(X, Y)
         self.eval(X, Y)
     
@@ -57,8 +57,7 @@ class SGDDetectionModel(DetectionModel):
     """
     def train(self, train_data):
         X, Y = self.data_to_numpy(train_data, labels=True)
-        self.model = SGDClassifier(loss="hinge", penalty="l2", 
-                                   max_iter=self.cfg["detection_models"]["SGDDetectionModel"]["max_iter"])
+        self.model = SGDClassifier(**self.cfg["detection_models"]["SGDDetectionModel"])
         self.model.fit(X, Y)
         self.eval(X, Y)
 

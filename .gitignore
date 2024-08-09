@@ -8,3 +8,4 @@ text-data
 *.pyc
 .dvc/config
 .dvc/cache
+/eval

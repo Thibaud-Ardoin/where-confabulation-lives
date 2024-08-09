@@ -26,8 +26,10 @@ detection_model_path: "models/detection/"
 detection_models:
   SVCDetectionModel:
     max_iter: 100
+    probability: True
   SGDDetectionModel:
     max_iter: 5
+    loss: "log_loss"
   XGBDetectionModel:
     n_estimators: 100
     max_depth: 3
@@ -54,6 +56,9 @@ manipulation:
   additive_vector_path: "LLMs/mri_llm/inference_data/proj.pkl" 
   PCA_projection_path: "LLMs/mri_llm/inference_data/unit_delta.pkl" 
   layer: 16
+
+# [ Evaluatoin ]
+evaluation_folder: "eval/"
 
 
 

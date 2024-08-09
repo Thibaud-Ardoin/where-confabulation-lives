@@ -57,4 +57,4 @@ stages:
     params:
     - evaluation.seed
     outs:
-    - data/evaluation
+    - eval

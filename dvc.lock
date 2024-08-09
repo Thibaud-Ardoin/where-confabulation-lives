@@ -77,21 +77,21 @@ stages:
       size: 88301909
     - path: src/detection.py
       hash: md5
-      md5: f8a40230e6203f5fe49526290c73c770
-      size: 4336
+      md5: 52b28d475898fa5bce6a5abb222d6637
+      size: 4304
     params:
       params.yaml:
         detection.seed: 1
     outs:
     - path: data/detection
       hash: md5
-      md5: bac7efb32d940b2afb878c2b64ad2544.dir
+      md5: 9b0f7a59d3911637e3a18f8ab88fb441.dir
       size: 185864983
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: 15099e447ed6aa4ddd3023f690ecb358.dir
-      size: 98723
+      md5: 6657ddc3ad59926dc3ce8cff88284a1c.dir
+      size: 98827
       nfiles: 3
   projection:
     cmd: python src/projection.py english_word celebrity
@@ -122,3 +122,32 @@ stages:
       md5: 243bb4ee1c7153b302f240ee31f56d6d.dir
       size: 134319532
       nfiles: 1
+  evaluation:
+    cmd: python src/evaluation.py english_word celebrity
+    deps:
+    - path: data/projected/celebrity.pkl
+      hash: md5
+      md5: bc5bab161106afde635c0709199500de
+      size: 97555803
+    - path: data/projected/english_word.pkl
+      hash: md5
+      md5: dbd25cc1f01aa73d736f86e2afc31d2a
+      size: 88301909
+    - path: models/detection
+      hash: md5
+      md5: 6657ddc3ad59926dc3ce8cff88284a1c.dir
+      size: 98827
+      nfiles: 3
+    - path: src/evaluation.py
+      hash: md5
+      md5: a37a2efa76e062a80f2af435725abfad
+      size: 4026
+    params:
+      params.yaml:
+        evaluation.seed: 1
+    outs:
+    - path: eval
+      hash: md5
+      md5: 078d6bbf711d444091c92ea6444d2d16.dir
+      size: 44280
+      nfiles: 6
