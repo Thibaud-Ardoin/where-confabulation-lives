@@ -159,18 +159,12 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
 def main():
     cfg = ConfigManager().config
 
-    # Sanity check
-    if len(sys.argv) < 2:
-        sys.stderr.write("Arguments error. Usage:\n")
-        sys.stderr.write("\tpython inference.py data-type\n")
-        sys.exit(1)
-
     # Load the prepared pickle data
     prepared_data_list = []
-    for input_type in sys.argv[1:]:
-        prepared_data_list.append(pickle.load(open(os.path.join(cfg["prepared_data_folder"], input_type + ".pkl"), "rb")))
+    for input_type in cfg["experiment"]["training_data"] + cfg["experiment"]["testing_data"]:
+        prepared_data_list.append(pickle.load(open(os.path.join(cfg["prepare"]["prepared_data_folder"], input_type + ".pkl"), "rb")))
 
-
+    cfg = cfg["inference"]
     torch.manual_seed(cfg["seed"])
     generator = Llama.build(
         ckpt_dir=cfg["model_path"],
@@ -192,7 +186,7 @@ def main():
                                 token_places=cfg["token_places"],
                                 take_promt_act=cfg["prompt_token"],
                                 layers = cfg["layers"],
-                                verbose=cfg["verbose"] and cfg["generation_verbose"],
+                                verbose=cfg["generation_verbose"],
             )
 
             # Put the gathered activation and output in the data element

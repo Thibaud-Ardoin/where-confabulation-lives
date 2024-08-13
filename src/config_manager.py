@@ -4,9 +4,9 @@ import numpy as np
 
 class ConfigManager:
     _instance = None
-    _file_root = "./config"
+    _file_root = ""
 
-    def __new__(cls, experiment_name='default'):
+    def __new__(cls, experiment_name='params'):
         if cls._instance is None:
             cls._instance = super(ConfigManager, cls).__new__(cls)
             cls._instance._load_config(experiment_name)
@@ -20,8 +20,8 @@ class ConfigManager:
 
     def pretty_format(self):
         # Make shortcut for selecting all layers
-        if self.config["layers"] == "all":
-            self.config["layers"] = list(range(32))
+        if self.config["inference"]["layers"] == "all":
+            self.config["inference"]["layers"] = list(range(32))
 
         # Give a random run number to each work
         self.config["run_id"] = int(np.random.rand()*1000)

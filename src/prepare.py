@@ -9,25 +9,19 @@ from config_manager import ConfigManager
 
 def main():
     # Here not sure if we need to use the param.yaml
-    # params = yaml.safe_load(open("params.yaml"))["prepare"]
     cfg = ConfigManager().config
 
-    # Take as input name of types of text data. Ex: "english_word", "celebrity"
-    if len(sys.argv) < 2:
-        sys.stderr.write("Arguments error. Usage:\n")
-        sys.stderr.write("\tpython prepare.py data-file\n")
-        sys.exit(1)
-
-    random.seed(cfg["seed"])
+    random.seed(cfg["prepare"]["seed"])
 
     # Initialize the dataset generator
     dg = DataGenerator()
 
     # Populate the data/prepared folder
-    os.makedirs(os.path.join("data", "prepared"), exist_ok=True)
-    for input_file in sys.argv[1:] :
+    os.makedirs(cfg["prepare"]["prepared_data_folder"], exist_ok=True)
+    files = cfg["experiment"]["training_data"] + cfg["experiment"]["testing_data"]
+    for input_file in files :
         input_name = os.path.basename(input_file)
-        output_data = os.path.join("data", "prepared", input_name + ".pkl")
+        output_data = os.path.join(cfg["prepare"]["prepared_data_folder"], input_name + ".pkl")
 
         data = dg.load_from_type(input_file)
 

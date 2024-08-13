@@ -53,7 +53,7 @@ class character(MyData):
 """
 class DataGenerator():
     def __init__(self):
-        self.cfg = ConfigManager().config
+        self.cfg = ConfigManager().config["prepare"]
         self.global_id = 0
 
 

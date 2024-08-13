@@ -67,28 +67,29 @@ def normalising_data(data_elt):
     # Normalise the data
     # data = (data - data.mean()) / data.std()
 
-def load_data(folder, name):
+def load_data(folder, names):
     # Load the data from the given file type with pickle
-    with open(os.path.join(folder, name + ".pkl"), 'rb') as file:
-        data_list = pickle.load(file)
-        for data_elt in data_list:
-            normalising_data(data_elt)
-    return data_list
+    data_concat = []
+    for name in names:
+        with open(os.path.join(folder, name + ".pkl"), 'rb') as file:
+            data_list = pickle.load(file)
+            for data_elt in data_list:
+                normalising_data(data_elt)
+            data_concat.extend(data_list)
+    return data_concat
 
 
 def main():
     # Loag config file as a global variable even outside of main
-    cfg = ConfigManager().config
+    cfgg = ConfigManager().config
+
+    # Load your data
+    training_data = load_data(cfgg["inference"]["inference_data_folder"], cfgg["experiment"]["training_data"])
+    test_data = load_data(cfgg["inference"]["inference_data_folder"], cfgg["experiment"]["testing_data"])
+
+    cfg = cfgg["projection"]
     os.makedirs(cfg["projection_data_folder"], exist_ok=True)
     os.makedirs(cfg["projection_model_path"], exist_ok=True)
-
-    # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 3:
-        print("Usage: python detection.py <path_to_training_data> <path_to_testing_data>")
-    
-    # Load your data
-    training_data = load_data(cfg["inference_data_folder"], sys.argv[1])
-    test_data = load_data(cfg["inference_data_folder"], sys.argv[2])
 
     # First, we train the projection models
     for projection_name in cfg["projections"]:
@@ -109,11 +110,14 @@ def main():
         with open(os.path.join(cfg["projection_model_path"], projection_name + ".pkl"), 'wb') as file:
             pickle.dump(projection, file)
 
-    # Save the processed inferences
-    with open(os.path.join(cfg["projection_data_folder"], sys.argv[1] + ".pkl"), 'wb') as file:
-            pickle.dump(training_data, file)
-    with open(os.path.join(cfg["projection_data_folder"], sys.argv[2] + ".pkl"), 'wb') as file:
-            pickle.dump(test_data, file)
+    # Group the data by type to same it according to its name
+    goups = {name: [] for name in cfgg["experiment"]["training_data"] + cfgg["experiment"]["testing_data"]}
+    for data_elt in training_data + test_data:
+        goups[data_elt.__class__.__name__ ].append(data_elt)
+
+    for name, data_list in goups.items():
+        with open(os.path.join(cfg["projection_data_folder"], name + ".pkl"), 'wb') as file:
+            pickle.dump(data_list, file)
 
 
     sys.stderr.write("Projection process completed\n")

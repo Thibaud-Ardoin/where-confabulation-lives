@@ -48,7 +48,7 @@ projection_data_folder: "data/projected"
 projection_model_path: "models/projection/"
 projections:
   PCAProjectionModel:
-    n_components: 2
+    n_components: 4
 
 # [ Manipulated ]
 manipulation: 

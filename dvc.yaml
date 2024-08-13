@@ -1,60 +1,55 @@
 stages:
   prepare:
-    cmd: python src/prepare.py english_word celebrity
+    cmd: python src/prepare.py
     deps:
     - src/prepare.py
-    - data/text/english_word_fake 
-    - data/text/english_word_real 
-    - data/text/celebrity_fake
-    - data/text/celebrity_real 
+    - data/text/ 
     params: 
-    - prepare.seed
+    - prepare
+    - experiment
     outs:
      - data/prepared 
 
   inference:
-    cmd: torchrun src/inference.py english_word celebrity
+    cmd: torchrun src/inference.py
     deps:
     - src/inference.py
-    - data/prepared/english_word.pkl
-    - data/prepared/celebrity.pkl
+    - data/prepared/
     params:
-    - inference.seed
+    - inference
+    - experiment
     outs:
     - data/inference
 
   projection:
-    cmd: python src/projection.py english_word celebrity
+    cmd: python src/projection.py
     deps:
     - src/projection.py
-    - data/inference/english_word.pkl
-    - data/inference/celebrity.pkl
+    - data/inference/
     params:
-    - projection.seed
+    - projection
     outs:
     - data/projected
     - models/projection
 
   detection:
-    cmd: python src/detection.py english_word celebrity
+    cmd: python src/detection.py
     deps:
     - src/detection.py
-    - data/projected/english_word.pkl
-    - data/projected/celebrity.pkl
+    - data/projected/
     params:
-    - detection.seed
+    - detection
     outs:
     - data/detection
     - models/detection
 
   evaluation:
-    cmd: python src/evaluation.py english_word celebrity
+    cmd: python src/evaluation.py
     deps:
     - src/evaluation.py
-    - data/projected/english_word.pkl
-    - data/projected/celebrity.pkl
+    - data/projected/
     - models/detection
     params:
-    - evaluation.seed
+    - evaluation
     outs:
     - eval
