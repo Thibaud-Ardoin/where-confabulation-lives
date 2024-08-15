@@ -161,7 +161,7 @@ def main():
 
     # Load the prepared pickle data
     prepared_data_list = []
-    for input_type in cfg["experiment"]["training_data"] + cfg["experiment"]["testing_data"]:
+    for input_type in cfg["experiment"]["data"]:
         prepared_data_list.append(pickle.load(open(os.path.join(cfg["prepare"]["prepared_data_folder"], input_type + ".pkl"), "rb")))
 
     cfg = cfg["inference"]

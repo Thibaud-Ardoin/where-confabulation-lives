@@ -18,7 +18,7 @@ def main():
 
     # Populate the data/prepared folder
     os.makedirs(cfg["prepare"]["prepared_data_folder"], exist_ok=True)
-    files = cfg["experiment"]["training_data"] + cfg["experiment"]["testing_data"]
+    files = cfg["experiment"]["data"]
     for input_file in files :
         input_name = os.path.basename(input_file)
         output_data = os.path.join(cfg["prepare"]["prepared_data_folder"], input_name + ".pkl")

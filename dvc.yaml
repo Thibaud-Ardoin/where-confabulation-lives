@@ -6,7 +6,7 @@ stages:
     - data/text/ 
     params: 
     - prepare
-    - experiment
+    - experiment.data
     outs:
      - data/prepared 
 
@@ -17,7 +17,7 @@ stages:
     - data/prepared/
     params:
     - inference
-    - experiment
+    - experiment.data
     outs:
     - data/inference
 
@@ -28,6 +28,7 @@ stages:
     - data/inference/
     params:
     - projection
+    - experiment.split
     outs:
     - data/projected
     - models/projection
@@ -39,6 +40,7 @@ stages:
     - data/projected/
     params:
     - detection
+    - experiment.split
     outs:
     - data/detection
     - models/detection
@@ -51,5 +53,6 @@ stages:
     - models/detection
     params:
     - evaluation
+    - experiment.split
     outs:
     - eval

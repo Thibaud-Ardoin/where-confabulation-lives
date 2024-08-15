@@ -88,8 +88,8 @@ def main():
     cfgg = ConfigManager().config
 
     # Load your data
-    training_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["training_data"])
-    test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["testing_data"])
+    training_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["training_data"])
+    test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["testing_data"])
 
     cfg = cfgg["detection"]
     os.makedirs(cfg["detection_model_path"], exist_ok=True)
@@ -113,7 +113,7 @@ def main():
 
 
     # Group the data by type to same it according to its name
-    goups = {name: [] for name in cfgg["experiment"]["training_data"] + cfgg["experiment"]["testing_data"]}
+    goups = {name: [] for name in cfgg["experiment"]["split"]["training_data"] + cfgg["experiment"]["split"]["testing_data"]}
     for data_elt in training_data + test_data:
         goups[data_elt.__class__.__name__ ].append(data_elt)
 

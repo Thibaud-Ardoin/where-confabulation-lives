@@ -47,7 +47,7 @@ def extract_hover_text(data):
 
 
 
-def generate_plots(train_data, test_data, trained_models):
+def generate_plots(train_data, test_data, trained_models, feature_vectors):
     
     # Extract data points and labels from training data
     X_train, Y_train = data_to_numpy(train_data)
@@ -60,7 +60,7 @@ def generate_plots(train_data, test_data, trained_models):
     predictions_test = trained_models[0].predict(X_test)
 
     # create a color vector that map the labels to colors
-    colors = np.array(["#00FF00", "#0000FF", "#FFFF00", "#FFA500"])
+    colors = np.array(["#00FF00", "#0000FF", "#FFFF00", "#FFA500", "#FF0000", "#800080", "#00FFFF", "#FF00FF"])
     colors_train = colors[Y_train]
     colors_test = colors[Y_test+2]
 
@@ -82,6 +82,22 @@ def generate_plots(train_data, test_data, trained_models):
         hovertemplate="%{text}",
         marker=dict(color=colors_test, symbol=predictions_test, size=hover_info_test["output_length"])
     ))
+
+    for i, vector in enumerate(feature_vectors):
+        # Add the direction vector to the plot
+        print("vector", vector)
+        fig.add_trace(go.Scatter(
+            x=[0, vector["projection_direction"][0]], y=[0, vector["projection_direction"][1]], mode='lines',
+            name=vector["vector_type"] + ': Relative direction',
+            line=dict(color=colors[-(2*i)], width=4)
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=[vector["center1"][0], vector["center2"][0]], y=[vector["center1"][1], vector["center2"][1]], mode='lines',
+            name=vector["vector_type"] + ': Feature direction (center to center)',
+            line=dict(color=colors[-(2*i+1)], width=1)
+        ))
+
     # Show the plot
     fig.show()
 
@@ -102,7 +118,7 @@ def log_metrics(live, metric, model_name, split):
         live.summary[metric[0]][model_name][split] = metric[1]
 
 
-def log_plots(projected_data):
+def log_plots(live, projected_data):
     # Log the plot using Dvc live
     fig = go.Figure(data=go.Scatter(x=projected_data[:, 0], y=projected_data[:, 1], mode='markers'))
     hover_text = [f"Data Point {i+1}" for i in range(len(projected_data))]
@@ -130,8 +146,9 @@ def main():
     cfgg = ConfigManager().config #["evaluation"]
 
     # Import the projected data and trained models from the previous stages
-    train_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["training_data"])
-    test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["testing_data"])
+    train_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["training_data"])
+    test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["testing_data"])
+    directions = load_data(cfgg["projection"]["projection_data_folder"], ["vectors"])
     trained_models = load_models(cfgg["detection"]["detection_model_path"])
 
     cfg = cfgg["evaluation"]
@@ -139,7 +156,7 @@ def main():
     # Create a DVC live instance
     live = Live(cfg["evaluation_folder"], report="html")
 
-    generate_plots(train_data, test_data, trained_models)
+    generate_plots(train_data, test_data, trained_models, directions)
 
     # Calculate the accuracy of the trained models on all the data
     calculate_mterics(live, trained_models, test_data, split="test")

@@ -4,9 +4,11 @@ system:
   verbose: True
 
 experiment:
-  name: "exp1"
-  training_data: ["english_word"]
-  testing_data: ["celebrity"]
+  name: "exp2"
+  data: ["celebrity", "english_word"]
+  split:
+    training_data: ["english_word"]
+    testing_data: ["celebrity"]
 
 # [ Data ]
 prepare:
@@ -101,7 +103,15 @@ projection:
   projection_model_path: "models/projection/"
   projections:
     PCAProjectionModel:
-      n_components: 4
+      n_components: 2
+    SparsePCAProjectionModel:
+      n_components: 2
+      alpha: 10
+    # LDAProjectionModel:
+    #   n_components: 2
+
+  steering_vector:
+    ["proj+mean+inv", "mean"]
 
 
 # [ Detection ]
