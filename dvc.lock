@@ -5,9 +5,9 @@ stages:
     deps:
     - path: data/text/
       hash: md5
-      md5: 9cc7759e0177b243978c44053556818a.dir
-      size: 41021
-      nfiles: 23
+      md5: 400b0b45c658661ed3c405debd1417d2.dir
+      size: 41386
+      nfiles: 25
     - path: src/prepare.py
       hash: md5
       md5: 695e36a6210d0912d618308df1abb8d7
@@ -32,14 +32,23 @@ stages:
               user_prompts:
               - '{}:'
               sufix: horizontal+token
+            test_celebrity:
+              switches:
+              - real
+              - fake
+              system_prompts:
+              - Always respond with a SINGLE sentence. You are given the name of a
+                personality, give me a short description.
+              user_prompts:
+              - '{}:'
+              sufix: test
             celebrity:
               switches:
               - real
               - fake
               system_prompts:
-              - "Always respond with a SINGLE date. You are given the name of a personality,
-                give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran:
-                1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802"
+              - Always respond with a SINGLE sentence. You are given the name of a
+                personality, give me a short description.
               user_prompts:
               - '{}:'
               sufix: horizontal+token
@@ -48,9 +57,8 @@ stages:
               - real
               - fake
               system_prompts:
-              - "Always respond with a SINGLE word. You are given an english word,
-                give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n
-                Service: Assistance"
+              - Always respond with a SINGLE sentence. You are given an english word,
+                give me a short definition.
               user_prompts:
               - '{}:'
               sufix: horizontal+token
@@ -98,16 +106,16 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: f4f46142e43561222acfdf1faf8e1ed0.dir
-      size: 22878
+      md5: c56410cf004a1b58170586c3f016a6a8.dir
+      size: 22743
       nfiles: 2
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: f4f46142e43561222acfdf1faf8e1ed0.dir
-      size: 22878
+      md5: c56410cf004a1b58170586c3f016a6a8.dir
+      size: 22743
       nfiles: 2
     - path: src/inference.py
       hash: md5
@@ -136,16 +144,16 @@ stages:
     outs:
     - path: data/inference
       hash: md5
-      md5: 953ca16e737da79efc32da3d75dd10b3.dir
-      size: 12180806370
+      md5: 1ba1083ba69939c3c9fbcb6de1b61484.dir
+      size: 4668527056
       nfiles: 2
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 7f814a3966ba844b97ef48b0e5f745bb.dir
-      size: 185891096
+      md5: d9ca0a577665b5dc9b893b0336a97237.dir
+      size: 188606249
       nfiles: 3
     - path: src/detection.py
       hash: md5
@@ -161,21 +169,6 @@ stages:
             SVCDetectionModel:
               max_iter: 100
               probability: true
-            SGDDetectionModel:
-              max_iter: 5
-              loss: log_loss
-            XGBDetectionModel:
-              n_estimators: 100
-              max_depth: 3
-              learning_rate: 0.1
-              subsample: 0.5
-              colsample_bytree: 0.5
-              gamma: 0
-              reg_alpha: 0
-              reg_lambda: 1
-              objective: binary:logistic
-              eval_metric: logloss
-              verbosity: 0
         experiment.split:
           training_data:
           - english_word
@@ -184,26 +177,26 @@ stages:
     outs:
     - path: data/detection
       hash: md5
-      md5: 89c8d5f25aadccc98605ed4e1993ff6f.dir
-      size: 185897755
+      md5: 24dc2c248160260714cb6cbb20960f6c.dir
+      size: 188547236
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: 4f7e62cd47a39012fdc378ac4cb0d351.dir
-      size: 90725
-      nfiles: 3
+      md5: 7a38f60033fd95eb17bf6a19690e586d.dir
+      size: 2587
+      nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: 953ca16e737da79efc32da3d75dd10b3.dir
-      size: 12180806370
+      md5: 1ba1083ba69939c3c9fbcb6de1b61484.dir
+      size: 4668527056
       nfiles: 2
     - path: src/projection.py
       hash: md5
-      md5: e991381a58b8ea2996b56ac73f113479
-      size: 7313
+      md5: ec3166f9610cb3623e28d26295822c30
+      size: 7912
     params:
       params.yaml:
         experiment.split:
@@ -217,40 +210,37 @@ stages:
           projection_model_path: models/projection/
           projections:
             PCAProjectionModel:
-              n_components: 2
-            SparsePCAProjectionModel:
-              n_components: 2
+              n_components: 4
           steering_vector:
           - proj+mean+inv
-          - mean
     outs:
     - path: data/projected
       hash: md5
-      md5: 7f814a3966ba844b97ef48b0e5f745bb.dir
-      size: 185891096
+      md5: d9ca0a577665b5dc9b893b0336a97237.dir
+      size: 188606249
       nfiles: 3
     - path: models/projection
       hash: md5
-      md5: e42a7ff658b46e5d5e613b982445bce2.dir
-      size: 134318156
-      nfiles: 2
+      md5: f106e3264c5fb24ff2a1635b2268281e.dir
+      size: 134382725
+      nfiles: 1
   evaluation:
     cmd: python src/evaluation.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 7f814a3966ba844b97ef48b0e5f745bb.dir
-      size: 185891096
+      md5: d9ca0a577665b5dc9b893b0336a97237.dir
+      size: 188606249
       nfiles: 3
     - path: models/detection
       hash: md5
-      md5: 4f7e62cd47a39012fdc378ac4cb0d351.dir
-      size: 90725
-      nfiles: 3
+      md5: 7a38f60033fd95eb17bf6a19690e586d.dir
+      size: 2587
+      nfiles: 1
     - path: src/evaluation.py
       hash: md5
-      md5: f883a3c47fd3418ecd5f86741ee7cd1a
-      size: 6381
+      md5: 17093d22a15753510ffaf989db64b332
+      size: 6731
     params:
       params.yaml:
         evaluation:
@@ -264,6 +254,6 @@ stages:
     outs:
     - path: eval
       hash: md5
-      md5: 31e9a0435d40a400ee75eec77823445c.dir
-      size: 52304
-      nfiles: 21
+      md5: 17db73ba0794ff6a01587f2ad415a238.dir
+      size: 3705264
+      nfiles: 10

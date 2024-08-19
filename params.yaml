@@ -23,12 +23,20 @@ prepare:
       user_prompts:     ['{}:']
       sufix: "horizontal+token"
 
+    test_celebrity:
+      switches:         ["real", "fake"]
+      system_prompts:   [
+        "Always respond with a SINGLE sentence.",
+      ]
+      user_prompts:     ['Do you know {}?']
+      sufix: "test"
+
     celebrity:
       switches:         ["real", "fake"]
       system_prompts:   [
         # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
-        "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
-        # "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+        # "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
+        "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
       ]
       user_prompts:     ['{}:']
     #   # sufix: "random"
@@ -37,8 +45,8 @@ prepare:
     english_word:
       switches:         ["real", "fake"]
       system_prompts:   [
-        "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-        # "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+        # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+        "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
       ]
       user_prompts:     ['{}:']
       sufix: "horizontal+token"
@@ -103,15 +111,16 @@ projection:
   projection_model_path: "models/projection/"
   projections:
     PCAProjectionModel:
-      n_components: 2
-    SparsePCAProjectionModel:
-      n_components: 2
-      alpha: 10
+      n_components: 4
+    # SparsePCAProjectionModel:
+    #   n_components: 2
+    #   alpha: 0.7
     # LDAProjectionModel:
     #   n_components: 2
 
   steering_vector:
-    ["proj+mean+inv", "mean"]
+    ["proj+mean+inv"]
+    #, "mean"]
 
 
 # [ Detection ]
@@ -123,21 +132,21 @@ detection:
     SVCDetectionModel:
       max_iter: 100
       probability: True
-    SGDDetectionModel:
-      max_iter: 5
-      loss: "log_loss"
-    XGBDetectionModel:
-      n_estimators: 100
-      max_depth: 3
-      learning_rate: 0.1
-      subsample: 0.5
-      colsample_bytree: 0.5
-      gamma: 0
-      reg_alpha: 0
-      reg_lambda: 1
-      objective: "binary:logistic"
-      eval_metric: "logloss"
-      verbosity: 0
+    # SGDDetectionModel:
+    #   max_iter: 5
+    #   loss: "log_loss"
+    # XGBDetectionModel:
+    #   n_estimators: 100
+    #   max_depth: 3
+    #   learning_rate: 0.1
+    #   subsample: 0.5
+    #   colsample_bytree: 0.5
+    #   gamma: 0
+    #   reg_alpha: 0
+    #   reg_lambda: 1
+    #   objective: "binary:logistic"
+    #   eval_metric: "logloss"
+    #   verbosity: 0
 
 # [ Manipulation ]
 manipulation: 

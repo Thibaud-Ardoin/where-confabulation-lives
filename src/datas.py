@@ -75,6 +75,14 @@ class DataGenerator():
                     birthdate = celebrity_infos[1]
                 )
             
+            case "test_celebrity":
+                celebrity_infos = text.split(" - ")
+                if len(celebrity_infos) == 1 : celebrity_infos.append(None)     # In case of no given date of birth
+                return celebrity(
+                    input_text = celebrity_infos[0],
+                    birthdate = celebrity_infos[1]
+                )
+
             case "english_word":
                 word = text.split(" ")[-1]
                 return english_word(

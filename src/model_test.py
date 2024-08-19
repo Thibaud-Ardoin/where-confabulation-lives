@@ -7,18 +7,24 @@ import tqdm
 import pickle
 import numpy as np
 
+from projection import *
+
+
 def main():
 
     generator = Llama.build(
-        ckpt_dir="Meta-Llama-3-8B-Instruct/",
-        tokenizer_path="Meta-Llama-3-8B-Instruct/tokenizer.model",
+        ckpt_dir="models/Meta-Llama-3-8B-Instruct/",
+        tokenizer_path="models/Meta-Llama-3-8B-Instruct/tokenizer.model",
         max_seq_len=512,#1024*4,
         max_batch_size=8,
         seed = 1
     )
 
-    proj = pickle.load(open("inference_data/proj2.pkl", "rb"))
-    delta = pickle.load(open("inference_data/unit_delta2.pkl", "rb"))
+    vectors = pickle.load(open("data/projected/PCAProjectionModel_vectors.pkl", "rb"))
+    proj_model = pickle.load(open("models/projection/PCAProjectionModel.pkl", "rb"))
+
+    # proj = pickle.load(open("inference_data/proj2.pkl", "rb"))
+    # delta = pickle.load(open("inference_data/unit_delta2.pkl", "rb"))
 
     while 1:
         print()
@@ -39,16 +45,26 @@ def main():
         ]
 
         try:
-            alpha = float(input("Dragging position:"))
-            beta = float(input("Dragginf force:"))
+            # alpha = float(input("Dragging position:"))
+            beta = float(input("Steering force:"))
             # alpha = 1
             # beta = 1
 
-            dragging_vector = proj.inverse_transform(delta * alpha)
+            #### NEW TESTS 
+            for vector in vectors:
+                print("vector info:", vector['vector_type'], "split", vector['split'], "projector", vector['projector'])
 
-            # dragging_vector = list(dragging_vector * beta)
+            dragging_vector = list(vectors[1]["activation_direction"])
 
-            print(np.min(dragging_vector), np.max(dragging_vector))
+
+            #######
+
+
+            # dragging_vector = proj.inverse_transform(delta * alpha)
+
+            # # dragging_vector = list(dragging_vector * beta)
+
+            # print(np.min(dragging_vector), np.max(dragging_vector))
             clip_val = 0.4
             a_pos = np.clip(np.array(dragging_vector), a_min=0, a_max=None)
             a_neg = np.clip(np.array(dragging_vector), a_min=None, a_max=0)

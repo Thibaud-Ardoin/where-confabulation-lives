@@ -78,6 +78,11 @@ class SparsePCAProjectionModel(ProjectionModel):
         X = self.data_to_numpy(train_data)
         self.model = SparsePCA(**self.cfg["projections"]["SparsePCAProjectionModel"])
         self.model.fit(X)
+        print("Non zero components in Sparse PCA:", self.non_zero_components())
+
+    def non_zero_components(self):
+        # Count the number of non-zero elements in each component
+        return np.count_nonzero(self.model.components_, axis=1)
 
     def project(self, data, raw=False):
         if raw:
@@ -98,7 +103,7 @@ def normalising_data(data_elt):
     generated_activations = activations[end_of_prompt_id:]
 
     # We take the mean of the activations for each token 
-    result = generated_activations.mean(dim=0) - prompt_activations.mean(dim=0)
+    result = generated_activations.mean(dim=0) #- prompt_activations.mean(dim=0)
 
     data_elt.activations = result.type(t.float64).detach().cpu().numpy()
 
@@ -143,7 +148,8 @@ def directional_vector(projector, data, split, typ="proj+mean+inv"):
 
     res_dict = {
         "vector_type": typ,
-        "split": name,
+        "split": split,
+        "projector": projector.model_type,
         "activation_direction": act_direction, 
         "projection_direction": proj_direction, 
         "center1": center1, 
@@ -185,11 +191,16 @@ def main():
         # Process the dataset, adding projection and removing without heavy parts
         for data_elt in test_data + training_data:
             data_elt.activations = projection.fwd(data_elt)
+            # data_elt.projection_name = projection.fwd(data_elt)
+
 
         # Save model with pickle
         with open(os.path.join(cfg["projection_model_path"], projection_name + ".pkl"), 'wb') as file:
             pickle.dump(projection, file)
             file.close()
+
+    # for data_elt in test_data + training_data:
+    #     del data_elt.activations # Remove the activations to save space
 
     # Group the data by type to same it according to its name
     goups = {name: [] for name in cfgg["experiment"]["data"]}

@@ -47,7 +47,7 @@ def extract_hover_text(data):
 
 
 
-def generate_plots(train_data, test_data, trained_models, feature_vectors):
+def generate_plots(train_data, test_data, trained_models, feature_vectors, cfg):
     
     # Extract data points and labels from training data
     X_train, Y_train = data_to_numpy(train_data)
@@ -60,7 +60,7 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors):
     predictions_test = trained_models[0].predict(X_test)
 
     # create a color vector that map the labels to colors
-    colors = np.array(["#00FF00", "#0000FF", "#FFFF00", "#FFA500", "#FF0000", "#800080", "#00FFFF", "#FF00FF"])
+    colors = np.array(["#264653", "#287271", "#2a9d8f", "#8ab17d", "#babb74", "#d2c06f", "#e9c46a", "#efb366", "#f4a261", "#e76f51"])
     colors_train = colors[Y_train]
     colors_test = colors[Y_test+2]
 
@@ -71,7 +71,7 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors):
         name='Train Data',
         text=hover_info_train["hover_text"],
         hovertemplate="%{text}",
-        marker=dict(color=colors_train, symbol=predictions_train, size=hover_info_train["output_length"])
+        marker=dict(color=colors_train, symbol=predictions_train, size=10)
     ))
 
     # Create a scatter plot for test data
@@ -80,26 +80,31 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors):
         name='Test Data',
         text=hover_info_test["hover_text"],
         hovertemplate="%{text}",
-        marker=dict(color=colors_test, symbol=predictions_test, size=hover_info_test["output_length"])
+        marker=dict(color=colors_test, symbol=predictions_test, size=10)
     ))
 
     for i, vector in enumerate(feature_vectors):
         # Add the direction vector to the plot
-        print("vector", vector)
-        fig.add_trace(go.Scatter(
-            x=[0, vector["projection_direction"][0]], y=[0, vector["projection_direction"][1]], mode='lines',
-            name=vector["vector_type"] + ': Relative direction',
-            line=dict(color=colors[-(2*i)], width=4)
-        ))
+
+        # fig.add_trace(go.Scatter(
+        #     x=[0, vector["projection_direction"][0]], y=[0, vector["projection_direction"][1]], mode='lines',
+        #     name=vector["vector_type"] + vector["split"] +"_"+ vector["projector"] + ': Relative direction',
+        #     hovertemplate="%{name}",
+        #     line=dict(color=colors[(4+2*i)%len(colors)], width=4)
+        # ))
 
         fig.add_trace(go.Scatter(
             x=[vector["center1"][0], vector["center2"][0]], y=[vector["center1"][1], vector["center2"][1]], mode='lines',
-            name=vector["vector_type"] + ': Feature direction (center to center)',
-            line=dict(color=colors[-(2*i+1)], width=1)
+            name= vector['vector_type'] +"_"+ vector["split"]+"_"+ vector["projector"] + ": Feature direction (center to center)",
+            hovertemplate="%{name}",
+            line=dict(color=colors[(4+i)%len(colors)], width=1)     
         ))
 
     # Show the plot
-    fig.show()
+    # fig.show()
+    
+    # Save the plot to the evaluation folder
+    fig.write_html(os.path.join(cfg["evaluation_folder"], "data_plot.html"))
 
 
 def log_metrics(live, metric, model_name, split):
@@ -148,7 +153,7 @@ def main():
     # Import the projected data and trained models from the previous stages
     train_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["training_data"])
     test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["testing_data"])
-    directions = load_data(cfgg["projection"]["projection_data_folder"], ["vectors"])
+    directions = load_data(cfgg["projection"]["projection_data_folder"], [projection_name + "_vectors" for projection_name in cfgg["projection"]["projections"]])
     trained_models = load_models(cfgg["detection"]["detection_model_path"])
 
     cfg = cfgg["evaluation"]
@@ -156,7 +161,7 @@ def main():
     # Create a DVC live instance
     live = Live(cfg["evaluation_folder"], report="html")
 
-    generate_plots(train_data, test_data, trained_models, directions)
+    generate_plots(train_data, test_data, trained_models, directions, cfg)
 
     # Calculate the accuracy of the trained models on all the data
     calculate_mterics(live, trained_models, test_data, split="test")
