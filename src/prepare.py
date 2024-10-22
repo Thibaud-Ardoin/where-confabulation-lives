@@ -19,14 +19,13 @@ def main():
     # Populate the data/prepared folder
     os.makedirs(cfg["prepare"]["prepared_data_folder"], exist_ok=True)
     files = cfg["experiment"]["data"]
+    # Load the data from the input files
     for input_file in files :
         input_name = os.path.basename(input_file)
         output_data = os.path.join(cfg["prepare"]["prepared_data_folder"], input_name + ".pkl")
 
+        # Transform the data in a readable dictionary, with prompt, label, id, etc.
         data = dg.load_from_type(input_file)
-
-        # At this point maybe run the inference of the model to populate the data
-        # model(data)
 
         with open(output_data, 'wb') as pickle_file:
             pickle.dump(data, pickle_file)

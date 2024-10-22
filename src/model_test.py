@@ -30,6 +30,7 @@ def main():
         print()
         print("***************************")
         prompt = input("user:")
+        # prompt = "Why did you hit Boris today ??"
         # prompt = "Nicolas Sarkozy"
 
         dialogs: List[Dialog] = [
@@ -38,66 +39,70 @@ def main():
                     "role": "system",
                     # "content": "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
                     # "content": "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
-                    "content": "",
+                    "content": "Let's roleplay. You are a student, I am a teacher.",
                 },
                 {"role": "user", "content": prompt}, 
             ]
         ]
 
-        try:
-            # alpha = float(input("Dragging position:"))
-            beta = float(input("Steering force:"))
-            # alpha = 1
-            # beta = 1
+        # try:
+        alpha = float(input("Dragging position:"))
+        beta = float(input("Steering force:"))
+        clip_val = float(input("Clipping value:"))
 
-            #### NEW TESTS 
-            for vector in vectors:
-                print("vector info:", vector['vector_type'], "split", vector['split'], "projector", vector['projector'])
+        # alpha = 1
+        # beta = 1
 
-            dragging_vector = list(vectors[1]["activation_direction"])
+        #### NEW TESTS 
+        for vector in vectors:
+            print("vector info:", vector['vector_type'], "split", vector['split'], "projector", vector['projector'])
 
+        dragging_vector = vectors[1]["projection_direction"]
 
-            #######
+        print("original norm of proj vector: ", np.linalg.norm(dragging_vector))
+        print("original norm of ectivation vector: ", np.linalg.norm(vectors[1]["activation_direction"]))
 
-
-            # dragging_vector = proj.inverse_transform(delta * alpha)
-
-            # # dragging_vector = list(dragging_vector * beta)
-
-            # print(np.min(dragging_vector), np.max(dragging_vector))
-            clip_val = 0.4
-            a_pos = np.clip(np.array(dragging_vector), a_min=0, a_max=None)
-            a_neg = np.clip(np.array(dragging_vector), a_min=None, a_max=0)
-            a_pos = np.clip(a_pos, a_min=clip_val, a_max=None)
-            a_pos[a_pos == clip_val] = 0
-            a_neg = np.clip(a_neg, a_min=None, a_max=-clip_val)
-            a_neg[a_neg == -clip_val] = 0
-            a = a_pos + a_neg
-            
-            # With a simple clipping of minimum 0.2, a drag position of 10; -10 and force of 1 we have conclusive "I know"/"I don't know" on nobodies.
-            # a = np.clip(np.array(dragging_vector), a_min=clip_val, a_max=None)
-            # print("amnt of clipped values", len(a[a == clip_val]))
-            # a[a == clip_val] = 0
-            print("Amnt of clipped values", len(a[a == 0]))
-
-            dragging_vector = list(a * beta)
+        #######
 
 
-            # Create Response from model
-            results = generator.chat_completion(
-                dialogs,
-                max_gen_len=None,
-                temperature=0.5,
-                top_p=0.9,
-                echo = False,
-                manipulation=dragging_vector
-            )
+        dragging_vector = proj_model.inverse(dragging_vector * alpha)
+
+        # # dragging_vector = list(dragging_vector * beta)
+
+        # print(np.min(dragging_vector), np.max(dragging_vector))
+        # clip_val = 0.4
+        a_pos = np.clip(np.array(dragging_vector), a_min=0, a_max=None)
+        a_neg = np.clip(np.array(dragging_vector), a_min=None, a_max=0)
+        a_pos = np.clip(a_pos, a_min=clip_val, a_max=None)
+        a_pos[a_pos == clip_val] = 0
+        a_neg = np.clip(a_neg, a_min=None, a_max=-clip_val)
+        a_neg[a_neg == -clip_val] = 0
+        a = a_pos + a_neg
+        
+        # With a simple clipping of minimum 0.2, a drag position of 10; -10 and force of 1 we have conclusive "I know"/"I don't know" on nobodies.
+        # a = np.clip(np.array(dragging_vector), a_min=clip_val, a_max=None)
+        # print("amnt of clipped values", len(a[a == clip_val]))
+        # a[a == clip_val] = 0
+        print("Amnt of clipped values", len(a[a == 0]))
+
+        dragging_vector = list(a * beta)
 
 
-            # print("Out, Inner: ", results[0]['generation']['inner'])
-            print("Out content: ", results[0]['generation']['content'])
-        except:
-            print("interuption through error.")
+        # Create Response from model
+        results = generator.chat_completion(
+            dialogs,
+            max_gen_len=None,
+            temperature=0.5,
+            top_p=0.9,
+            echo = False,
+            manipulation=dragging_vector
+        )
+
+
+        # print("Out, Inner: ", results[0]['generation']['inner'])
+        print("Out content: ", results[0]['generation']['content'])
+        # except:
+        #     print("interuption through error.")
 
         # exit()
 

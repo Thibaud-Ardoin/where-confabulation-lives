@@ -199,7 +199,7 @@ def main():
             data_elt.gen_token_emb = act_dict["gen_token_emb"]
 
         # save as pickle file the prepared type data lists
-        with open(os.path.join(cfg["inference_data_folder"], "{}.pkl".format(data_elt.__class__.__name__)), "wb") as fp:
+        with open(os.path.join(cfg["inference_data_folder"], "{}.pkl".format(data_elt.original_name)), "wb") as fp:
             pickle.dump(prepared_type, fp)
             fp.close()
         msg = "The Key type {}, with {} different entries is saved with inference\n"

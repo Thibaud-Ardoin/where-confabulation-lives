@@ -1,0 +1,106 @@
+emotion:
+  switches:         ["positive", "negative"]
+  system_prompts:   ["Given a concept, respond with the corresponding name of emotion."]
+  user_prompts:     ['{}:']
+  sufix: "horizontal"
+
+test_sentiment:
+  switches:         ["positive", "negative"]
+  system_prompts:   ["Given a concept, respond with the corresponding name of emotion."]
+  user_prompts:     ['{}:']
+  sufix: "horizontal"
+
+
+conspiracy:
+  switches:         ["real", "fake"]
+  system_prompts:   ["Always respond with a SINGLE sentence. You are given the name of an historical phenomena, give me a short neutral description."]
+  user_prompts:     ['{}:']
+  sufix: "horizontal+token"
+
+test_celebrity:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts:     ['Do you know the person called {}?']
+  sufix: "test"
+
+just_test:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Just answer with Yes,  I can't say, or No.",
+    # "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts:     ['Is {} a prime number ?']
+  sufix: "test"
+
+
+truthfulQA:
+  switches:         ["subset"]
+  system_prompts:   [
+    "Give shortest posible answer. You can also say you don't know.",
+    "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  sufix: "test"
+
+
+test_celebrity2:
+  switches:         ["fake"]
+  system_prompts:   [
+    "",
+    # "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts:     ['Do you know the person called {}?']
+  sufix: "test"
+
+celebrity:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
+    # "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
+    "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+  ]
+  user_prompts:     ['{}:']
+#   # sufix: "random"
+  sufix: "horizontal+token"
+
+english_word:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+    "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+  ]
+  user_prompts:     ['{}:']
+  sufix: "horizontal+token"
+
+french_word:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
+    "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet \n Outillage: Meteriel",
+    # "Repond toujours en une SEULE phrase. A partir d'un mot français, donne moi une courte definition.",
+  ]
+  user_prompts:     ['{}:']
+  sufix: "horizontal+token"
+
+date:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond only YES or NO.",
+  ]
+  user_prompts:     ['Does {} end with a 1?']
+
+election:
+  switches:         ["2024", "2022", "2010"]
+  system_prompts:   [
+    "Always respond only YES or NO.",
+  ]
+  user_prompts:     ['Could you list events that happend during the presidential election of {}?']
+  sufix: "yes-no"
+
+character:
+  switches:         ["real", "fake"]
+  system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
+  user_prompts:     ['{}:']
+  sufix: "horizontal"

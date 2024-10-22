@@ -4,6 +4,7 @@ stages:
     deps:
     - src/prepare.py
     - data/text/ 
+    - prompts.yaml
     params: 
     - prepare
     - experiment.data

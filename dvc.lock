@@ -5,13 +5,17 @@ stages:
     deps:
     - path: data/text/
       hash: md5
-      md5: 400b0b45c658661ed3c405debd1417d2.dir
-      size: 41386
-      nfiles: 25
+      md5: 4a8a1d1074780fa79fc6ecc01d5ceda4.dir
+      size: 109117
+      nfiles: 33
+    - path: prompts.yaml
+      hash: md5
+      md5: 380404c30e84a2fe0f3e5057d0f122f4
+      size: 3724
     - path: src/prepare.py
       hash: md5
-      md5: 695e36a6210d0912d618308df1abb8d7
-      size: 983
+      md5: 76bfd956399452be1529fd2ac83b377e
+      size: 1003
     params:
       params.yaml:
         experiment.data:
@@ -21,106 +25,26 @@ stages:
           seed: 1
           text_data_folder: data/text
           prepared_data_folder: data/prepared
-          inputs:
-            conspiracy:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - Always respond with a SINGLE sentence. You are given the name of an
-                historical phenomena, give me a short neutral description.
-              user_prompts:
-              - '{}:'
-              sufix: horizontal+token
-            test_celebrity:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - Always respond with a SINGLE sentence. You are given the name of a
-                personality, give me a short description.
-              user_prompts:
-              - '{}:'
-              sufix: test
-            celebrity:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - Always respond with a SINGLE sentence. You are given the name of a
-                personality, give me a short description.
-              user_prompts:
-              - '{}:'
-              sufix: horizontal+token
-            english_word:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - Always respond with a SINGLE sentence. You are given an english word,
-                give me a short definition.
-              user_prompts:
-              - '{}:'
-              sufix: horizontal+token
-            french_word:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne
-                moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet
-                \n Outillage: Meteriel"
-              user_prompts:
-              - '{}:'
-              sufix: horizontal+token
-            date:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - Always respond only YES or NO.
-              user_prompts:
-              - Does {} end with a 1?
-            election:
-              switches:
-              - '2024'
-              - '2022'
-              - '2010'
-              system_prompts:
-              - Always respond only YES or NO.
-              user_prompts:
-              - Could you list events that happend during the presidential election
-                of {}?
-              sufix: yes-no
-            character:
-              switches:
-              - real
-              - fake
-              system_prompts:
-              - Always respond with a SINGLE sentence. You are given a character name,
-                give me a short description.
-              user_prompts:
-              - '{}:'
-              sufix: horizontal
           output_file_name: inference
+          prompt_file: prompts.yaml
     outs:
     - path: data/prepared
       hash: md5
-      md5: c56410cf004a1b58170586c3f016a6a8.dir
-      size: 22743
+      md5: 82e96b85ec052644969d92da331997aa.dir
+      size: 24158
       nfiles: 2
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: c56410cf004a1b58170586c3f016a6a8.dir
-      size: 22743
+      md5: 82e96b85ec052644969d92da331997aa.dir
+      size: 24158
       nfiles: 2
     - path: src/inference.py
       hash: md5
-      md5: 9588f3657c3f6b248af59a26c044a9e1
-      size: 7672
+      md5: 9f8c279e72bdde8c6842f2ee8f80795e
+      size: 7667
     params:
       params.yaml:
         experiment.data:
@@ -144,21 +68,21 @@ stages:
     outs:
     - path: data/inference
       hash: md5
-      md5: 1ba1083ba69939c3c9fbcb6de1b61484.dir
-      size: 4668527056
-      nfiles: 2
+      md5: 647c50f409821550c1256af270f914a7.dir
+      size: 4829279902
+      nfiles: 4
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: d9ca0a577665b5dc9b893b0336a97237.dir
-      size: 188606249
+      md5: 4bba258bd9328dd79005bdd904e8f2d1.dir
+      size: 283238007
       nfiles: 3
     - path: src/detection.py
       hash: md5
-      md5: 7a2ea3d77275eae6a433295be0607f3d
-      size: 4484
+      md5: 5860917a2d473c1ead16ed3e87e3fb96
+      size: 4479
     params:
       params.yaml:
         detection:
@@ -171,36 +95,38 @@ stages:
               probability: true
         experiment.split:
           training_data:
+          - celebrity
           - english_word
           testing_data:
           - celebrity
     outs:
     - path: data/detection
       hash: md5
-      md5: 24dc2c248160260714cb6cbb20960f6c.dir
-      size: 188547236
+      md5: 0e9644ead0ca340e0decdc5b92235979.dir
+      size: 472461330
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: 7a38f60033fd95eb17bf6a19690e586d.dir
-      size: 2587
+      md5: f7b7c01d5004c4f1f29a509252f8fd46.dir
+      size: 2942
       nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: 1ba1083ba69939c3c9fbcb6de1b61484.dir
-      size: 4668527056
-      nfiles: 2
+      md5: 647c50f409821550c1256af270f914a7.dir
+      size: 4829279902
+      nfiles: 4
     - path: src/projection.py
       hash: md5
-      md5: ec3166f9610cb3623e28d26295822c30
-      size: 7912
+      md5: 3e43ad39864ca1b4bc0823bf4553646b
+      size: 5031
     params:
       params.yaml:
         experiment.split:
           training_data:
+          - celebrity
           - english_word
           testing_data:
           - celebrity
@@ -210,32 +136,32 @@ stages:
           projection_model_path: models/projection/
           projections:
             PCAProjectionModel:
-              n_components: 4
+              n_components: 2
           steering_vector:
           - proj+mean+inv
     outs:
     - path: data/projected
       hash: md5
-      md5: d9ca0a577665b5dc9b893b0336a97237.dir
-      size: 188606249
+      md5: 4bba258bd9328dd79005bdd904e8f2d1.dir
+      size: 283238007
       nfiles: 3
     - path: models/projection
       hash: md5
-      md5: f106e3264c5fb24ff2a1635b2268281e.dir
-      size: 134382725
+      md5: e636d79d5bed320a3d7493772a59123b.dir
+      size: 99367
       nfiles: 1
   evaluation:
     cmd: python src/evaluation.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: d9ca0a577665b5dc9b893b0336a97237.dir
-      size: 188606249
+      md5: 4bba258bd9328dd79005bdd904e8f2d1.dir
+      size: 283238007
       nfiles: 3
     - path: models/detection
       hash: md5
-      md5: 7a38f60033fd95eb17bf6a19690e586d.dir
-      size: 2587
+      md5: f7b7c01d5004c4f1f29a509252f8fd46.dir
+      size: 2942
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
@@ -248,12 +174,13 @@ stages:
           seed: 1
         experiment.split:
           training_data:
+          - celebrity
           - english_word
           testing_data:
           - celebrity
     outs:
     - path: eval
       hash: md5
-      md5: 17db73ba0794ff6a01587f2ad415a238.dir
-      size: 3705264
+      md5: 1da567dc7ffa013f30469dbc62d4a9af.dir
+      size: 3799191
       nfiles: 10

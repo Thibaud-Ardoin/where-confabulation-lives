@@ -2,95 +2,11 @@ import sys
 import numpy as np
 import os
 
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.decomposition import PCA, SparsePCA, FactorAnalysis
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-from sklearn.svm import SVC
-
 import pickle
 import torch as t
 
 from config_manager import ConfigManager
-
-class ProjectionModel:
-    def __init__(self, conf):
-        self.model_type = self.__class__.__name__
-        self.score = None
-        self.model = None
-        self.cfg = conf
-    def train(self, train_data):
-        raise NotImplementedError("train method must be implemented in the subclass")
-    def project(self, data):
-        raise NotImplementedError("project method must be implemented in the subclass")
-    def inverse(self, data):
-        raise NotImplementedError("project method must be implemented in the subclass")
-    def data_to_numpy(self, some_data, labels=False):
-        X = np.array([data_elt.activations for data_elt in some_data])
-        if labels:
-            Y = np.array([data_elt.label for data_elt in some_data])
-            return X, Y
-        return X
-    def fwd(self, data):
-        return self.model.transform(np.array([data.activations]))[0]
-
-class PCAProjectionModel(ProjectionModel):
-    """
-        PCA Projection
-    """
-    def train(self, train_data):
-        X = self.data_to_numpy(train_data)
-        self.model = PCA(**self.cfg["projections"]["PCAProjectionModel"])
-        self.model.fit(X)
-        self.score = self.model.get_precision()
-
-    def project(self, data, raw=False):
-        if raw:
-            return self.model.transform(data)
-        return self.model.transform(self.data_to_numpy(data))
-
-    def inverse(self, data):
-        return self.model.inverse_transform(data)
-    
-class LDAProjectionModel(ProjectionModel):
-    """
-        LDA Projection
-    """
-    def train(self, train_data):
-        X, Y = self.data_to_numpy(train_data, labels=True)
-        self.model = LDA()
-        self.model.fit(X, Y)
-        self.score = self.model.score(X, Y)
-
-    def project(self, data, raw=False):
-        if raw:
-            return self.model.transform(data)
-        return self.model.transform(self.data_to_numpy(data))
-
-    def inverse(self, data):
-        return self.model.inverse_transform(data)
-    
-class SparsePCAProjectionModel(ProjectionModel):
-    """
-        Sparse PCA Projection
-    """
-    def train(self, train_data):
-        X = self.data_to_numpy(train_data)
-        self.model = SparsePCA(**self.cfg["projections"]["SparsePCAProjectionModel"])
-        self.model.fit(X)
-        print("Non zero components in Sparse PCA:", self.non_zero_components())
-
-    def non_zero_components(self):
-        # Count the number of non-zero elements in each component
-        return np.count_nonzero(self.model.components_, axis=1)
-
-    def project(self, data, raw=False):
-        if raw:
-            return self.model.transform(data)
-        return self.model.transform(self.data_to_numpy(data))
-
-    def inverse(self, data):
-        return self.model.inverse_transform(data)
+from probes import MMProbe, ProjectionModel, PCAProjectionModel, LDAProjectionModel, SparsePCAProjectionModel
 
 
 def normalising_data(data_elt):
@@ -205,7 +121,7 @@ def main():
     # Group the data by type to same it according to its name
     goups = {name: [] for name in cfgg["experiment"]["data"]}
     for data_elt in training_data + test_data:
-        goups[data_elt.__class__.__name__ ].append(data_elt)
+        goups[data_elt.original_name ].append(data_elt)
 
     for name, data_list in goups.items():
         with open(os.path.join(cfg["projection_data_folder"], name + ".pkl"), 'wb') as file:

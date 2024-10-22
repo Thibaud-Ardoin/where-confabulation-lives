@@ -14,7 +14,7 @@ from datas import DataGenerator
 
 def main():
 
-    max_seq = 512
+    max_seq = 32
 
     generator = Llama.build(
         ckpt_dir="models/Meta-Llama-3-8B-Instruct/",
@@ -31,12 +31,12 @@ def main():
     # Loading the input keys
     dg = DataGenerator()
     # Populate the data/prepared folder
-    data_points = dg.aggregate_type_data("test_celebrity")
+    data_points = dg.aggregate_type_data("just_test")
 
     processings = ["clipping_activation"] #Raw_activation, 
-    project_space_steers = [50, 20, -20, -50]#[10, 2, 1, 0.5, 0, -0.5,   -1, -2, -10]
-    act_space_steers = [1, 2]
-    clip_values = []
+    project_space_steers = [-100, 0, 100] #[10*i for i in range(-10, 15, 5)]#[-100, -90, -80, -70, -60, -50, - -20, 0, 20, 50, 100] #[10, 2, 1, 0.5, 0, -0.5,   -1, -2, -10]
+    act_space_steers = [0.01*i*i for i in range(10)]
+    clip_values = [0.1*i*i for i in range(15)] #[0, 0.4, 0.5, 0.6, 1, 2, 5]
     vectors = vectors[1:2]
 
     test_results = []
@@ -59,98 +59,97 @@ def main():
         for process in processings:
             for vector in vectors:
                 vect_name = vector["vector_type"] + "_" + vector["split"] + "_" + vector["projector"]
-                # if vect_name not in test_results:
-                #     test_results[vect_name] = {}
                 for alpha in project_space_steers:
-                    # if alpha not in test_results[vect_name]:
-                    #     test_results[vect_name][alpha] = {}
-                    
                     for beta in act_space_steers:
-                        # if beta not in test_results[vect_name][alpha]:
-                        #     test_results[vect_name][alpha][beta] = {}
-                        
-                        if process == "clipping_activation":
+                        for clip_val in clip_values:
 
-                            proj_vect = vector["projection_direction"]
+                            
+                            if process == "clipping_activation":
 
-                            dragging_vector = proj_model.inverse(proj_vect * alpha)
+                                proj_vect = vector["projection_direction"]
 
-                            clip_val = 0.4
-                            # if clip_val not in test_results[vect_name][alpha][beta]:
-                            #     test_results[vect_name][alpha][beta][clip_val] = {}
+                                dragging_vector = proj_model.inverse(proj_vect * alpha)
 
-                            dragging_vector[np.abs(dragging_vector) < clip_val] = 0
+                                dragging_vector[np.abs(dragging_vector) < clip_val] = 0
 
-                            dragging_vector = dragging_vector * beta
+                                dragging_vector = dragging_vector * beta
 
 
-                            # Create Response from model
-                            try:
-                                results = generator.chat_completion(
-                                    dialogs,
-                                    max_gen_len=None,
-                                    temperature=0.5,
-                                    top_p=0.9,
-                                    echo = False,
-                                    manipulation=list(dragging_vector)
-                                )
-                            except:
-                                results = [{"generation": {"content": "Error"}}]
+                                # Create Response from model
+                                try:
+                                    results = generator.chat_completion(
+                                        dialogs,
+                                        max_gen_len=None,
+                                        temperature=0.5,
+                                        top_p=0.9,
+                                        logprobs=True,
+                                        echo = False,
+                                        manipulation=list(dragging_vector)
+                                    )
+                                except:
+                                    results = [{"generation": {"content": "Error"}}]
 
-                            generated_answer = results[0]['generation']['content']
+                                generated_answer = results[0]['generation']['content']
+                                number_gen_token = len(results[0]['tokens'])
 
-                            # Save the results in a dictionary that takes the input text as key
-                            # if data_elt.input_text not in test_results[vect_name][alpha][beta][clip_val]:
-                            #     test_results[vect_name][alpha][beta][clip_val][data_elt.input_text] = {}
-                            # test_results[vect_name][alpha][beta][clip_val][data_elt.input_text]["output_text"] = generated_answer
-                            # test_results[vect_name][alpha][beta][clip_val][data_elt.input_text]["nb_cliped_values"] = len(dragging_vector[dragging_vector == 0])
+                                print("> Number of generated Tokens: ", number_gen_token)
 
-                            if len(generated_answer) > max_seq - 20:
-                                generated_answer = generated_answer[:max_seq - 20]
+                                if len(generated_answer) >= 200:
+                                    generated_answer = generated_answer[:200]
 
-                            system_eval_prompt = 'Answer with a single word'
-                            key_prompt = 'Is the following text giving information about the person ? "{}"'.format(generated_answer)
-                            # Use the same LLM to evaluate the output
-                            eval_dialogs: List[Dialog] = [
-                                [
-                                    {
-                                        "role": "system",
-                                        "content": system_eval_prompt,
-                                    },
-                                    {"role": "user", "content": key_prompt}, 
+                                system_eval_prompt = 'You are given a text, Does this text says that {} is a prime number ? Answer with "Yes", "No", "Unclear" is the answer can not be said confidently or "Invalid" if the text is nonsense.'.format(data_elt.input_text)
+                                # key_prompt = 'Is the writer of this text familiar with a specific person called {} ? \n Text:"{}"'.format(data_elt.input_text, generated_answer)
+                                key_prompt = 'Text:"{}"'.format(generated_answer)
+                                # Use the same LLM to evaluate the output
+
+                                # print("System eval prompt: ", system_eval_prompt)
+                                # print("User prompt: ", key_prompt)
+
+                                eval_dialogs: List[Dialog] = [
+                                    [
+                                        {
+                                            "role": "system",
+                                            "content": system_eval_prompt,
+                                        },
+                                        {"role": "user", "content": key_prompt}, 
+                                    ]
                                 ]
-                            ]
-                            try:
-                                eval_results = generator.chat_completion(
-                                    eval_dialogs,
-                                    max_gen_len=None,
-                                    temperature=0.5,
-                                    top_p=0.9,
-                                    echo = False
-                                )
-                            except:
-                                eval_results = [{"generation": {"content": "Error"}}]
-                            print("Name evaluated on: ", data_elt.input_text)
-                            print("Output text: ", generated_answer)
-                            print("Output evaluation text: ", eval_results[0]['generation']['content'])
+                                try:
+                                    eval_results = generator.chat_completion(
+                                        eval_dialogs,
+                                        max_gen_len=None,
+                                        temperature=0.5,
+                                        top_p=0.9,
+                                        echo = False
+                                    )
+                                except:
+                                    eval_results = [{"generation": {"content": "Error"}}]
+                                print("Name evaluated on: ", data_elt.input_text)
+                                print("Output text: ", generated_answer)
+                                print("Output evaluation text: ", eval_results[0]['generation']['content'])
 
-                            element_dict = {
-                                'process': process,
-                                'vector_name': vect_name,
-                                'alpha': alpha,
-                                'beta': beta,
-                                'clip_value': clip_val,
-                                'data_elt': data_elt,
-                                'output_text': results[0]['generation']['content'],
-                                'nb_cliped_values': len(dragging_vector[dragging_vector == 0]),
-                                'eval_text': eval_results[0]['generation']['content'],
-                            }
+                                element_dict = {
+                                    'process': process,
+                                    'vector_name': vect_name,
+                                    'alpha': alpha,
+                                    'beta': beta,
+                                    'clip_value': clip_val,
+                                    'data_elt': data_elt,
+                                    'output_text': results[0]['generation']['content'],
+                                    'nb_cliped_values': len(dragging_vector[dragging_vector == 0]),
+                                    'eval_text': eval_results[0]['generation']['content'],
+                                    'steering_norm': np.linalg.norm(dragging_vector),
+                                    'steering_vect': dragging_vector,
+                                    'projection_norm': np.linalg.norm(proj_vect),
+                                    'projection_vect': proj_vect,
+                                    'number_gen_token': number_gen_token
+                                }
 
-                            test_results.append(element_dict)
+                                test_results.append(element_dict)
 
     print(test_results)
 
-    with open("eval/celebrity_steering_test_results.pkl", "wb") as file:
+    with open("eval/steering_test_results.pkl", "wb") as file:
         pickle.dump(test_results, file)
 
 

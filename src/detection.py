@@ -115,7 +115,7 @@ def main():
     # Group the data by type to same it according to its name
     goups = {name: [] for name in cfgg["experiment"]["split"]["training_data"] + cfgg["experiment"]["split"]["testing_data"]}
     for data_elt in training_data + test_data:
-        goups[data_elt.__class__.__name__ ].append(data_elt)
+        goups[data_elt.original_name ].append(data_elt)
 
     for name, data_list in goups.items():
         with open(os.path.join(cfg["detection_data_folder"], name + ".pkl"), 'wb') as file:
