@@ -1,0 +1,3 @@
+close_questions:
+  "no": ["No", "No.", "no", "I don't know", "Negative"]
+  "yes": ["Yes", "Yes.", "yes", "I know", "I do", "Positive"]

@@ -1,0 +1,39 @@
+#####################################
+# This is the STEERING DVC pipeline #
+#####################################
+
+# params:
+#   - steering_dvc/params.yaml
+
+
+stages:
+  steering:
+    cmd: torchrun ../src/steering_inference.py
+    deps:
+    - ../src/steering_inference.py
+    - ../src/datas.py
+    - ../data/features
+    params:
+      - steering
+      - prepare
+    outs:
+     - ../data/steered
+
+  evaluation:
+    cmd: python ../src/sentence_similarity.py
+    deps:
+    - ../data/steered
+    - expected_outputs.yaml
+    params:
+      - evaluation
+    outs:
+    - ../data/steered_evaluation
+
+  compile:
+    cmd: python ../src/compile_results.py
+    deps:
+    - ../data/steered_evaluation 
+    params:
+      - compile
+    outs:
+    - ../data/compiled

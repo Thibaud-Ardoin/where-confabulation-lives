@@ -37,6 +37,10 @@ class MyData:
 
     def get_user_prompt(self):
         return self.user_prompt.format(self.input_text)
+    
+    def update(self, dict):
+        for key, value in dict.items():
+            setattr(self, key, value)
 
 
 class truthfulQA(MyData):
@@ -188,6 +192,12 @@ class DataGenerator():
         for type_name in self.prompts:
             generated_data.extend(self.aggregate_type_data(type_name))
         return generated_data
+    
+    def aggregate_data_list(self, data_list):
+        generated_data = []
+        for type_name in data_list:
+            generated_data.extend(self.aggregate_type_data(type_name))
+        return generated_data
 
     def aggregate_type_data(self, type_name):
         generated_data = []
@@ -205,6 +215,7 @@ class DataGenerator():
                                     data_elmt.switch_name = switch
                                     data_elmt.user_prompt = user_prompt
                                     data_elmt.system_prompt = system_prompt
+                                    data_elmt.expected_outputs = self.prompts[type_name]["expected_outputs"]
                                     if "sufix" in self.prompts[type_name]:
                                         data_elmt.sufix = self.prompts[type_name]["sufix"]
                                     # int

@@ -1,0 +1,56 @@
+# [ Data ]
+prepare:
+  seed: 1
+  text_data_folder: "../data/text"
+  prepared_data_folder: "../data/prepared"
+  output_file_name: "inference"
+  prompt_file: "prompts.yaml"
+
+
+# [ Steering Inference ]
+steering:
+  # Data
+  evaluation_set: ["celebrity"]
+  output_folder: "../data/steered"
+  verbose: True
+  seed: 1
+
+  # Model Info 
+  model_path: "../models/Meta-Llama-3-8B-Instruct/"
+  tokenizer_path: "../models/Meta-Llama-3-8B-Instruct/tokenizer.model"
+  temperature: 0.5
+  top_p: 0.9
+  max_seq_len: 512
+  max_batch_size: 8
+  
+  # Vector Info
+  vector_name: "proj+mean+inv"
+  vector_path: "../data/features/PCAProjectionModel_vectors.pkl"
+  projection_path: "../data/features/PCAProjectionModel.pkl"
+  layers: [16]
+  alpha: [1]
+  beta: [-5, -2, -1, 0.5, 0, 0.5, 1, 2, 5]
+  clip_value: [0, 0.5, 1]
+
+
+# [ Evaluation of Outputs]
+evaluation:
+  expected_outputs_path: "expected_outputs.yaml"
+  similarity_decision_threshold: 0.5
+  seed: 1
+  output_folder: "../data/steered_evaluation"
+
+#   evaluation_folder: "eval/"
+
+
+# [ Compile Results]
+compile:
+  seed: 1
+  palette: [
+    "#ee6a00",
+    "#eeff41",
+    "#009667",
+    "#cd92d7",
+    "#b3a77d",
+    "#a1e8d9"
+  ]

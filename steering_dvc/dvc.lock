@@ -1,0 +1,90 @@
+schema: '2.0'
+stages:
+  steering:
+    cmd: torchrun ../src/steering_inference.py
+    deps:
+    - path: ../data/features
+      hash: md5
+      md5: 10086af00e97cfd5f31787ec94b41bf5.dir
+      size: 165554
+      nfiles: 2
+    - path: ../src/datas.py
+      hash: md5
+      md5: 589b64ff28a250a1b446d0b96db58a3b
+      size: 7667
+    - path: ../src/steering_inference.py
+      hash: md5
+      md5: b55feba243b793a9bf0e6a5bbdc0e5c4
+      size: 4026
+    params:
+      params.yaml:
+        prepare:
+          seed: 1
+          text_data_folder: ../data/text
+          prepared_data_folder: ../data/prepared
+          output_file_name: inference
+          prompt_file: prompts.yaml
+        steering:
+          evaluation_set:
+          - celebrity
+          output_folder: ../data/steered
+          verbose: true
+          seed: 1
+          model_path: ../models/Meta-Llama-3-8B-Instruct/
+          tokenizer_path: ../models/Meta-Llama-3-8B-Instruct/tokenizer.model
+          temperature: 0.5
+          top_p: 0.9
+          max_seq_len: 512
+          max_batch_size: 8
+          vector_name: proj+mean+inv
+          vector_path: ../data/features/PCAProjectionModel_vectors.pkl
+          projection_path: ../data/features/PCAProjectionModel.pkl
+          layers:
+          - 16
+          alpha:
+          - 1
+          beta:
+          - -5
+          - -2
+          - -1
+          - 0.5
+          - 0
+          - 0.5
+          - 1
+          - 2
+          - 5
+          clip_value:
+          - 0
+          - 0.5
+          - 1
+    outs:
+    - path: ../data/steered
+      hash: md5
+      md5: 21ac6667e651e70b52c8ee78f054e552.dir
+      size: 387068
+      nfiles: 1
+  evaluation:
+    cmd: python ../src/sentence_similarity.py
+    deps:
+    - path: ../data/steered
+      hash: md5
+      md5: 21ac6667e651e70b52c8ee78f054e552.dir
+      size: 387068
+      nfiles: 1
+    - path: expected_outputs.yaml
+      hash: md5
+      md5: c18dd77e9100bec58077d21e0a2ed5c9
+      size: 135
+    params:
+      params.yaml:
+        evaluation:
+          expected_outputs_path: expected_outputs.yaml
+          similarity_decision_threshold: 0.5
+          seed: 1
+          output_folder: ../data/steered_evaluation
+    outs:
+    - path: ../data/steered_evaluation
+      hash: md5
+      md5: 2bbd6efdf5a06510731461668265f026.dir
+      size: 5255366
+      nfiles: 1

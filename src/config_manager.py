@@ -20,8 +20,9 @@ class ConfigManager:
 
     def pretty_format(self):
         # Make shortcut for selecting all layers
-        if self.config["inference"]["layers"] == "all":
-            self.config["inference"]["layers"] = list(range(32))
+        if "inference" in self.config and "layer" in self.config["inference"] :
+            if self.config["inference"]["layers"] == "all":
+                self.config["inference"]["layers"] = list(range(32))
 
         # Give a random run number to each work
         self.config["run_id"] = int(np.random.rand()*1000)

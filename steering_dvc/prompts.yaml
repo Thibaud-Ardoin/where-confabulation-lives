@@ -1,0 +1,10 @@
+celebrity:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Respond in ONE word.",
+    # "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts: ["Do you know the person called {}? Respond 'Yes' or 'No'."]
+  #['Do you know the person called {}?']
+  expected_outputs: "close_questions"
+  sufix: "evaluation"

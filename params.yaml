@@ -9,7 +9,7 @@ experiment:
   name: "exp_ActAdd1"
   data: ["celebrity", "english_word"] #["emotion", "test_sentiment"]
   split:
-    training_data: ["celebrity", "english_word"]
+    training_data: ["english_word"]
     testing_data: ["celebrity"]
 
 # [ Data ]

@@ -68,7 +68,7 @@ stages:
     outs:
     - path: data/inference
       hash: md5
-      md5: 647c50f409821550c1256af270f914a7.dir
+      md5: e68f998fe6588f89ebbe2ec04ca5dc2f.dir
       size: 4829279902
       nfiles: 4
   detection:
@@ -76,8 +76,8 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: 4bba258bd9328dd79005bdd904e8f2d1.dir
-      size: 283238007
+      md5: 34fecd1aa3e271f9298753ae534ca995.dir
+      size: 188602112
       nfiles: 3
     - path: src/detection.py
       hash: md5
@@ -95,27 +95,26 @@ stages:
               probability: true
         experiment.split:
           training_data:
-          - celebrity
           - english_word
           testing_data:
           - celebrity
     outs:
     - path: data/detection
       hash: md5
-      md5: 0e9644ead0ca340e0decdc5b92235979.dir
-      size: 472461330
+      md5: e641cc6770cca95b5bb71a66c4e292b8.dir
+      size: 188543195
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: f7b7c01d5004c4f1f29a509252f8fd46.dir
-      size: 2942
+      md5: 1c3b4930a5f2a337c25a4bc339e7c949.dir
+      size: 1996
       nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: 647c50f409821550c1256af270f914a7.dir
+      md5: e68f998fe6588f89ebbe2ec04ca5dc2f.dir
       size: 4829279902
       nfiles: 4
     - path: src/projection.py
@@ -126,7 +125,6 @@ stages:
       params.yaml:
         experiment.split:
           training_data:
-          - celebrity
           - english_word
           testing_data:
           - celebrity
@@ -142,26 +140,26 @@ stages:
     outs:
     - path: data/projected
       hash: md5
-      md5: 4bba258bd9328dd79005bdd904e8f2d1.dir
-      size: 283238007
+      md5: 34fecd1aa3e271f9298753ae534ca995.dir
+      size: 188602112
       nfiles: 3
     - path: models/projection
       hash: md5
-      md5: e636d79d5bed320a3d7493772a59123b.dir
-      size: 99367
+      md5: 38312bf49640225f6d6a325c79047e6c.dir
+      size: 99366
       nfiles: 1
   evaluation:
     cmd: python src/evaluation.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 4bba258bd9328dd79005bdd904e8f2d1.dir
-      size: 283238007
+      md5: 34fecd1aa3e271f9298753ae534ca995.dir
+      size: 188602112
       nfiles: 3
     - path: models/detection
       hash: md5
-      md5: f7b7c01d5004c4f1f29a509252f8fd46.dir
-      size: 2942
+      md5: 1c3b4930a5f2a337c25a4bc339e7c949.dir
+      size: 1996
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
@@ -174,13 +172,12 @@ stages:
           seed: 1
         experiment.split:
           training_data:
-          - celebrity
           - english_word
           testing_data:
           - celebrity
     outs:
     - path: eval
       hash: md5
-      md5: 1da567dc7ffa013f30469dbc62d4a9af.dir
-      size: 3799191
+      md5: c3930aef735ac15bfff286f6dc1b9c74.dir
+      size: 3705279
       nfiles: 10
