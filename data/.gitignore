@@ -3,3 +3,7 @@
 /text
 /projected
 /detection
+/steered
+/steered_evaluation
+/features
+/compiled_results

@@ -19,16 +19,16 @@ def plot_steering_wight_and_binary_out(list_result, cfg):
     # Convert list_result to a pandas DataFrame
     df = pd.DataFrame([elmt.__dict__ for elmt in list_result])
 
+    print(df[df["label"] == 1]["output_text"].unique())
+
     # Filter out the undecisive data
     df = df[df["evaluation"]<2]
-    df = df[df["clip_val"]==0]
+    df = df[df["clip_val"]==0.5]
 
     # Create a new column 'accuracy' that gives 0 if evaluation is equal to the label of each element
     df['accuracy'] = df.apply(lambda row: 0 if row['evaluation'] == row['label'] else 1, axis=1)
 
     palette = cfg["compile"]["palette"]
-
-    print(df[df["label"] == 0].iloc[0])
 
     # Plot mean accuracy for the two labels 0 and 1, and mean accuracy for all the data
     mean_accuracy_label = df.groupby(["beta", "label"]).agg(
