@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import torch as t
 import os
 import yaml
+from typing import List, Optional
+
+from llama import Dialog, Llama
 
 # import gensim.downloader as api
 from sentence_transformers import SentenceTransformer
@@ -31,101 +34,167 @@ def main():
         expected_type = prompts[cfg["steering"]["evaluation_set"][0]]["expected_outputs"]
 
     cfg["evaluation"]["evaluation_set"] = cfg["steering"]["evaluation_set"]
-    cfg = cfg["evaluation"]
 
-    # Load the expected out as dictionary
-    with open(cfg["expected_outputs_path"], "r") as file:
-        expected_output = yaml.safe_load(file)[expected_type]
+    #########################################
+    #   Open Question: evaluation with LLM  #
+    #########################################
 
-    print("expected_output", expected_output)
+    if expected_type == "open_question":
+        # Load LLMs to evaluate the similarity to this or this
+        generator = Llama.build(
+            ckpt_dir=cfg["steering"]["model_path"],
+            tokenizer_path=cfg["steering"]["tokenizer_path"],
+            max_seq_len=256, #cfg["steering"]["max_seq_len"],
+            max_batch_size=cfg["steering"]["max_batch_size"],
+            seed = cfg["steering"]["seed"]
+        )
 
-    # Load the BERT_type model
-    model = SentenceTransformer("all-mpnet-base-v2") # all-MiniLM-L6-v2
+        for elmt_dict in results:
+
+            # Trying to anonymise the text:
+            anonyme_name = "John Doe"
+            anan_output_text = elmt_dict.output_text.replace(elmt_dict.input_text, anonyme_name)
+
+            eval_txt = "You are are a professor grading student's text. They were asked if they know {}.".format(anonyme_name)
+            eval_txt += " Grade if the text contain information on the person called {}.".format(anonyme_name)
+            eval_txt += " The grade is a number between 0 and 1. 0 is not information, 1 is some information. 0,5 is undecidable."
+            eval_txt += "\nFor example: '{} is an American novelist and poet.', should get a grade of 1.".format(anonyme_name)
+            eval_txt += "\n'I'm not familiar with a specific personality named {}', should get a score of 0.".format(anonyme_name)
+            eval_txt += "\nA text starting with 'Yes' should get a grade of 1. If it starts with 'No', it should get a grade of 0."
+            eval_txt += "\nGrade the following Text:\n '{}'".format(anan_output_text)
+
+            # Create Dialog from data
+            dialogs: List[Dialog] = [[
+                {
+                    "role": "system",
+                    "content": "ONLY answer with a number between 0 and 1.",
+                },
+                {"role": "user", "content": eval_txt}, 
+            ]]
+
+            # Create Response from model
+            # try:
+            llm_out = generator.chat_completion(
+                dialogs,
+                max_gen_len=None,
+                temperature=0,
+                top_p=1,
+                logprobs=False,
+                echo = False,
+                manipulation=None
+            )
+            # except:
+            #     results = [{"generation": {"content": "Error"}}]
 
 
-    for elmt_dict in results:
-        print(elmt_dict.output_text)
-        print(expected_output)
-        # Create the corpus of Generated text, positive and negative
-        corpus = [elmt_dict.output_text] + list(expected_output['yes']) + list(expected_output['no'])
-        embeddings = model.encode(corpus)
+            print('<"', llm_out[0]['generation']['content'])
 
-        correct_id = list(range(1, 1+len(expected_output['yes'])))
-        wrong_id = list(range(1+len(expected_output['yes']), 1+len(expected_output['yes'])+len(expected_output['no'])))
-        
-        # Calculate pairwise cosine similarity
-        pairwise_similarity = model.similarity(embeddings, embeddings)
+            try:
+                similarity_score = float(llm_out[0]['generation']['content'])
+                if similarity_score > 0.5:
+                    matching_expected_indice = 1
+                elif similarity_score == 0.5:
+                    matching_expected_indice = -1
+                else:
+                    matching_expected_indice = 0
+            except ValueError:
+                similarity_score = -1
+                matching_expected_indice = -1
 
-        correct_similarity = pairwise_similarity[0, correct_id]
-        wrong_similarity = pairwise_similarity[0, wrong_id]
-        
-        print(elmt_dict.output_text)
-        print(expected_output['yes'])
-        print(expected_output['no'])
-        # print(pairwise_similarity)
-        print("Correct Answer Similarity (MiniLM):", correct_similarity)
-        print("Wrong Answer Similarity (MiniLM):", wrong_similarity)
+            print("similarity_score and rounded up", similarity_score, matching_expected_indice)
 
 
-        # Compile max similarities
-        print(elmt_dict.output_text)
-        id_max_sim = t.argmax(pairwise_similarity[0, 1:]).item() +1
+            elmt_dict.update({
+                "similarity_score": similarity_score,
+                "matched_out_indice": matching_expected_indice,
+            })
 
-        print(correct_id, wrong_id)
-        print("id of max sim", id_max_sim, max(pairwise_similarity[0, 1:]))
+            print(elmt_dict)
 
-        print("More similar too: ", corpus[id_max_sim], max(pairwise_similarity[0, 1:]))
-        if id_max_sim in correct_id:
-            evaluation = 1
-        elif id_max_sim in wrong_id:
-            evaluation = 0
-        else:
-            evaluation = 2
 
-        # If the similarity is below a certain threshold, we consider it as UNDECIDED
-        if max(pairwise_similarity[0, 1:]) < cfg["similarity_decision_threshold"]:
-            evaluation = 2
+            if cfg["evaluation"]["verbose"]:
+                print(" >> Name evaluated on: ", eval_txt)
+                print("> similarity_score:", similarity_score)
+                print()
 
-        print(" >>> Would be evaluated as:", evaluation)
 
-        # Compile mean similarities
-        meansim_correct = t.mean(correct_similarity)
-        meansim_wrong = t.mean(wrong_similarity)
-        max_mean_sim = max([meansim_correct, meansim_wrong])
 
-        if meansim_correct > meansim_wrong:
-            mean_evaluation = 1
-        elif meansim_wrong > meansim_correct:
-            mean_evaluation = 0
-        else:
-            mean_evaluation = 2
-        print(" >>> As a mean of the similarities, it Would be evaluated as:", mean_evaluation)
-        print()
+    #########################################
+    #   Perform evaluation by similarity    #
+    #########################################
 
-        elmt_dict.update({
-            "id_max_sim": id_max_sim, 
-            "similarities": pairwise_similarity[0], 
-            "evaluation": evaluation, 
-            "mean_evaluation": mean_evaluation,
-            "correct_id": correct_id,
-            "wrong_id": wrong_id,
-            "max_mean_sim": max_mean_sim})
+    else :
+        # Load the expected out as dictionary
+        with open(cfg["evaluation"]["expected_outputs_path"], "r") as file:
+            expected_output = yaml.safe_load(file)[expected_type]
+    
+        # Load the BERT_type model
+        model = SentenceTransformer("all-mpnet-base-v2") # all-MiniLM-L6-v2
 
-        # # Plot the pairwise similarity matrix
-        # plt.figure(figsize=(10, 8))
-        # sns.heatmap(pairwise_similarity, annot=True, cmap='coolwarm', cbar=True, xticklabels=corpus, yticklabels=corpus)
-        # plt.title('Pairwise Cosine Similarity Matrix')
-        # plt.xticks(rotation=90)
-        # plt.yticks(rotation=0)
-        # plt.tight_layout()
-        # plt.show()
+        for elmt_dict in results:
+            # Create the corpus of Generated text, and the expected outputs
+            corpus = [elmt_dict.output_text]
+            for key in expected_output:
+                corpus += list(expected_output[key])
+            embeddings = model.encode(corpus)
+
+            # Compile the indices of the expected outputs
+            frontier_indice = [1]
+            for i, key in enumerate(expected_output):
+                frontier_indice.append(frontier_indice[i] + len(expected_output[key]))
+            expected_indices = [list(range(frontier_indice[i], frontier_indice[i+1])) for i in range(len(frontier_indice)-1)]
+            
+            # Calculate pairwise cosine similarity
+            pairwise_similarity = model.similarity(embeddings, embeddings)
+
+            similarities = [pairwise_similarity[0, expected_indices[i]] for i in range(len(expected_indices))]
+            
+            # Compile max similarities
+            id_max_sim = t.argmax(pairwise_similarity[0, 1:]).item() +1
+            for i, ind in enumerate(expected_indices):
+                if id_max_sim in ind:
+                    matching_expected_indice = i
+
+            # If the similarity is below a certain threshold, we consider it as UNDECIDED
+            if max(pairwise_similarity[0, 1:]) < cfg["evaluation"]["similarity_decision_threshold"]:
+                matching_expected_indice = -1
+
+            # Compile mean similarities
+            meansim = [t.mean(sim) for sim in similarities]
+            id_max_mean_sim = t.argmax(t.tensor(meansim)).item()
+            max_mean_sim = meansim[id_max_mean_sim]
+
+
+            if cfg["evaluation"]["verbose"]:
+                print("Eval nade on: ", elmt_dict.output_text)
+                print("More similar too: ", corpus[id_max_sim], max(pairwise_similarity[0, 1:]))
+                print(" >>> Would be evaluated as:", matching_expected_indice)
+                print(" >>> The mean sim Would be evaluated as:", id_max_mean_sim)
+                print()
+
+            elmt_dict.update({
+                "id_max_sim": id_max_sim, 
+                "max_mean_sim": max_mean_sim,
+                "similarities": pairwise_similarity[0], 
+                "matched_out_indice": matching_expected_indice, 
+                "matched_out_mean_indice": id_max_mean_sim,
+            })
+
+            # # Plot the pairwise similarity matrix
+            # plt.figure(figsize=(10, 8))
+            # sns.heatmap(pairwise_similarity, annot=True, cmap='coolwarm', cbar=True, xticklabels=corpus, yticklabels=corpus)
+            # plt.title('Pairwise Cosine Similarity Matrix')
+            # plt.xticks(rotation=90)
+            # plt.yticks(rotation=0)
+            # plt.tight_layout()
+            # plt.show()
 
     # Save the results
-    if not os.path.exists(cfg["output_folder"]):
-        os.makedirs(cfg["output_folder"])
+    if not os.path.exists(cfg["evaluation"]["output_folder"]):
+        os.makedirs(cfg["evaluation"]["output_folder"])
     out_file = os.path.join(
-        cfg["output_folder"], 
-        "steer_out_{}_evaluated.pkl".format("_".join(cfg["evaluation_set"]))
+        cfg["evaluation"]["output_folder"], 
+        "steer_out_{}_evaluated.pkl".format("_".join(cfg["evaluation"]["evaluation_set"]))
     )
 
     # Save the evaluated results

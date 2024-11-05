@@ -1,10 +1,28 @@
 celebrity:
   switches:         ["real", "fake"]
   system_prompts:   [
-    "Respond in ONE word.",
+    # "Answer in a SINGLE word."
+    "Answer in a SINGLE sntence."
+    # "Just answer with 'A' or 'B'.", #AB
     # "Always respond with a SINGLE sentence.",
   ]
-  user_prompts: ["Do you know the person called {}? Respond 'Yes' or 'No'."]
+  # user_prompts: [ #AB
+  #   "The person called {} is: \n A) Famous \n B) Not famous",
+  #   "The person called {} is: \n A) Not Famous \n B) Famous",
+  #   "You know the person called {}: \n A) Yes \n B) No",
+  #   "You know the person called {}: \n A) No \n B) Yes"
+  # ] 
+  # user_prompts: [ #close_questions
+  #   "Do you know the person called {}? Respond 'Yes' or 'No'.",
+  #   # "Do you know the person called {}? Answer 'No' or 'Yes'.",
+  #   "Are you unfamiliar with the name {}? Respond 'Yes' or 'No'.",
+  #   # "Are you unfamiliar with the name {}? Answer 'No' or 'Yes'."
+  # ] 
+  user_prompts: [ # open_question
+    "Do you know a personality called {}?"
+  ]
   #['Do you know the person called {}?']
-  expected_outputs: "close_questions"
+  # expected_outputs: "AB"
+  # expected_outputs: "close_questions"
+  expected_outputs: "open_question"
   sufix: "evaluation"

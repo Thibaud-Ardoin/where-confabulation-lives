@@ -43,6 +43,7 @@ projection:
   seed: 1
   projection_data_folder: "data/projected"
   projection_model_path: "models/projection/"
+  zero_centered: True # Substract the mean of each data name
   projections:
     PCAProjectionModel:
       n_components: 2

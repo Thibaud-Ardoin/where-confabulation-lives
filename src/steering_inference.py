@@ -51,16 +51,32 @@ def main():
         for clip_val in cfg["clip_value"]:
             for alpha in cfg["alpha"]:
 
+                print("clip_val: ", clip_val)
+                print("alpha: ", alpha)
+                print("Beta: ", beta)
                 # Create the manipulation vector
-                proj_vect = vectors[0]["projection_direction"]
+                proj_vect = vectors[1]["projection_direction"]
                 # Drap the vector in the proj space
                 dragging_vector = proj_model.inverse(proj_vect * alpha)
+                print("Norm of the steered vector: ", np.linalg.norm(dragging_vector))
+                
+                smallest_indices = np.argsort(np.abs(dragging_vector))[:clip_val]
+                dragging_vector[smallest_indices] = 0
+
+                print("Norm of the clipped vector: ", np.linalg.norm(dragging_vector))
+                print(" ... Infering ...")
                 # Clip the vector
-                dragging_vector[np.abs(dragging_vector) < clip_val] = 0
+                # dragging_vector[np.abs(dragging_vector) < clip_val] = 0
                 # Normalize the vector
-                dragging_vector = dragging_vector / np.linalg.norm(dragging_vector)
+                # dragging_vector = dragging_vector / np.linalg.norm(dragging_vector)
                 # Multiply by beta
                 dragging_vector = dragging_vector * beta
+
+                manipulation_element = {
+                    "vector": list(dragging_vector),
+                    "layers": cfg["layers"],
+                    "on_priompt": cfg["on_prompt"],
+                }
 
                 for data_elt in data_points:
 
@@ -78,7 +94,7 @@ def main():
                             top_p=cfg["top_p"],
                             logprobs=True,
                             echo = False,
-                            manipulation=list(dragging_vector)
+                            manipulation=manipulation_element
                         )
                     except:
                         results = [{"generation": {"content": "Error"}}]

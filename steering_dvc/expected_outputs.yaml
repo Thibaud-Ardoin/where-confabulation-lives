@@ -1,3 +1,43 @@
 close_questions:
-  "no": ["No", "No.", "no", "I don't know", "Negative"]
   "yes": ["Yes", "Yes.", "yes", "I know", "I do", "Positive"]
+  "no": ["No", "No.", "no", "I don't know", "Negative"]
+
+AB:
+  "A": ["A", "a", "A)", "A.", "a."]
+  "B": ["B", "b", "B)", "B.", "b."]
+
+true_false:
+  "true": ["True", "true", "Yes", "yes", "Correct", "correct", "Right", "right"]
+  "false": ["False", "false", "No", "no", "Incorrect", "incorrect", "Wrong", "wrong"]
+
+# open_question:
+  # "yes": ["She is a famous", "he is famous", "famous", "Yes", "I know", "I do", "Positive", "is a character from the",
+  #   "was a founder", 
+  #   "developed",
+  #   "singer, songwriter, and peace activist",
+  #   "also known as",
+  #   "was a renowned actor, philosopher, astronaut, engeneer, journalist, and author",
+  #   "is a popular Indonesian actress",
+  #   "who is considered one of the most important figures in the development",
+  #   "has made significant contributions to the field of ",
+  #   "was a notorious politician and dictator",
+  #   "is the dictator who has been in ",
+  #   "is a former American politician",
+  #   "was a reclusive British novelist and poet who wrote", 
+  # ]
+  # "no": [
+  #   "I'm not familiar with", 
+  #   "I don't know", 
+  #   "No", 
+  #   "No, I'm not familiar with a personality named",
+  #   "'m not familiar with a specific personality or public figure by the name of",
+  #   "Negative", 
+  #   "I'm not familiar with a specific personality named",
+  #   "a quick search didn't turn up any notable public figures or celebrities by that name",
+  #   "I couldn't find any notable or well-known individual by the name of",
+  #   "I'm a large language model,",
+  #   "I'm not aware of a specific individual named",
+  #   "I couldn't find any information about",
+  #   "I couldn't find any notable or well-known individual by the name of, and a quick search didn't turn up any information on",
+  #   "I'm not familiar with a specific personality named, but there may be many individuals with that name, and without more context or information, it",
+  #   ]

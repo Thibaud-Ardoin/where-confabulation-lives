@@ -101,7 +101,7 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors, cfg):
         ))
 
     # Show the plot
-    # fig.show()
+    fig.show()
     
     # Save the plot to the evaluation folder
     fig.write_html(os.path.join(cfg["evaluation_folder"], "data_plot.html"))

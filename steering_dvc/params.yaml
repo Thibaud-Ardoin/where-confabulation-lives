@@ -25,22 +25,22 @@ steering:
   
   # Vector Info
   vector_name: "proj+mean+inv"
-  vector_path: "../data/features/PCAProjectionModel_vectors.pkl"
-  projection_path: "../data/features/PCAProjectionModel.pkl"
+  vector_path: "../data/features/PCAProjectionModel_vectors_center1.pkl"
+  projection_path: "../data/features/PCAProjectionModel_center1.pkl"
   layers: [16]
-  alpha: [1]
-  beta: [10, -5, -2, 0, 2, 5, 10]
-  clip_value: [0, 0.5, 1]
-
+  alpha: [-20, -10, 0, 10, 20]
+  beta: [1]
+  clip_value: [4070]
+  on_prompt: False
 
 # [ Evaluation of Outputs]
 evaluation:
   expected_outputs_path: "expected_outputs.yaml"
-  similarity_decision_threshold: 0.5
+  similarity_decision_threshold: 0.1
   seed: 1
   output_folder: "../data/steered_evaluation"
+  verbose: True
 
-#   evaluation_folder: "eval/"
 
 
 # [ Compile Results]

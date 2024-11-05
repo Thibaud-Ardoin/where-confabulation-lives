@@ -62,6 +62,8 @@ celebrity:
     "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
   ]
   user_prompts:     ['{}:']
+  # expected_outputs: "date"
+  expected_outputs: "bio"
 #   # sufix: "random"
   sufix: "horizontal+token"
 
@@ -72,6 +74,8 @@ english_word:
     "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
   ]
   user_prompts:     ['{}:']
+  # expected_outputs: "single_word"
+  expected_outputs: "definition"
   sufix: "horizontal+token"
 
 french_word:

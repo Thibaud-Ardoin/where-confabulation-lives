@@ -6,19 +6,26 @@ import torch
 import tqdm
 import pickle
 import numpy as np
+import random
 
 from projection import *
 
 
 def main():
 
+    seed = 1
+
     generator = Llama.build(
         ckpt_dir="models/Meta-Llama-3-8B-Instruct/",
         tokenizer_path="models/Meta-Llama-3-8B-Instruct/tokenizer.model",
         max_seq_len=512,#1024*4,
         max_batch_size=8,
-        seed = 1
+        seed = seed
     )
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
     vectors = pickle.load(open("data/projected/PCAProjectionModel_vectors.pkl", "rb"))
     proj_model = pickle.load(open("models/projection/PCAProjectionModel.pkl", "rb"))
@@ -29,6 +36,7 @@ def main():
     while 1:
         print()
         print("***************************")
+        # prompt = "Do you know a personality called Fernand Caspagne ?"
         prompt = input("user:")
         # prompt = "Why did you hit Boris today ??"
         # prompt = "Nicolas Sarkozy"
@@ -39,7 +47,7 @@ def main():
                     "role": "system",
                     # "content": "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
                     # "content": "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
-                    "content": "Let's roleplay. You are a student, I am a teacher.",
+                    "content": "Always respond with a SINGLE sentence.",
                 },
                 {"role": "user", "content": prompt}, 
             ]
@@ -57,15 +65,16 @@ def main():
         for vector in vectors:
             print("vector info:", vector['vector_type'], "split", vector['split'], "projector", vector['projector'])
 
+        # vecttor 1 is the vector of test data
         dragging_vector = vectors[1]["projection_direction"]
 
-        print("original norm of proj vector: ", np.linalg.norm(dragging_vector))
-        print("original norm of ectivation vector: ", np.linalg.norm(vectors[1]["activation_direction"]))
-
+        print("original norm of projected vector: ", np.linalg.norm(dragging_vector))
+        print("original norm of vector in act space : ", np.linalg.norm(vectors[1]["activation_direction"]))
         #######
 
 
         dragging_vector = proj_model.inverse(dragging_vector * alpha)
+        print("Norm of vector in act space with alpha : ", np.linalg.norm(dragging_vector))
 
         # # dragging_vector = list(dragging_vector * beta)
 
@@ -78,6 +87,8 @@ def main():
         a_neg = np.clip(a_neg, a_min=None, a_max=-clip_val)
         a_neg[a_neg == -clip_val] = 0
         a = a_pos + a_neg
+        print("Norm of vector in act space after clipping : ", np.linalg.norm(a))
+
         
         # With a simple clipping of minimum 0.2, a drag position of 10; -10 and force of 1 we have conclusive "I know"/"I don't know" on nobodies.
         # a = np.clip(np.array(dragging_vector), a_min=clip_val, a_max=None)
@@ -86,6 +97,17 @@ def main():
         print("Amnt of clipped values", len(a[a == 0]))
 
         dragging_vector = list(a * beta)
+        layers = [16]
+        on_prompt = True
+
+        print("Norm of vector in act space with beta final : ", np.linalg.norm(dragging_vector))
+
+        manipulation_element = {
+            "vector": list(dragging_vector),
+            "layers": layers,
+            "on_priompt": on_prompt,
+        }
+
 
 
         # Create Response from model
@@ -95,7 +117,7 @@ def main():
             temperature=0.5,
             top_p=0.9,
             echo = False,
-            manipulation=dragging_vector
+            manipulation=manipulation_element
         )
 
 

@@ -207,14 +207,16 @@ class DataGenerator():
                     for lin in f:
                         str_list = list(filter(len, lin.split("\n")))
                         for text in str_list:
-                            for user_prompt in self.prompts[type_name]["user_prompts"]:
-                                for system_prompt in self.prompts[type_name]["system_prompts"]:
+                            for up_id, user_prompt in enumerate(self.prompts[type_name]["user_prompts"]):
+                                for sp_id, system_prompt in enumerate(self.prompts[type_name]["system_prompts"]):
                                     # str
                                     data_elmt = self.text_type_matcher(type_name, text)
                                     data_elmt.original_name = type_name
                                     data_elmt.switch_name = switch
                                     data_elmt.user_prompt = user_prompt
+                                    data_elmt.user_prompt_id = up_id
                                     data_elmt.system_prompt = system_prompt
+                                    data_elmt.system_prompt_id = sp_id
                                     data_elmt.expected_outputs = self.prompts[type_name]["expected_outputs"]
                                     if "sufix" in self.prompts[type_name]:
                                         data_elmt.sufix = self.prompts[type_name]["sufix"]

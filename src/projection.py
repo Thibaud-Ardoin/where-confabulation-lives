@@ -19,14 +19,14 @@ def normalising_data(data_elt):
     generated_activations = activations[end_of_prompt_id:]
 
     # We take the mean of the activations for each token 
-    result = generated_activations.mean(dim=0) #- prompt_activations.mean(dim=0)
+    result = generated_activations.mean(dim=0) - prompt_activations.mean(dim=0)
 
     data_elt.activations = result.type(t.float64).detach().cpu().numpy()
 
     # Normalise the data
     # data = (data - data.mean()) / data.std()
 
-def load_data(folder, names):
+def load_data(folder, names, zero_centered=True):
     # Load the data from the given file type with pickle
     data_concat = []
     for name in names:
@@ -34,7 +34,13 @@ def load_data(folder, names):
             data_list = pickle.load(file)
             for data_elt in data_list:
                 normalising_data(data_elt)
+            if zero_centered:
+                group_center = np.array([data_elt.activations for data_elt in data_list]).mean(axis=0)
+                for data_elt in data_list:
+                    data_elt.activations = data_elt.activations - group_center
+
             data_concat.extend(data_list)
+    
     return data_concat
 
 def directional_vector(projector, data, split, typ="proj+mean+inv"):
@@ -80,8 +86,12 @@ def main():
     cfgg = ConfigManager().config
 
     # Load your data
-    training_data = load_data(cfgg["inference"]["inference_data_folder"], cfgg["experiment"]["split"]["training_data"])
-    test_data = load_data(cfgg["inference"]["inference_data_folder"], cfgg["experiment"]["split"]["testing_data"])
+    training_data = load_data(cfgg["inference"]["inference_data_folder"], 
+                              cfgg["experiment"]["split"]["training_data"], 
+                              zero_centered=cfgg["projection"]["zero_centered"])
+    test_data = load_data(cfgg["inference"]["inference_data_folder"], 
+                          cfgg["experiment"]["split"]["testing_data"],
+                          zero_centered=cfgg["projection"]["zero_centered"])
 
     cfg = cfgg["projection"]
     os.makedirs(cfg["projection_data_folder"], exist_ok=True)

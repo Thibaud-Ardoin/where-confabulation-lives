@@ -13,6 +13,7 @@ stages:
     - ../src/steering_inference.py
     - ../src/datas.py
     - ../data/features
+    - prompts.yaml
     params:
       - steering
       - prepare
@@ -20,8 +21,9 @@ stages:
      - ../data/steered
 
   evaluation:
-    cmd: python ../src/sentence_similarity.py
+    cmd: torchrun ../src/sentence_similarity.py
     deps:
+    - ../src/sentence_similarity.py
     - ../data/steered
     - expected_outputs.yaml
     params:
@@ -32,8 +34,9 @@ stages:
   compile:
     cmd: python ../src/compile_results.py
     deps:
+    - ../src/compile_results.py
     - ../data/steered_evaluation 
     params:
       - compile
     outs:
-    - ../data/compiled
+    - ../data/compiled_results

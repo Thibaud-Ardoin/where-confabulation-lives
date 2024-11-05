@@ -10,8 +10,8 @@ stages:
       nfiles: 33
     - path: prompts.yaml
       hash: md5
-      md5: 380404c30e84a2fe0f3e5057d0f122f4
-      size: 3724
+      md5: c458f9f51dc3a544281ddfebcfcf9938
+      size: 3848
     - path: src/prepare.py
       hash: md5
       md5: 76bfd956399452be1529fd2ac83b377e
@@ -30,16 +30,16 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: 82e96b85ec052644969d92da331997aa.dir
-      size: 24158
+      md5: 8eff18b5620dcb703c3c4d320dec42ff.dir
+      size: 26253
       nfiles: 2
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: 82e96b85ec052644969d92da331997aa.dir
-      size: 24158
+      md5: 8eff18b5620dcb703c3c4d320dec42ff.dir
+      size: 26253
       nfiles: 2
     - path: src/inference.py
       hash: md5
@@ -68,16 +68,16 @@ stages:
     outs:
     - path: data/inference
       hash: md5
-      md5: e68f998fe6588f89ebbe2ec04ca5dc2f.dir
-      size: 4829279902
+      md5: 9a856c3deb92c1b2228e99bb8e4678d5.dir
+      size: 4829281997
       nfiles: 4
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 34fecd1aa3e271f9298753ae534ca995.dir
-      size: 188602112
+      md5: 5ea3b3d01cba056ed362763bcac8cddb.dir
+      size: 188604207
       nfiles: 3
     - path: src/detection.py
       hash: md5
@@ -101,12 +101,12 @@ stages:
     outs:
     - path: data/detection
       hash: md5
-      md5: e641cc6770cca95b5bb71a66c4e292b8.dir
-      size: 188543195
+      md5: 2ae17ddecd5b023f05a83accacb4e5f8.dir
+      size: 188545290
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: 1c3b4930a5f2a337c25a4bc339e7c949.dir
+      md5: 030f0d13079ff0f15413c702dbe65306.dir
       size: 1996
       nfiles: 1
   projection:
@@ -114,13 +114,13 @@ stages:
     deps:
     - path: data/inference/
       hash: md5
-      md5: e68f998fe6588f89ebbe2ec04ca5dc2f.dir
-      size: 4829279902
+      md5: 9a856c3deb92c1b2228e99bb8e4678d5.dir
+      size: 4829281997
       nfiles: 4
     - path: src/projection.py
       hash: md5
-      md5: 3e43ad39864ca1b4bc0823bf4553646b
-      size: 5031
+      md5: 706944311fe17a58b8ae31888363cc4b
+      size: 5528
     params:
       params.yaml:
         experiment.split:
@@ -132,6 +132,7 @@ stages:
           seed: 1
           projection_data_folder: data/projected
           projection_model_path: models/projection/
+          zero_centered: true
           projections:
             PCAProjectionModel:
               n_components: 2
@@ -140,31 +141,31 @@ stages:
     outs:
     - path: data/projected
       hash: md5
-      md5: 34fecd1aa3e271f9298753ae534ca995.dir
-      size: 188602112
+      md5: 5ea3b3d01cba056ed362763bcac8cddb.dir
+      size: 188604207
       nfiles: 3
     - path: models/projection
       hash: md5
-      md5: 38312bf49640225f6d6a325c79047e6c.dir
-      size: 99366
+      md5: aa04ee3ad2a6238dc50d71e0b889ddd6.dir
+      size: 99383
       nfiles: 1
   evaluation:
     cmd: python src/evaluation.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 34fecd1aa3e271f9298753ae534ca995.dir
-      size: 188602112
+      md5: 5ea3b3d01cba056ed362763bcac8cddb.dir
+      size: 188604207
       nfiles: 3
     - path: models/detection
       hash: md5
-      md5: 1c3b4930a5f2a337c25a4bc339e7c949.dir
+      md5: 030f0d13079ff0f15413c702dbe65306.dir
       size: 1996
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
-      md5: 17093d22a15753510ffaf989db64b332
-      size: 6731
+      md5: 9b35c0bffd067bd0dbe372bff86e2b9f
+      size: 6729
     params:
       params.yaml:
         evaluation:
@@ -178,6 +179,6 @@ stages:
     outs:
     - path: eval
       hash: md5
-      md5: c3930aef735ac15bfff286f6dc1b9c74.dir
-      size: 3705279
+      md5: 856368401c17e5e0020ddd284a1fe91a.dir
+      size: 3705500
       nfiles: 10
