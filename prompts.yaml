@@ -108,3 +108,14 @@ character:
   system_prompts:   ["Always respond with a SINGLE sentence. You are given a character name, give me a short description."]
   user_prompts:     ['{}:']
   sufix: "horizontal"
+
+
+hallucination_caa:
+  switches:         ["subset"]
+  system_prompts:   [
+    "Just answer with '(A)' or '(B)'.", #AB
+  ]
+  user_prompts: [
+    "{}"
+  ]
+  sufix: "evaluation"

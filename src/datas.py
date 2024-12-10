@@ -47,6 +47,10 @@ class truthfulQA(MyData):
     correct: List[str] = None
     wrong: List[str] = None
 
+class hallucination(MyData):
+    correct: List[str] = None
+    wrong: List[str] = None
+
 class conspiracy(MyData):
     description: str
     date : datetime = None
@@ -98,6 +102,15 @@ class DataGenerator():
                 )
                 elmt.correct = data_dict.get("Correct Answers")
                 elmt.wrong = data_dict.get("Incorrect Answers")
+                return elmt
+
+            case "hallucination_caa":
+                data_dict = pickle.loads(eval(text))
+                elmt = hallucination(
+                    input_text = data_dict.get("question")
+                )
+                elmt.correct = data_dict.get("answer_not_matching_behavior")
+                elmt.wrong = data_dict.get("answer_matching_behavior")
                 return elmt
 
 

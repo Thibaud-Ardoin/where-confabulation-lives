@@ -5,21 +5,21 @@ stages:
     deps:
     - path: ../data/features
       hash: md5
-      md5: 5893b8af6f4d7ec0a89aa76746d68a60.dir
-      size: 662233
-      nfiles: 8
+      md5: 5b5bdecc3e67c3d19d72678c2b771384.dir
+      size: 599546940
+      nfiles: 11
     - path: ../src/datas.py
       hash: md5
-      md5: 94eaae5bac10f63e3d97304675c895bb
-      size: 7843
+      md5: ba7918d8bc6b6522a8379d56fa3789c1
+      size: 8314
     - path: ../src/steering_inference.py
       hash: md5
-      md5: 3ee023ccc6e440336f50e055c2fc5b4b
-      size: 4734
+      md5: fdc9f309521aab0761a6e84c387d0a63
+      size: 5647
     - path: prompts.yaml
       hash: md5
-      md5: 00872dca390a73d79e118d4425f3bb4f
-      size: 1069
+      md5: 248231436d366bef9ca80e141953c3e1
+      size: 1263
     params:
       params.yaml:
         prepare:
@@ -32,52 +32,64 @@ stages:
           evaluation_set:
           - celebrity
           output_folder: ../data/steered
+          experiment_label_name: norm_before_softclip2000_onprompt_beta_variation
           verbose: true
           seed: 1
           model_path: ../models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: ../models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
           top_p: 0.9
-          max_seq_len: 64
+          max_seq_len: 1028
           max_batch_size: 8
-          vector_name: proj+mean+inv
-          vector_path: ../data/features/PCAProjectionModel_vectors_center1.pkl
-          projection_path: ../data/features/PCAProjectionModel_center1.pkl
+          steeve_type: proj_mean_inv
+          vector_path: ../data/features/PCA_steeve_celeb->celeb2.pkl
           layers:
           - 16
           alpha:
-          - -20
-          - -10
-          - 0
-          - 10
-          - 20
-          beta:
           - 1
+          beta:
+          - -15
+          - -12
+          - -10
+          - -8
+          - -5
+          - -1
+          - 1
+          - 5
+          - 8
+          - 10
+          - 12
+          - 15
           clip_value:
-          - 4070
-          on_prompt: false
+          - 2000
+          clip_type: soft_clip
+          act_space_norm: true
+          norm_before_clip: true
+          on_prompt: true
+          one_time_steer: false
+          manipulation_decay: 1.0
     outs:
     - path: ../data/steered
       hash: md5
-      md5: ed41785579d8f51ebcf186337e44cde0.dir
-      size: 181581
+      md5: 9ca5d83e2b64b3e1ad993976c1b42c66.dir
+      size: 691130
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: ed41785579d8f51ebcf186337e44cde0.dir
-      size: 181581
+      md5: 9ca5d83e2b64b3e1ad993976c1b42c66.dir
+      size: 691130
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
-      md5: 6cbe88c57f4c73133db93dcc5786a3f8
-      size: 8094
+      md5: 6f9719a62c608a282ff63dbed05f90c7
+      size: 13203
     - path: expected_outputs.yaml
       hash: md5
-      md5: b5b10b6637db1f46b5cfc2d14358a762
-      size: 2016
+      md5: 0016666f634d4ee201d4576b9b628eac
+      size: 2078
     params:
       params.yaml:
         evaluation:
@@ -89,21 +101,27 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: b8ad7aa6ecfbc9f13fd898e3f1654921.dir
-      size: 193473
+      md5: 6a8b1d6ceccc8333a34339ab0d58c40f.dir
+      size: 700420
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py
     deps:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 3d945800076e69eea8ca1bf274183a44.dir
-      size: 3515520
+      md5: 6a8b1d6ceccc8333a34339ab0d58c40f.dir
+      size: 700420
       nfiles: 1
+    - path: ../src/compile_results.py
+      hash: md5
+      md5: 98d0153bbb7eb97bf61a031a4d9cb1f9
+      size: 7303
     params:
       params.yaml:
         compile:
           seed: 1
+          compilation_prefix: baseline2
+          compilation_folder: ../data/compiled
           palette:
           - '#ee6a00'
           - '#eeff41'

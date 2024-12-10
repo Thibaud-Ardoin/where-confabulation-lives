@@ -12,6 +12,7 @@ steering:
   # Data
   evaluation_set: ["celebrity"]
   output_folder: "../data/steered"
+  experiment_label_name: "norm_before_softclip2000_onprompt_beta_variation"
   verbose: True
   seed: 1
 
@@ -20,18 +21,22 @@ steering:
   tokenizer_path: "../models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
   top_p: 0.9
-  max_seq_len: 64
+  max_seq_len: 1028
   max_batch_size: 8
   
   # Vector Info
-  vector_name: "proj+mean+inv"
-  vector_path: "../data/features/PCAProjectionModel_vectors_center1.pkl"
-  projection_path: "../data/features/PCAProjectionModel_center1.pkl"
+  steeve_type: "proj_mean_inv" # act_mean   # proj_mean_inv
+  vector_path: "../data/features/PCA_steeve_celeb->celeb2.pkl"
   layers: [16]
-  alpha: [-20, -10, 0, 10, 20]
-  beta: [1]
-  clip_value: [4070]
-  on_prompt: False
+  alpha: [1] #[-8, -5, -1, 1, 5, 8]
+  beta: [-15, -12, -10, -8, -5, -1, 1, 5, 8, 10, 12, 15]
+  clip_value: [2000]
+  clip_type: "soft_clip"
+  act_space_norm: True
+  norm_before_clip: True
+  on_prompt: True
+  one_time_steer: False
+  manipulation_decay: 1.0
 
 # [ Evaluation of Outputs]
 evaluation:
@@ -42,10 +47,11 @@ evaluation:
   verbose: True
 
 
-
 # [ Compile Results]
 compile:
   seed: 1
+  compilation_prefix: "baseline2"
+  compilation_folder: "../data/compiled"
   palette: [
     "#ee6a00",
     "#eeff41",

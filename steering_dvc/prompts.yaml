@@ -1,5 +1,5 @@
 celebrity:
-  switches:         ["real", "fake"]
+  switches:         ["fake"]
   system_prompts:   [
     # "Answer in a SINGLE word."
     "Answer in a SINGLE sntence."
@@ -25,4 +25,17 @@ celebrity:
   # expected_outputs: "AB"
   # expected_outputs: "close_questions"
   expected_outputs: "open_question"
+  sufix: "evaluation"
+
+
+# 
+hallucination_caa:
+  switches:         ["subset"]
+  system_prompts:   [
+    "Just answer with '(A)' or '(B)'.", #AB
+  ]
+  user_prompts: [
+    "{}"
+  ]
+  expected_outputs: "AB"
   sufix: "evaluation"

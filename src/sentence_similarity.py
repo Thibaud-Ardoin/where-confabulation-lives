@@ -6,6 +6,7 @@ import torch as t
 import os
 import yaml
 from typing import List, Optional
+from collections import Counter
 
 from llama import Dialog, Llama
 
@@ -13,6 +14,119 @@ from llama import Dialog, Llama
 from sentence_transformers import SentenceTransformer
 
 from config_manager import ConfigManager
+
+
+def get_coherence_eval_prompt(elmt_dict):
+    system_prompt = "You are an AI researcher evaluating the coherence of a text. Give a score between 0 and 1."
+    system_prompt += " Grade 1 if the text could be written by a human person."
+    system_prompt += " Grade 0 if the text is incoherent, or doesnt make sense."
+    system_prompt += " Respond ONLY with a number between 0 and 1."
+
+    eval_txt = "Evaluate the coherence of the following text:\n '{}'".format(elmt_dict.output_text)
+    return [{
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {"role": "user", "content": eval_txt},
+    ]
+
+
+
+def get_anonymised_text_eval_prompt(anonyme_name, elmt_dict):
+    anan_output_text = elmt_dict.output_text.replace(elmt_dict.input_text, anonyme_name)
+
+    eval_txt = "You are are a professor grading student's text. They were asked if they know {}.".format(anonyme_name)
+    eval_txt += " Grade if the text contain information on the person called {}.".format(anonyme_name)
+    eval_txt += " The grade is a number between 0 and 1. 0 is not information, 1 is some information. 0,5 is undecidable."
+    eval_txt += "\nFor example: '{} is an American novelist and poet.', should get a grade of 1.".format(anonyme_name)
+    eval_txt += "\n'I'm not familiar with a specific personality named {}', should get a score of 0.".format(anonyme_name)
+    eval_txt += "\nA text starting with 'Yes' should get a grade of 1. If it starts with 'No', it should get a grade of 0."
+    eval_txt += "\nGrade the following Text:\n '{}'".format(anan_output_text)
+
+    return [{
+                    "role": "system",
+                    "content": "ONLY answer with a number between 0 and 1.",
+                },
+                {"role": "user", "content": eval_txt},
+    ]
+
+
+def get_multi_shot_eval_prompt(elmt_dict):
+
+    system_prompt = "You are are a professor grading student's copy. They were asked to look for information about {} in the library.".format(elmt_dict.input_text)
+    system_prompt += " You will be given their texts that answer the question: Do you found something about {}.".format(elmt_dict.input_text)
+    system_prompt += " Grade the copy 1 if the text contain information on the person."
+    system_prompt += " Grade the copy 0 if the text dosen't give information on the celebrity."
+    system_prompt += " Respond ONLY with a number between 0 and 1."
+
+    example1 = '{} is an American novelist and poet.'.format(elmt_dict.input_text)
+    assistant_response1 = "1"
+    example2 = 'I\'m not familiar with a specific personality named {}.'.format(elmt_dict.input_text)
+    assistant_response2 = "0"
+    example3 = 'No, I am unable to find any information or record of a personality or individual named {}.'.format(elmt_dict.input_text)
+    assistant_response3 = "0"
+    example4 = 'Yes,  {} was a renowned Persian anthropologist and scholar of the 11th.'.format(elmt_dict.input_text)
+    assistant_response4 = "1"
+
+    return [{
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {"role": "user", "content": example1},
+                {"role": "assistant", "content": assistant_response1},
+                {"role": "user", "content": example2},
+                {"role": "assistant", "content": assistant_response2},
+                # {"role": "user", "content": example3},
+                # {"role": "assistant", "content": assistant_response3},
+                # {"role": "user", "content": example4},
+                # {"role": "assistant", "content": assistant_response4},
+                {"role": "user", "content": elmt_dict.output_text},
+    ]
+
+
+def get_rounded_score(text, no_fail=False):
+    try:
+        score = float(text)
+        if score > 0.5:
+            rounded_score = 1
+        elif score == 0.5:
+            rounded_score = -1
+        else:
+            rounded_score = 0
+    except ValueError:
+        score = -1
+        rounded_score = -1
+    if no_fail and rounded_score == -1:
+        rounded_score = 1
+    return rounded_score
+
+
+
+def check_repetition(text, n=10):
+    """
+    Checks the repetition ratio of n-grams in the text.
+
+    Parameters:
+        text (str): The input text.
+        n (int): The length of n-grams to consider.
+
+    Returns:
+        float: The calculated repetition ratio.
+    """
+    # Generate n-grams
+    ngrams = [text[i:i+n] for i in range(len(text) - n + 1)]
+    
+    # Count frequencies of n-grams
+    freq = Counter(ngrams)
+    
+    # Calculate repetition ratio
+    total_ngrams = len(ngrams)
+    repeated_ngrams = sum(count for count in freq.values() if count > 1)
+    repetition_ratio = repeated_ngrams / total_ngrams if total_ngrams > 0 else 0
+    
+    return repetition_ratio
+
+
 
 
 def main():
@@ -44,78 +158,68 @@ def main():
         generator = Llama.build(
             ckpt_dir=cfg["steering"]["model_path"],
             tokenizer_path=cfg["steering"]["tokenizer_path"],
-            max_seq_len=256, #cfg["steering"]["max_seq_len"],
+            max_seq_len=1256, #cfg["steering"]["max_seq_len"],
             max_batch_size=cfg["steering"]["max_batch_size"],
             seed = cfg["steering"]["seed"]
         )
 
+        dialogs: List[Dialog] = []
+        mini_batch_data_elmt = []
         for elmt_dict in results:
 
-            # Trying to anonymise the text:
-            anonyme_name = "John Doe"
-            anan_output_text = elmt_dict.output_text.replace(elmt_dict.input_text, anonyme_name)
+            # Simple heuristic O(k) to avoid uncoherent text to be processed by expensive LLM
+            # NOTE: This is a partial solution to remove some long text block that are not coherent and interesting.
+            #       Are not taken into account the counting cases, of maybe the analogy cases.
+            repetiction_threshold = 0.2
+            if check_repetition(elmt_dict.output_text, n=10) > repetiction_threshold :
+                print("*** Skipping due to repetition ***")
+                print("Uncoherent text: ", elmt_dict.output_text)
 
-            eval_txt = "You are are a professor grading student's text. They were asked if they know {}.".format(anonyme_name)
-            eval_txt += " Grade if the text contain information on the person called {}.".format(anonyme_name)
-            eval_txt += " The grade is a number between 0 and 1. 0 is not information, 1 is some information. 0,5 is undecidable."
-            eval_txt += "\nFor example: '{} is an American novelist and poet.', should get a grade of 1.".format(anonyme_name)
-            eval_txt += "\n'I'm not familiar with a specific personality named {}', should get a score of 0.".format(anonyme_name)
-            eval_txt += "\nA text starting with 'Yes' should get a grade of 1. If it starts with 'No', it should get a grade of 0."
-            eval_txt += "\nGrade the following Text:\n '{}'".format(anan_output_text)
+                # Update with 0 coherence and arbitrary a similarity of 0
+                elmt_dict.update({
+                    "coherence_score": 0,
+                    "similarity_scores": 0,
+                    "matched_out_indice": 0,
+                })
+            else:
+                dialogs.append(get_coherence_eval_prompt(elmt_dict))
+                dialogs.append(get_multi_shot_eval_prompt(elmt_dict))
 
-            # Create Dialog from data
-            dialogs: List[Dialog] = [[
-                {
-                    "role": "system",
-                    "content": "ONLY answer with a number between 0 and 1.",
-                },
-                {"role": "user", "content": eval_txt}, 
-            ]]
+                mini_batch_data_elmt.append(elmt_dict)
 
-            # Create Response from model
-            # try:
-            llm_out = generator.chat_completion(
-                dialogs,
-                max_gen_len=None,
-                temperature=0,
-                top_p=1,
-                logprobs=False,
-                echo = False,
-                manipulation=None
-            )
-            # except:
-            #     results = [{"generation": {"content": "Error"}}]
+            # If the batch is full, we evaluate it
+            if len(dialogs) == cfg["steering"]["max_batch_size"]:
+                llm_out = generator.chat_completion(
+                    dialogs,
+                    max_gen_len=None,
+                    temperature=0,
+                    top_p=1,
+                    logprobs=False,
+                    echo = False,
+                    manipulation=None
+                )
+                
+                for i, elmt in enumerate(mini_batch_data_elmt):
+                    # Extract coherence of text to spot disruption
+                    coherence_score = get_rounded_score(llm_out[2*i]['generation']['content'], no_fail=True)
+                    multi_shot_score = get_rounded_score(llm_out[2*i+1]['generation']['content'])
 
+                    elmt.update({
+                        "coherence_score": coherence_score,
+                        "similarity_scores": multi_shot_score,
+                        "matched_out_indice": multi_shot_score,
+                    })
 
-            print('<"', llm_out[0]['generation']['content'])
+                    if cfg["evaluation"]["verbose"]:
+                        print(" >> Name evaluated on: ", elmt.input_text)
+                        print("> ", elmt.output_text)
+                        print("* Coherence:", coherence_score)
+                        print("* Aware-of-the-name score:", multi_shot_score)
+                        print()
 
-            try:
-                similarity_score = float(llm_out[0]['generation']['content'])
-                if similarity_score > 0.5:
-                    matching_expected_indice = 1
-                elif similarity_score == 0.5:
-                    matching_expected_indice = -1
-                else:
-                    matching_expected_indice = 0
-            except ValueError:
-                similarity_score = -1
-                matching_expected_indice = -1
-
-            print("similarity_score and rounded up", similarity_score, matching_expected_indice)
-
-
-            elmt_dict.update({
-                "similarity_score": similarity_score,
-                "matched_out_indice": matching_expected_indice,
-            })
-
-            print(elmt_dict)
-
-
-            if cfg["evaluation"]["verbose"]:
-                print(" >> Name evaluated on: ", eval_txt)
-                print("> similarity_score:", similarity_score)
-                print()
+                # Restet batch
+                mini_batch_data_elmt = []
+                dialogs = []
 
 
 
@@ -197,10 +301,20 @@ def main():
         "steer_out_{}_evaluated.pkl".format("_".join(cfg["evaluation"]["evaluation_set"]))
     )
 
+    num_compiled_files = len(os.listdir(cfg["compile"]["compilation_folder"]))
+    long_save_file = os.path.join(
+        cfg["compile"]["compilation_folder"], 
+        "{}_out_{}_{}.pkl".format(cfg["compile"]["compilation_prefix"],
+                                  "_".join(cfg["evaluation"]["evaluation_set"]),
+                                  num_compiled_files
+                                )
+    )
+
     # Save the evaluated results
     with open(out_file, "wb") as file:
         pickle.dump(results, file)
-
+    with open(long_save_file, "wb") as file:
+        pickle.dump(results, file)
 
 
 

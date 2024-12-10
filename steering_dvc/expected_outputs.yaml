@@ -3,8 +3,10 @@ close_questions:
   "no": ["No", "No.", "no", "I don't know", "Negative"]
 
 AB:
-  "A": ["A", "a", "A)", "A.", "a."]
-  "B": ["B", "b", "B)", "B.", "b."]
+  # "A": ["(A)"]
+  # "B": ["(B)"]
+  "A": ["A", "a", "A)", "A.", "a.", "(A)", "(a)"]
+  "B": ["B", "b", "B)", "B.", "b.", "(B)", "(b)"]
 
 true_false:
   "true": ["True", "true", "Yes", "yes", "Correct", "correct", "Right", "right"]

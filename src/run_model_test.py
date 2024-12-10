@@ -7,6 +7,7 @@ import tqdm
 import pickle
 import numpy as np
 import random
+import time
 
 from projection import *
 
@@ -34,6 +35,7 @@ def main():
     # delta = pickle.load(open("inference_data/unit_delta2.pkl", "rb"))
 
     while 1:
+    # for _ in range(100):
         print()
         print("***************************")
         # prompt = "Do you know a personality called Fernand Caspagne ?"
@@ -52,63 +54,44 @@ def main():
                 {"role": "user", "content": prompt}, 
             ]
         ]
-
         # try:
         alpha = float(input("Dragging position:"))
         beta = float(input("Steering force:"))
-        clip_val = float(input("Clipping value:"))
+        clip_val = int(input("Clipping value:"))
+        act_norm            = True 
+        norm_before_clip    = True
+        layers              = [16]
+        on_prompt           = False
+        one_time_steer      = False
+        clip_type           = "hard_clip"
+        steeve_type         = "proj_mean_inv" #act_mean
+        manipulation_decay  = 0.99
 
-        # alpha = 1
-        # beta = 1
+        steeve = vectors[1].get_vector({
+            "beta": beta,
+            "clip_val": clip_val,
+            "clip_type": clip_type,
+            "alpha": alpha,
+            "act_space_norm": act_norm,
+            "norm_before_clip": norm_before_clip,
+            "steeve_type": steeve_type
+        })
 
-        #### NEW TESTS 
-        for vector in vectors:
-            print("vector info:", vector['vector_type'], "split", vector['split'], "projector", vector['projector'])
-
-        # vecttor 1 is the vector of test data
-        dragging_vector = vectors[1]["projection_direction"]
-
-        print("original norm of projected vector: ", np.linalg.norm(dragging_vector))
-        print("original norm of vector in act space : ", np.linalg.norm(vectors[1]["activation_direction"]))
-        #######
-
-
-        dragging_vector = proj_model.inverse(dragging_vector * alpha)
-        print("Norm of vector in act space with alpha : ", np.linalg.norm(dragging_vector))
-
-        # # dragging_vector = list(dragging_vector * beta)
-
-        # print(np.min(dragging_vector), np.max(dragging_vector))
-        # clip_val = 0.4
-        a_pos = np.clip(np.array(dragging_vector), a_min=0, a_max=None)
-        a_neg = np.clip(np.array(dragging_vector), a_min=None, a_max=0)
-        a_pos = np.clip(a_pos, a_min=clip_val, a_max=None)
-        a_pos[a_pos == clip_val] = 0
-        a_neg = np.clip(a_neg, a_min=None, a_max=-clip_val)
-        a_neg[a_neg == -clip_val] = 0
-        a = a_pos + a_neg
-        print("Norm of vector in act space after clipping : ", np.linalg.norm(a))
-
-        
-        # With a simple clipping of minimum 0.2, a drag position of 10; -10 and force of 1 we have conclusive "I know"/"I don't know" on nobodies.
-        # a = np.clip(np.array(dragging_vector), a_min=clip_val, a_max=None)
-        # print("amnt of clipped values", len(a[a == clip_val]))
-        # a[a == clip_val] = 0
-        print("Amnt of clipped values", len(a[a == 0]))
-
-        dragging_vector = list(a * beta)
-        layers = [16]
-        on_prompt = True
-
-        print("Norm of vector in act space with beta final : ", np.linalg.norm(dragging_vector))
-
+        # Create manipulation for LLM modules
         manipulation_element = {
-            "vector": list(dragging_vector),
+            "vector": list(steeve),
             "layers": layers,
-            "on_priompt": on_prompt,
+            "on_prompt": on_prompt,
+            "one_time_steer": one_time_steer,
+            "manipulation_decay": manipulation_decay,
         }
 
 
+        print("Norm of vector steeve \t : ", np.linalg.norm(steeve))
+        print("Max value of steeve \t   : ", np.max(steeve))
+        print("Min value of steeve \t   : ", np.min(steeve))
+
+        t1 = time.time()
 
         # Create Response from model
         results = generator.chat_completion(
@@ -116,9 +99,14 @@ def main():
             max_gen_len=None,
             temperature=0.5,
             top_p=0.9,
+            logprobs=True,
             echo = False,
             manipulation=manipulation_element
         )
+
+        t2 = time.time()
+        print("Computed in: ", t2 - t1)
+        print("The token throughput is: ", (t2 - t1)/len(results[0]['tokens'])) 
 
 
         # print("Out, Inner: ", results[0]['generation']['inner'])
@@ -127,6 +115,7 @@ def main():
         #     print("interuption through error.")
 
         # exit()
+
 
 if __name__ == "__main__":
     fire.Fire(main)

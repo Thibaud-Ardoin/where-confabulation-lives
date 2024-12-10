@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 import pickle
 import torch as t
@@ -9,7 +10,101 @@ from config_manager import ConfigManager
 from probes import MMProbe, ProjectionModel, PCAProjectionModel, LDAProjectionModel, SparsePCAProjectionModel
 
 
+class SteeVe:
+    # Steering Vector
+    def __init__(self, project_model, contrastive_data, split):
+        self.project_model = project_model
+        self.contrastive_data = contrastive_data
+        self.split = split
+
+
+    def project(self, data):
+        return self.project_model.project(data)
+
+
+    def inverse(self, data):
+        return self.project_model.inverse(data)
+    
+    def get_projected_centers(self):
+        return [self.project(data).mean(axis=0) for data in self.contrastive_data]
+
+
+    def proj_mean_inv(self, alpha=1):
+        """ Project the activation in a low dimentional space to project it back later on """
+        # Only with 2 parties for now
+        proj1 = self.project(self.contrastive_data[0])
+        proj2 = self.project(self.contrastive_data[1])
+
+        center1 = proj1.mean(axis=0)
+        center2 = proj2.mean(axis=0)
+
+        proj_direction = center1 - center2
+
+        act_direction = self.inverse([proj_direction * alpha])[0]
+
+        return act_direction
+
+
+    def act_mean(self, alpha=1):
+        """ Compute contrast vector directly in the actiavtion space """
+        center1 = np.array([elmt.activations for elmt in self.contrastive_data[0]]).mean(axis=0)
+        center2 = np.array([elmt.activations for elmt in self.contrastive_data[1]]).mean(axis=0)
+
+        act_direction = center1 - center2
+
+        return act_direction
+    
+    def reduce_norm_by_clip(self, target_norm):
+        """ DONT USE THAT """
+        """ Reduce the norm of the vector by clipping the values """
+        act_direction = self.proj_mean_inv(alpha)
+        act_direction = act_direction / np.linalg.norm(act_direction)
+        return act_direction
+    
+    def hard_clip(self, steeve, clip_val):
+        # Clip the values that are too small to remove noise
+        smallest_indices = np.argsort(np.abs(steeve))[:clip_val]
+        steeve[smallest_indices] = 0
+        return steeve
+
+    def soft_clip(self, steeve, clip_val):
+        # Clip the values in a "continuous" way
+        smallest_indices = np.argsort(np.abs(steeve))[:clip_val]
+        threshold = np.abs(steeve[smallest_indices[-1]])
+        clipped_steeve = np.sign(steeve) * np.maximum(np.abs(steeve) - threshold, 0)
+        return clipped_steeve
+
+
+    def get_vector(self, parameters):
+
+        # Compute the contrastive vector
+        contrast_steeve = eval("self."+ parameters["steeve_type"])(
+            alpha=parameters["alpha"]
+        )
+
+        # Normalize the vector BEFORE clipping
+        if parameters["norm_before_clip"] and parameters["act_space_norm"]:
+            contrast_steeve = contrast_steeve / np.linalg.norm(contrast_steeve)
+
+        # Clip the values that are too small to remove noise
+        contrast_steeve = eval("self."+parameters["clip_type"])(contrast_steeve, parameters["clip_val"])
+
+        # Normalize the vector AFTER clipping
+        if parameters["act_space_norm"] and not parameters["norm_before_clip"]:
+            contrast_steeve = contrast_steeve / np.linalg.norm(contrast_steeve)
+
+        # Stretch the final vector
+        contrast_steeve = contrast_steeve * parameters["beta"]
+
+        return contrast_steeve    
+
+
+
+
 def normalising_data(data_elt):
+    """ 
+        This normalisation step is done at the loading of actiavtion, before the Probe model is trained.
+    """
     # For the only layer there is, we split activation between prompt and generated text
     end_of_prompt_id = len(data_elt.prompt_token_emb) - 1 #data_el.input_token_length-1     # add -1 because during process of last prompt token we are alreaddy generating new content.
 
@@ -21,6 +116,7 @@ def normalising_data(data_elt):
     # We take the mean of the activations for each token 
     result = generated_activations.mean(dim=0) - prompt_activations.mean(dim=0)
 
+    # We overwrite the activations with the result to spear memory usage
     data_elt.activations = result.type(t.float64).detach().cpu().numpy()
 
     # Normalise the data
@@ -43,42 +139,17 @@ def load_data(folder, names, zero_centered=True):
     
     return data_concat
 
-def directional_vector(projector, data, split, typ="proj+mean+inv"):
+
+def directional_vector(projector, data, split):
     d_label1 = np.array([data_elt for data_elt in data if data_elt.label == 0])
     d_label2 = np.array([data_elt for data_elt in data if data_elt.label == 1])
-    if typ == "proj+mean+inv":
-        proj1 = projector.project(d_label1)
-        proj2 = projector.project(d_label2)
 
-        center1 = proj1.mean(axis=0)
-        center2 = proj2.mean(axis=0)
-
-        proj_direction = center1 - center2
-
-        act_direction = projector.inverse([proj_direction])[0]
-
-    elif typ == "mean":
-        center1 = np.array([data_elt.activations for data_elt in d_label1]).mean(axis=0)
-        center2 = np.array([data_elt.activations for data_elt in d_label2]).mean(axis=0)
-
-        act_direction = center1 - center2
-
-        center1 = projector.project([center1], raw=True)[0]
-        center2 = projector.project([center2], raw=True)[0]
-
-        proj_direction = center1 - center2
-
-    res_dict = {
-        "vector_type": typ,
-        "split": split,
-        "projector": projector.model_type,
-        "activation_direction": act_direction, 
-        "projection_direction": proj_direction, 
-        "center1": center1, 
-        "center2": center2
-    }
-
-    return res_dict
+    steeve = SteeVe(
+        project_model=projector, 
+        contrastive_data=[d_label1, d_label2],
+        split=split
+    )
+    return steeve
 
 
 def main():
@@ -107,9 +178,9 @@ def main():
 
         # # Also save the directional vector
         vectors = []
-        for vector_type in cfg["steering_vector"]:
-            vectors.append(directional_vector(projection, training_data, split="train", typ=vector_type))
-            vectors.append(directional_vector(projection, test_data, split="test", typ=vector_type))
+        # for vector_type in cfg["steering_vector"]:
+        vectors.append(directional_vector(projection, training_data, split="train"))
+        vectors.append(directional_vector(projection, test_data, split="test"))
         with open(os.path.join(cfg["projection_data_folder"], projection_name +"_vectors.pkl"), 'wb') as file:
             pickle.dump(vectors, file)
             file.close()

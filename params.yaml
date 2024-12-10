@@ -7,9 +7,9 @@ system:
 experiment:
   type: "discrimination"
   name: "exp_ActAdd1"
-  data: ["celebrity", "english_word"] #["emotion", "test_sentiment"]
+  data: ["celebrity"] #["emotion", "test_sentiment"]
   split:
-    training_data: ["english_word"]
+    training_data: ["celebrity"]
     testing_data: ["celebrity"]
 
 # [ Data ]
@@ -52,9 +52,9 @@ projection:
     #   alpha: 0.7
     # LDAProjectionModel:
     #   n_components: 2
-
-  steering_vector:
-    ["proj+mean+inv"]
+  # steeve_type: "proj+mean+inv"
+  # steering_vector:
+  #   ["proj+mean+inv"]
     #, "mean"]
 
 

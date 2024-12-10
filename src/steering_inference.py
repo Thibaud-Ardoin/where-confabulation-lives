@@ -9,10 +9,12 @@ import pickle
 import numpy as np
 import copy
 from sklearn.feature_extraction.text import TfidfVectorizer
+import matplotlib.pyplot as plt
 
 from projection import *
 
 from datas import DataGenerator
+from projection import *
 from config_manager import ConfigManager
 import os
 
@@ -41,7 +43,7 @@ def main():
 
     # Loading the projection model
     vectors = pickle.load(open(cfg["vector_path"], "rb"))
-    proj_model = pickle.load(open(cfg["projection_path"], "rb"))
+    # proj_model = pickle.load(open(cfg["projection_path"], "rb"))
 
 
     test_results = []
@@ -51,42 +53,39 @@ def main():
         for clip_val in cfg["clip_value"]:
             for alpha in cfg["alpha"]:
 
-                print("clip_val: ", clip_val)
-                print("alpha: ", alpha)
-                print("Beta: ", beta)
-                # Create the manipulation vector
-                proj_vect = vectors[1]["projection_direction"]
-                # Drap the vector in the proj space
-                dragging_vector = proj_model.inverse(proj_vect * alpha)
-                print("Norm of the steered vector: ", np.linalg.norm(dragging_vector))
-                
-                smallest_indices = np.argsort(np.abs(dragging_vector))[:clip_val]
-                dragging_vector[smallest_indices] = 0
+                # Get SteeVe
+                steeve = vectors[1].get_vector({
+                    "beta": beta,
+                    "clip_val": clip_val,
+                    "clip_type": cfg["clip_type"],
+                    "alpha": alpha,
+                    "act_space_norm": cfg["act_space_norm"],
+                    "norm_before_clip": cfg["norm_before_clip"],
+                    "steeve_type": cfg["steeve_type"]
+                })
 
-                print("Norm of the clipped vector: ", np.linalg.norm(dragging_vector))
-                print(" ... Infering ...")
-                # Clip the vector
-                # dragging_vector[np.abs(dragging_vector) < clip_val] = 0
-                # Normalize the vector
-                # dragging_vector = dragging_vector / np.linalg.norm(dragging_vector)
-                # Multiply by beta
-                dragging_vector = dragging_vector * beta
-
+                # Create manipulation for LLM modules
                 manipulation_element = {
-                    "vector": list(dragging_vector),
+                    "vector": list(steeve),
                     "layers": cfg["layers"],
-                    "on_priompt": cfg["on_prompt"],
+                    "on_prompt": cfg["on_prompt"],
+                    "one_time_steer": cfg["one_time_steer"],
+                    "manipulation_decay": cfg["manipulation_decay"],
                 }
 
+                mini_batch_data_elmt = []
+                dialogs: List[Dialog] = []
+                # Loop over the data elements to feed the model
                 for data_elt in data_points:
 
                     # Create Dialog from data
-                    dialogs: List[Dialog] = [
-                        data_elt.get_dialog()
-                    ]
+                    dialogs.append(data_elt.get_dialog())
+                    mini_batch_data_elmt.append(data_elt)
 
-                    # Create Response from model
-                    try:
+                    # If the batch is full, feed the model
+                    if len(mini_batch_data_elmt) == cfg["max_batch_size"]:
+                        # Create Responses from model
+                        # try:
                         results = generator.chat_completion(
                             dialogs,
                             max_gen_len=None,
@@ -96,31 +95,44 @@ def main():
                             echo = False,
                             manipulation=manipulation_element
                         )
-                    except:
-                        results = [{"generation": {"content": "Error"}}]
+                        # except:
+                        #     results = [{"generation": {"content": "Error"}}] * len(mini_batch_data_elmt)
+                        #     raise Exception("Error in the generation in the LLM part. Likely mmax_seq_len too low")
+                        # Loop over the results in the mini batch to gather the responses
+                        for i, elmt in enumerate(mini_batch_data_elmt):
+                            # Gather response
+                            generated_answer = results[i]['generation']['content']
+                            number_gen_token = len(results[i]['tokens'])
 
-                    # Gather response
-                    generated_answer = results[0]['generation']['content']
-                    number_gen_token = len(results[0]['tokens'])
+                            if cfg["verbose"]:
+                                print(" >> Name evaluated on: ", elmt.input_text)
+                                print("> ", generated_answer)
+                                print()
 
-                    if cfg["verbose"]:
-                        print(" >> Name evaluated on: ", data_elt.input_text)
-                        print("> ", generated_answer)
-                        print()
+                            copy_data_elt = copy.deepcopy(elmt)
 
-                    copy_data_elt = copy.deepcopy(data_elt)
+                            # Compile the answer in dictionary
+                            copy_data_elt.update({
+                                'output_text': results[i]['generation']['content'],
+                                'number_gen_token': number_gen_token,
+                                'beta': beta,
+                                'alpha': alpha,
+                                'clip_val': clip_val,
+                                'steeve': steeve,
+                                'steeve_type': cfg["steeve_type"],
+                                'act_space_norm': cfg["act_space_norm"],
+                                'norm_before_clip': cfg["norm_before_clip"],
+                                'amnt_clipped': len(steeve[steeve == 0]),
+                                "experiment_label_name": cfg["experiment_label_name"]
+                            })
 
-                    # Compile the answer in dictionary
-                    copy_data_elt.update({
-                        'output_text': results[0]['generation']['content'],
-                        'number_gen_token': number_gen_token,
-                        'beta': beta,
-                        'alpha': alpha,
-                        'clip_val': clip_val,
-                        'amnt_clipped': len(dragging_vector[dragging_vector == 0])
-                    })
+                            
+                            test_results.append(copy_data_elt)
 
-                    test_results.append(copy_data_elt)
+                        # Free the memorry of the previous minibatch
+                        mini_batch_data_elmt = []
+                        dialogs: List[Dialog] = []
+        
 
     # Save the results
     if not os.path.exists(cfg["output_folder"]):

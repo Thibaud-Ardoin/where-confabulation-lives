@@ -38,5 +38,3 @@ stages:
     - ../data/steered_evaluation 
     params:
       - compile
-    outs:
-    - ../data/compiled_results

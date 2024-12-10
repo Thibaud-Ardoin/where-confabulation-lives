@@ -10,6 +10,7 @@ from dvclive import Live
 
 from config_manager import ConfigManager
 from detection import *
+from projection import *
 
 def data_to_numpy(some_data):
     X = np.array([data_elt.activations for data_elt in some_data])
@@ -93,9 +94,11 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors, cfg):
         #     line=dict(color=colors[(4+2*i)%len(colors)], width=4)
         # ))
 
+        centers = vector.get_projected_centers()
+
         fig.add_trace(go.Scatter(
-            x=[vector["center1"][0], vector["center2"][0]], y=[vector["center1"][1], vector["center2"][1]], mode='lines',
-            name= vector['vector_type'] +"_"+ vector["split"]+"_"+ vector["projector"] + ": Feature direction (center to center)",
+            x=[centers[0][0], centers[1][0]], y=[centers[0][1], centers[1][1]], mode='lines',
+            name= vector.split + "_" + vector.project_model.model_type + ": Feature direction (center to center)",
             hovertemplate="%{name}",
             line=dict(color=colors[(4+i)%len(colors)], width=1)     
         ))
