@@ -9,3 +9,5 @@ text-data
 .dvc/config
 .dvc/cache
 /eval
+/currated_results
+currated_results/
