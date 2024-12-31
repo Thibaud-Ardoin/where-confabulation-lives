@@ -10,11 +10,55 @@ test_sentiment:
   user_prompts:     ['{}:']
   sufix: "horizontal"
 
-
 conspiracy:
   switches:         ["real", "fake"]
   system_prompts:   ["Always respond with a SINGLE sentence. You are given the name of an historical phenomena, give me a short neutral description."]
   user_prompts:     ['{}:']
+  sufix: "horizontal+token"
+
+poem:
+  switches:         ["test"]
+  system_prompts:   [""]
+  user_prompts:     ['Write me a poem about {}.']
+  sufix: "horizontal+token"
+
+protein:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatievely with a SINGLE sentence.",
+  ]
+  user_prompts:     [
+    "What is the purpose of the protein or biomolecules called {}?"
+  ]
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+medical:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatievely with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+culture:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatievely with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+
+legal:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatievely with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  expected_outputs: "open_answer"
   sufix: "horizontal+token"
 
 test_celebrity:

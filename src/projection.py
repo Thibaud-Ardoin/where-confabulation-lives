@@ -87,7 +87,8 @@ class SteeVe:
             contrast_steeve = contrast_steeve / np.linalg.norm(contrast_steeve)
 
         # Clip the values that are too small to remove noise
-        contrast_steeve = eval("self."+parameters["clip_type"])(contrast_steeve, parameters["clip_val"])
+        if parameters["clip_val"] > 0:
+            contrast_steeve = eval("self."+parameters["clip_type"])(contrast_steeve, parameters["clip_val"])
 
         # Normalize the vector AFTER clipping
         if parameters["act_space_norm"] and not parameters["norm_before_clip"]:

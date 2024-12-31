@@ -88,7 +88,7 @@ def get_acts(system_prompt, statements, generator, layers, device, verbose=False
             acts[layer].append(hook.out)
 
         # String conversion of the "input hook". Looks like distorted from the original input.
-        strings1 = token2string(generator, input_hook.input[0])
+        # strings1 = token2string(generator, input_hook.input[0])
 
         if verbose:
             print("input:", statement)

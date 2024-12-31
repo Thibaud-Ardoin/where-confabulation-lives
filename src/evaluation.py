@@ -61,10 +61,15 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors, cfg):
     predictions_test = trained_models[0].predict(X_test)
 
     # create a color vector that map the labels to colors
-    colors = np.array(["#264653", "#287271", "#2a9d8f", "#8ab17d", "#babb74", "#d2c06f", "#e9c46a", "#efb366", "#f4a261", "#e76f51"])
+    colors = np.array(cfg["palette"])
+    # ["#264653", "#287271", "#2a9d8f", "#8ab17d", "#babb74", "#d2c06f", "#e9c46a", "#efb366", "#f4a261", "#e76f51"])
     colors_train = colors[Y_train]
     colors_test = colors[Y_test+2]
 
+    if len(X_train[0]) < 2:
+        X_train = np.hstack((X_train, np.random.rand(len(X_train), 1)))
+        X_test = np.hstack((X_test, np.random.rand(len(X_test), 1)))
+        
     # Create a scatter plot for training data
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -95,6 +100,8 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors, cfg):
         # ))
 
         centers = vector.get_projected_centers()
+        if len(centers[0]) < 2:
+            centers = [np.hstack((center, 0)) for center in centers]
 
         fig.add_trace(go.Scatter(
             x=[centers[0][0], centers[1][0]], y=[centers[0][1], centers[1][1]], mode='lines',
@@ -107,7 +114,7 @@ def generate_plots(train_data, test_data, trained_models, feature_vectors, cfg):
     fig.show()
     
     # Save the plot to the evaluation folder
-    fig.write_html(os.path.join(cfg["evaluation_folder"], "data_plot.html"))
+    fig.write_html(os.path.join(cfg["evaluation"]["evaluation_folder"], "data_plot.html"))
 
 
 def log_metrics(live, metric, model_name, split):
@@ -159,12 +166,12 @@ def main():
     directions = load_data(cfgg["projection"]["projection_data_folder"], [projection_name + "_vectors" for projection_name in cfgg["projection"]["projections"]])
     trained_models = load_models(cfgg["detection"]["detection_model_path"])
 
-    cfg = cfgg["evaluation"]
+    # cfg = cfgg["evaluation"]
 
     # Create a DVC live instance
-    live = Live(cfg["evaluation_folder"], report="html")
+    live = Live(cfgg["evaluation"]["evaluation_folder"], report="html")
 
-    generate_plots(train_data, test_data, trained_models, directions, cfg)
+    generate_plots(train_data, test_data, trained_models, directions, cfgg)
 
     # Calculate the accuracy of the trained models on all the data
     calculate_mterics(live, trained_models, test_data, split="test")

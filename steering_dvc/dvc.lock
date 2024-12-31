@@ -5,21 +5,21 @@ stages:
     deps:
     - path: ../data/features
       hash: md5
-      md5: 5b5bdecc3e67c3d19d72678c2b771384.dir
-      size: 599546940
-      nfiles: 11
+      md5: bf7a1783377c85038920958f7c373e6a.dir
+      size: 5006641524
+      nfiles: 15
     - path: ../src/datas.py
       hash: md5
-      md5: ba7918d8bc6b6522a8379d56fa3789c1
-      size: 8314
+      md5: dae5db681db0af5a87631dd6230f3887
+      size: 9262
     - path: ../src/steering_inference.py
       hash: md5
       md5: fdc9f309521aab0761a6e84c387d0a63
       size: 5647
     - path: prompts.yaml
       hash: md5
-      md5: 248231436d366bef9ca80e141953c3e1
-      size: 1263
+      md5: a8b51f26b876f13c8b5a990e9662afc1
+      size: 1934
     params:
       params.yaml:
         prepare:
@@ -30,11 +30,11 @@ stages:
           prompt_file: prompts.yaml
         steering:
           evaluation_set:
-          - celebrity
+          - legal
           output_folder: ../data/steered
-          experiment_label_name: norm_before_softclip2000_onprompt_beta_variation
+          experiment_label_name: Sparse01_noLegal->legal
           verbose: true
-          seed: 1
+          seed: 2
           model_path: ../models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: ../models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
@@ -42,26 +42,22 @@ stages:
           max_seq_len: 1028
           max_batch_size: 8
           steeve_type: proj_mean_inv
-          vector_path: ../data/features/PCA_steeve_celeb->celeb2.pkl
+          vector_path: ../data/features/SparsePCA01_steeve_noLegal->legal.pkl
           layers:
           - 16
           alpha:
           - 1
           beta:
-          - -15
-          - -12
-          - -10
+          - -9
           - -8
           - -5
-          - -1
-          - 1
+          - -2
+          - 2
           - 5
           - 8
-          - 10
-          - 12
-          - 15
+          - 9
           clip_value:
-          - 2000
+          - 0
           clip_type: soft_clip
           act_space_norm: true
           norm_before_clip: true
@@ -71,21 +67,21 @@ stages:
     outs:
     - path: ../data/steered
       hash: md5
-      md5: 9ca5d83e2b64b3e1ad993976c1b42c66.dir
-      size: 691130
+      md5: 3008d6205a337642637853c9d4fa8ae4.dir
+      size: 500902
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: 9ca5d83e2b64b3e1ad993976c1b42c66.dir
-      size: 691130
+      md5: 3008d6205a337642637853c9d4fa8ae4.dir
+      size: 500902
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
-      md5: 6f9719a62c608a282ff63dbed05f90c7
-      size: 13203
+      md5: 343f94b49798632f864c509bbb6eb0db
+      size: 14240
     - path: expected_outputs.yaml
       hash: md5
       md5: 0016666f634d4ee201d4576b9b628eac
@@ -94,6 +90,7 @@ stages:
       params.yaml:
         evaluation:
           expected_outputs_path: expected_outputs.yaml
+          few_shot_path: few_shot.yaml
           similarity_decision_threshold: 0.1
           seed: 1
           output_folder: ../data/steered_evaluation
@@ -101,26 +98,26 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 6a8b1d6ceccc8333a34339ab0d58c40f.dir
-      size: 700420
+      md5: 118195c3ba21f646bce0856bc427982d.dir
+      size: 505593
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py
     deps:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 6a8b1d6ceccc8333a34339ab0d58c40f.dir
-      size: 700420
+      md5: 118195c3ba21f646bce0856bc427982d.dir
+      size: 505593
       nfiles: 1
     - path: ../src/compile_results.py
       hash: md5
-      md5: 98d0153bbb7eb97bf61a031a4d9cb1f9
-      size: 7303
+      md5: 2c74f270dd4cfef0c7cef9213966c846
+      size: 7478
     params:
       params.yaml:
         compile:
           seed: 1
-          compilation_prefix: baseline2
+          compilation_prefix: baseline3
           compilation_folder: ../data/compiled
           palette:
           - '#ee6a00'

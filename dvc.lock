@@ -5,13 +5,13 @@ stages:
     deps:
     - path: data/text/
       hash: md5
-      md5: ff5cff998f81bcd3418190b72e5de5f4.dir
-      size: 967095
-      nfiles: 34
+      md5: c01e3a18d6c14ad824f6c64f0bccf632.dir
+      size: 1011685
+      nfiles: 42
     - path: prompts.yaml
       hash: md5
-      md5: 7d559d37c3bd640965eee8fbf6e9d8ef
-      size: 4023
+      md5: c33aaefcf28a6523943178a808e72fac
+      size: 4980
     - path: src/prepare.py
       hash: md5
       md5: 76bfd956399452be1529fd2ac83b377e
@@ -19,7 +19,7 @@ stages:
     params:
       params.yaml:
         experiment.data:
-        - celebrity
+        - culture
         prepare:
           seed: 1
           text_data_folder: data/text
@@ -29,25 +29,25 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: 4d9446fef4179074f903b4fe13459a2b.dir
-      size: 12235
+      md5: 28cfd90eb196c4eeb743a80f806f581b.dir
+      size: 15679
       nfiles: 1
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: 4d9446fef4179074f903b4fe13459a2b.dir
-      size: 12235
+      md5: 28cfd90eb196c4eeb743a80f806f581b.dir
+      size: 15679
       nfiles: 1
     - path: src/inference.py
       hash: md5
-      md5: 9f8c279e72bdde8c6842f2ee8f80795e
-      size: 7667
+      md5: 651bdb1858c3ccbddad7df8db0f594e0
+      size: 7669
     params:
       params.yaml:
         experiment.data:
-        - celebrity
+        - culture
         inference:
           seed: 1
           model_path: models/Meta-Llama-3-8B-Instruct/
@@ -56,26 +56,26 @@ stages:
           top_p: 0.9
           max_seq_len: 512
           max_batch_size: 8
-          generation_verbose: false
+          generation_verbose: true
           inference_data_folder: data/inference
           prompt_token: true
           token_places: all
           layers:
-          - 16
+          - 18
           save_input_token: true
     outs:
     - path: data/inference
       hash: md5
-      md5: 7bdfeba17b9805bc96875e907e8e0fe3.dir
-      size: 4829281997
-      nfiles: 4
+      md5: 3c77e00a6b8bddef12875846cb48fd7f.dir
+      size: 16473406076
+      nfiles: 10
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 91c26cccb14ed266233b0e677705bd28.dir
-      size: 388536738
+      md5: b742e4658830078aef44aa9bebc47765.dir
+      size: 241823652
       nfiles: 2
     - path: src/detection.py
       hash: md5
@@ -93,75 +93,76 @@ stages:
               probability: true
         experiment.split:
           training_data:
-          - celebrity
+          - culture
           testing_data:
-          - celebrity
+          - culture
     outs:
     - path: data/detection
       hash: md5
-      md5: ed0f0b05f7dc0ee2742b2fb90f504ffa.dir
-      size: 378560646
+      md5: 73398b3869b74a6bed7b6c70aad40425.dir
+      size: 236205126
       nfiles: 1
     - path: models/detection
       hash: md5
-      md5: b8a10c959d5f150202873972f3b392f2.dir
-      size: 2432
+      md5: 22dbe3904a2e0313752525edb26b361d.dir
+      size: 4456
       nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: 7bdfeba17b9805bc96875e907e8e0fe3.dir
-      size: 4829281997
-      nfiles: 4
+      md5: 3c77e00a6b8bddef12875846cb48fd7f.dir
+      size: 16473406076
+      nfiles: 10
     - path: src/projection.py
       hash: md5
-      md5: ccc14bf66f04556f6c83c499ffe40148
-      size: 7402
+      md5: 7d5cd1fd8784696cf2eed3a5b40c3b40
+      size: 8032
     params:
       params.yaml:
         experiment.split:
           training_data:
-          - celebrity
+          - culture
           testing_data:
-          - celebrity
+          - culture
         projection:
           seed: 1
           projection_data_folder: data/projected
           projection_model_path: models/projection/
           zero_centered: true
           projections:
-            PCAProjectionModel:
+            SparsePCAProjectionModel:
               n_components: 2
+              alpha: 0.1
     outs:
     - path: data/projected
       hash: md5
-      md5: 91c26cccb14ed266233b0e677705bd28.dir
-      size: 388536738
+      md5: b742e4658830078aef44aa9bebc47765.dir
+      size: 241823652
       nfiles: 2
     - path: models/projection
       hash: md5
-      md5: 3656e4ed387c356107a49e8c6b3b352f.dir
-      size: 99346
+      md5: 257dd39c1355fbbce62345d09a799e9d.dir
+      size: 109998
       nfiles: 1
   evaluation:
     cmd: python src/evaluation.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 91c26cccb14ed266233b0e677705bd28.dir
-      size: 388536738
+      md5: b742e4658830078aef44aa9bebc47765.dir
+      size: 241823652
       nfiles: 2
     - path: models/detection
       hash: md5
-      md5: b8a10c959d5f150202873972f3b392f2.dir
-      size: 2432
+      md5: 22dbe3904a2e0313752525edb26b361d.dir
+      size: 4456
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
-      md5: 0871d691ffbd9d0a1ce5c50bf382c48b
-      size: 6760
+      md5: 364c2b3f0bffca03c94e2886bb8f9a4a
+      size: 7093
     params:
       params.yaml:
         evaluation:
@@ -169,12 +170,12 @@ stages:
           seed: 1
         experiment.split:
           training_data:
-          - celebrity
+          - culture
           testing_data:
-          - celebrity
+          - culture
     outs:
     - path: eval
       hash: md5
-      md5: e2eda3de0946e7c7105f5e85b5de02d4.dir
-      size: 3750681
+      md5: 7b1c2e45e49ee60e012504ebe88adf4d.dir
+      size: 3736853
       nfiles: 10

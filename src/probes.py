@@ -101,14 +101,41 @@ class LDAProjectionModel(ProjectionModel):
         self.model = LDA()
         self.model.fit(X, Y)
         self.score = self.model.score(X, Y)
+        self.calculate_pseudo_inverse()
+
+    def calculate_pseudo_inverse(self):
+        # Adjust W to match the number of projected dimensions
+        W = self.model.scalings_[:, :1]
+        # Compute the pseudo-inverse of the transformation matrix
+        self.W_pseudo_inv = np.linalg.pinv(W)
 
     def project(self, data, raw=False):
         if raw:
             return self.model.transform(data)
         return self.model.transform(self.data_to_numpy(data))
 
-    def inverse(self, data):
-        return self.model.inverse_transform(data)
+    # def inverse(self, data):
+    #     return self.model.inverse_transform(data)
+    
+    def inverse(self, X_projected):
+
+        X_projected = np.array(X_projected)
+        # if not hasattr(self, 'W_pseudo_inv'):
+        #     self.calculate_pseudo_inverse()
+
+        # Adjust W to match the number of projected dimensions
+        W = self.model.scalings_[:, :1]
+
+        X_projected = X_projected[:, np.newaxis]
+
+        # Compute the pseudo-inverse of the transformation matrix
+        self.W_pseudo_inv = np.linalg.pinv(W)
+
+        # Add back the mean of the original data
+        X_approx = np.dot(X_projected, W.T) + self.model.xbar_
+
+        return X_approx[0]
+
     
 class SparsePCAProjectionModel(ProjectionModel):
     """

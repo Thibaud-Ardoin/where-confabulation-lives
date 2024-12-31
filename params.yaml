@@ -7,10 +7,10 @@ system:
 experiment:
   type: "discrimination"
   name: "exp_ActAdd1"
-  data: ["celebrity"] #["emotion", "test_sentiment"]
+  data: ["poem"] #["medical", "celebrity", "english_word", "protein"] #["emotion", "test_sentiment"]
   split:
-    training_data: ["celebrity"]
-    testing_data: ["celebrity"]
+    training_data: ["poem"] #["protein", "celebrity", "english_word"]
+    testing_data: ["poem"]
 
 # [ Data ]
 prepare:
@@ -27,14 +27,14 @@ inference:
   tokenizer_path: "models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
   top_p: 0.9
-  max_seq_len: 512
+  max_seq_len: 2048 #512
   max_batch_size: 8
-  generation_verbose: False
+  generation_verbose: True
 
   inference_data_folder: "data/inference"
   prompt_token: True
   token_places: "all" #[-1]
-  layers: [16] #"all"
+  layers: [18] #"all"
   save_input_token: True
 
 
@@ -45,11 +45,11 @@ projection:
   projection_model_path: "models/projection/"
   zero_centered: True # Substract the mean of each data name
   projections:
-    PCAProjectionModel:
-      n_components: 2
-    # SparsePCAProjectionModel:
+    # PCAProjectionModel:
     #   n_components: 2
-    #   alpha: 0.7
+    SparsePCAProjectionModel:
+      n_components: 2
+      alpha: 0.1
     # LDAProjectionModel:
     #   n_components: 2
   # steeve_type: "proj+mean+inv"

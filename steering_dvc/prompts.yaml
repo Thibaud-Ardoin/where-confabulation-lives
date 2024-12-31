@@ -39,3 +39,47 @@ hallucination_caa:
   ]
   expected_outputs: "AB"
   sufix: "evaluation"
+
+medical:
+  switches:         ["fake"]
+  system_prompts:   [
+    "Always respond informatievely with a SINGLE sentence.",
+  ]
+  user_prompts: [
+    "{}"
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"
+
+protein:
+  switches:         ["fake"]
+  system_prompts:   [
+    "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts: [
+    "Do you have information regarding a biomolecules called {}?"
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"
+
+legal:
+  switches:         ["fake"]
+  system_prompts:   [
+    "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts: [
+    "{}"
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"
+
+legal:
+  switches:         ["fake"]
+  system_prompts:   [
+    "Always respond with a SINGLE sentence.",
+  ]
+  user_prompts: [
+    "{}"
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"

@@ -1,0 +1,112 @@
+celebrity:
+  awareness_test:
+    filling_string: "input_text"
+    system_prompt: "You are are a professor grading student's copy. 
+                    They were asked to look for information about {} in the library. 
+                    You will be given their texts that answer the question: Do you found something about {}. 
+                    Grade the copy 1 if the text contain information on the person.
+                    Grade the copy 0 if the text dosen't give information on the celebrity.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} is an American novelist and poet.",
+          "assistant": "1",
+        },
+        {
+          "user": "I'm not familiar with a specific personality named {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"
+
+
+medical:
+  awareness_test:
+    filling_string: "description"
+    system_prompt: "You are are a professor grading medical student's copy. 
+                    They were asked to look for information about {} in the library. 
+                    You will be given their texts that answer the question: What is {}? 
+                    Grade the copy 1 if the text contain some information on that topic.
+                    Grade the copy 0 if the text states that this concept doesnt exists.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} is a concept that refers to the role of the immune system's memory component.",
+          "assistant": "1",
+        },
+        {
+          "user": "I'm not familiar with the term {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"
+
+protein:
+  awareness_test:
+    filling_string: "input_text"
+    system_prompt: "You are are a professor grading biomedical student's copy. 
+                    They were asked to look for information about the biomolecules called {} in the library. 
+                    You will be given their texts that answer the question: What is {}? 
+                    Grade the copy 1 if the text contain some information on that topic.
+                    Grade the copy 0 if the text contain no information or states that this biomolecules doesn't exists.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} is a protein that is involved in the degradation of lignin-related compounds.",
+          "assistant": "1",
+        },
+        {
+          "user": "I'm not familiar with the term {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"
+
+
+legal:
+  awareness_test:
+    filling_string: "description"
+    system_prompt: "You are are a professor grading law student's copy. 
+                    They were asked to look for information about {} in the library. 
+                    You will be given their texts that answer the question: What is {}? 
+                    Grade the copy 1 if the text contain some information on that topic.
+                    Grade the copy 0 if the text contain no information or states that this concept doesn't exists.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} is a protein that is involved in the degradation of lignin-related compounds.",
+          "assistant": "1",
+        },
+        {
+          "user": "I'm not familiar with the term {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"
+
+
+culture:
+  awareness_test:
+    filling_string: "description"
+    system_prompt: "You are are a professor grading sutdent's copy. 
+                    They were asked to look for information about {} in the library. 
+                    You will be given their texts that answer the question: Describe {}? 
+                    Grade the copy 1 if the text contain some information on that topic.
+                    Grade the copy 0 if the text contain no information or states that this concept doesn't exists.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} revolutionized contemporary art by introducing a new language of fluid forms.",
+          "assistant": "1",
+        },
+        {
+          "user": "I'm not familiar with {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"

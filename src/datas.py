@@ -25,6 +25,7 @@ class MyData:
     output_text: str = None
     sufix: str = None
     input_token_length: int = None
+    description: str = None
     
     def get_dialog(self):
         return [
@@ -81,6 +82,22 @@ class election(MyData):
 class character(MyData):
     description: str = None
 
+class medical(MyData):
+    description: str = None
+
+class legal(MyData):
+    description: str = None
+
+class protein(MyData):
+    description: str = None
+
+class culture(MyData):
+    description: str = None
+
+class poem(MyData):
+    description: str = None
+
+
 """
     Matching each data type to a special formating to fit the desired data structure
 """
@@ -120,6 +137,39 @@ class DataGenerator():
                     input_text = conspiracy_name,
                     description = conspiracy_description
                 )
+            
+            case "medical":
+                medical_info = text.split(" | ")
+                return medical(
+                    input_text = medical_info[0],
+                    description = medical_info[1],
+                )
+            
+            case "culture":
+                culture_info = text.split(" | ")
+                return medical(
+                    input_text = culture_info[0],
+                    description = culture_info[1],
+                )
+            
+            case "poem":
+                return poem(
+                    input_text = text,
+                )
+            
+            case "legal":
+                legal_info = text.split(" | ")
+                return legal(
+                    input_text = legal_info[0],
+                    description = legal_info[1],
+                )
+            
+            
+            case "protein":
+                return protein(
+                    input_text = text
+                )
+            
             
             case "celebrity":
                 celebrity_infos = text.split(" - ")
@@ -247,9 +297,12 @@ class DataGenerator():
 
 if __name__ == "__main__": 
 
-    cfg = ConfigManager().config
+    # cfg = ConfigManager().config
+    cfg = ConfigManager(experiment_name="params")
+    cfg._load_config(experiment_name="params")
+    cfg = cfg.config
 
     dg = DataGenerator()
-    data = dg.data_loading()
+    data = dg.aggregate_type_data("medical")
 
-    print(data)
+    print(data[0])

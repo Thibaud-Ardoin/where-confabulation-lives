@@ -28,8 +28,9 @@ def main():
     np.random.seed(seed)
     torch.manual_seed(seed)
 
-    vectors = pickle.load(open("data/projected/PCAProjectionModel_vectors.pkl", "rb"))
-    proj_model = pickle.load(open("models/projection/PCAProjectionModel.pkl", "rb"))
+    # proj_model = pickle.load(open("models/projection/PCAProjectionModel.pkl", "rb"))
+    # vectors = pickle.load(open("data/projected/PCAProjectionModel_vectors.pkl", "rb"))
+    vectors = pickle.load(open("data/features/SparsePCA_steeve_celeb->celeb.pkl", "rb"))
 
     # proj = pickle.load(open("inference_data/proj2.pkl", "rb"))
     # delta = pickle.load(open("inference_data/unit_delta2.pkl", "rb"))
@@ -65,7 +66,7 @@ def main():
         one_time_steer      = False
         clip_type           = "hard_clip"
         steeve_type         = "proj_mean_inv" #act_mean
-        manipulation_decay  = 0.99
+        manipulation_decay  = 1
 
         steeve = vectors[1].get_vector({
             "beta": beta,

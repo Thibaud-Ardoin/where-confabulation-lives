@@ -32,7 +32,7 @@ def plot_steering_wight_results(list_result, cfg):
     # df = df[df["user_prompt_id"] == 3]
 
     # Parameter to see variate
-    paramX = "alpha"
+    paramX = "beta"
     paramY = "accuracy"
     paramZ = "experiment_label_name"
 
@@ -59,6 +59,12 @@ def plot_steering_wight_results(list_result, cfg):
     # print(df[df["label"]==0][df["alpha"]==-1][df["user_prompt_id"]==0].iloc[0])
     # print(df[df["label"]==0][df["alpha"]==-1][df["user_prompt_id"]==1].iloc[0])
 
+    print()
+
+    print(df[paramX].unique())
+    print(df[paramZ].unique())
+    print(df["label"].unique())
+    print(df[df["experiment_label_name"]=="LDA_noLegal->legal_L18"])
 
     # Calculate mean accuracy for each 'beta', 'clip_val', and 'label' combination
     mean_accuracy_label = df.groupby([paramX, paramZ, "label", "max_steeve"]).agg(

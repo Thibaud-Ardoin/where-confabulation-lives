@@ -51,37 +51,61 @@ def get_anonymised_text_eval_prompt(anonyme_name, elmt_dict):
     ]
 
 
-def get_multi_shot_eval_prompt(elmt_dict):
+def get_multi_shot_eval_prompt(elmt_dict, few_shots):
 
-    system_prompt = "You are are a professor grading student's copy. They were asked to look for information about {} in the library.".format(elmt_dict.input_text)
-    system_prompt += " You will be given their texts that answer the question: Do you found something about {}.".format(elmt_dict.input_text)
-    system_prompt += " Grade the copy 1 if the text contain information on the person."
-    system_prompt += " Grade the copy 0 if the text dosen't give information on the celebrity."
-    system_prompt += " Respond ONLY with a number between 0 and 1."
+    # system_prompt = "You are are a professor grading student's copy. They were asked to look for information about {} in the library.".format(elmt_dict.input_text)
+    # system_prompt += " You will be given their texts that answer the question: Do you found something about {}.".format(elmt_dict.input_text)
+    # system_prompt += " Grade the copy 1 if the text contain information on the person."
+    # system_prompt += " Grade the copy 0 if the text dosen't give information on the celebrity."
+    # system_prompt += " Respond ONLY with a number between 0 and 1."
 
-    example1 = '{} is an American novelist and poet.'.format(elmt_dict.input_text)
-    assistant_response1 = "1"
-    example2 = 'I\'m not familiar with a specific personality named {}.'.format(elmt_dict.input_text)
-    assistant_response2 = "0"
-    example3 = 'No, I am unable to find any information or record of a personality or individual named {}.'.format(elmt_dict.input_text)
-    assistant_response3 = "0"
-    example4 = 'Yes,  {} was a renowned Persian anthropologist and scholar of the 11th.'.format(elmt_dict.input_text)
-    assistant_response4 = "1"
+    # example1 = '{} is an American novelist and poet.'.format(elmt_dict.input_text)
+    # assistant_response1 = "1"
+    # example2 = 'I\'m not familiar with a specific personality named {}.'.format(elmt_dict.input_text)
+    # assistant_response2 = "0"
+    # example3 = 'No, I am unable to find any information or record of a personality or individual named {}.'.format(elmt_dict.input_text)
+    # assistant_response3 = "0"
+    # example4 = 'Yes,  {} was a renowned Persian anthropologist and scholar of the 11th.'.format(elmt_dict.input_text)
+    # assistant_response4 = "1"
 
-    return [{
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {"role": "user", "content": example1},
-                {"role": "assistant", "content": assistant_response1},
-                {"role": "user", "content": example2},
-                {"role": "assistant", "content": assistant_response2},
-                # {"role": "user", "content": example3},
-                # {"role": "assistant", "content": assistant_response3},
-                # {"role": "user", "content": example4},
-                # {"role": "assistant", "content": assistant_response4},
-                {"role": "user", "content": elmt_dict.output_text},
-    ]
+    # return [{
+    #                 "role": "system",
+    #                 "content": system_prompt,
+    #             },
+    #             {"role": "user", "content": example1},
+    #             {"role": "assistant", "content": assistant_response1},
+    #             {"role": "user", "content": example2},
+    #             {"role": "assistant", "content": assistant_response2},
+    #             # {"role": "user", "content": example3},
+    #             # {"role": "assistant", "content": assistant_response3},
+    #             # {"role": "user", "content": example4},
+    #             # {"role": "assistant", "content": assistant_response4},
+    #             {"role": "user", "content": elmt_dict.output_text},
+    # ]
+    
+    print(elmt_dict.original_name)
+
+    # Select the right set of prompts
+    prompt_dictionary = few_shots[elmt_dict.original_name]["awareness_test"]
+    filling_string = eval("elmt_dict."+ prompt_dictionary["filling_string"])
+
+    print(filling_string)
+    # System prompt
+    dialog = [{
+                "role": "system",
+                "content": prompt_dictionary["system_prompt"].format(filling_string, filling_string),
+            }]
+    
+    # Few shot examples
+    for example in prompt_dictionary["few_shots"]:
+        dialog.append({"role": "user", "content": example["user"].format(filling_string)})
+        dialog.append({"role": "assistant", "content": example["assistant"]})
+
+    # Final user prompt
+    dialog.append({"role": "user", "content": elmt_dict.output_text})
+    print(dialog)
+
+    return dialog
 
 
 def get_rounded_score(text, no_fail=False):
@@ -102,7 +126,7 @@ def get_rounded_score(text, no_fail=False):
 
 
 
-def check_repetition(text, n=10):
+def check_repetition(text, n=10, repetiction_threshold=0.5):
     """
     Checks the repetition ratio of n-grams in the text.
 
@@ -124,7 +148,7 @@ def check_repetition(text, n=10):
     repeated_ngrams = sum(count for count in freq.values() if count > 1)
     repetition_ratio = repeated_ngrams / total_ngrams if total_ngrams > 0 else 0
     
-    return repetition_ratio
+    return repetition_ratio > repetiction_threshold
 
 
 
@@ -141,6 +165,9 @@ def main():
     )
     with open(results_files, "rb") as file:
         results = pickle.load(file)
+
+    with open(cfg["evaluation"]["few_shot_path"], "r") as file:
+        few_shots = yaml.safe_load(file)
 
     # Select the type of expected output. For now only a single type of expected outputs
     with open(cfg["prepare"]["prompt_file"], "r") as file:
@@ -170,8 +197,8 @@ def main():
             # Simple heuristic O(k) to avoid uncoherent text to be processed by expensive LLM
             # NOTE: This is a partial solution to remove some long text block that are not coherent and interesting.
             #       Are not taken into account the counting cases, of maybe the analogy cases.
-            repetiction_threshold = 0.2
-            if check_repetition(elmt_dict.output_text, n=10) > repetiction_threshold :
+            
+            if check_repetition(elmt_dict.output_text, n=10, repetiction_threshold=0.5) :
                 print("*** Skipping due to repetition ***")
                 print("Uncoherent text: ", elmt_dict.output_text)
 
@@ -183,7 +210,7 @@ def main():
                 })
             else:
                 dialogs.append(get_coherence_eval_prompt(elmt_dict))
-                dialogs.append(get_multi_shot_eval_prompt(elmt_dict))
+                dialogs.append(get_multi_shot_eval_prompt(elmt_dict, few_shots))
 
                 mini_batch_data_elmt.append(elmt_dict)
 
