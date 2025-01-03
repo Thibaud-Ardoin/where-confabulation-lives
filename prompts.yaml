@@ -18,8 +18,14 @@ conspiracy:
 
 poem:
   switches:         ["test"]
-  system_prompts:   [""]
-  user_prompts:     ['Write me a poem about {}.']
+  system_prompts:   ["Just fulfil the request."]
+  user_prompts:     [
+    'Write me a poem about {}.', 
+    # 'Please give me a beautiful poem about {}.',
+    # 'Could you write me a poem about {}?',
+    # "I want a poem about {}."
+  ]
+  expected_outputs: "open_answer"
   sufix: "horizontal+token"
 
 protein:

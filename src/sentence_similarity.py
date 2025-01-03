@@ -248,7 +248,22 @@ def main():
                 mini_batch_data_elmt = []
                 dialogs = []
 
-
+    elif expected_type == "length":
+        # simply calculate the length of the output text
+        threshold = 228
+        count_bellow = 0
+        for elmt_dict in results:
+            if len(elmt_dict.output_text) > threshold:
+                score = 1
+            else:
+                score = 0
+                count_bellow += 1
+            elmt_dict.update({"coherence_score": 1,
+                              "similarity_scores": score,
+                              "matched_out_indice": score,
+                            })
+        if cfg["evaluation"]["verbose"]:
+            print("Proportion of text below threshold: ", count_bellow/len(results))
 
     #########################################
     #   Perform evaluation by similarity    #

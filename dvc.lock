@@ -5,13 +5,13 @@ stages:
     deps:
     - path: data/text/
       hash: md5
-      md5: c01e3a18d6c14ad824f6c64f0bccf632.dir
-      size: 1011685
-      nfiles: 42
+      md5: b607a93b28efbe52ae7dc2244325cad9.dir
+      size: 1013455
+      nfiles: 44
     - path: prompts.yaml
       hash: md5
-      md5: c33aaefcf28a6523943178a808e72fac
-      size: 4980
+      md5: df49cf93c6b31a6b3b81edb00ff5aff4
+      size: 5315
     - path: src/prepare.py
       hash: md5
       md5: 76bfd956399452be1529fd2ac83b377e
@@ -19,7 +19,7 @@ stages:
     params:
       params.yaml:
         experiment.data:
-        - culture
+        - poem
         prepare:
           seed: 1
           text_data_folder: data/text
@@ -29,16 +29,16 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: 28cfd90eb196c4eeb743a80f806f581b.dir
-      size: 15679
+      md5: 600fd18e11a11ebec01b56b3a158affe.dir
+      size: 3424
       nfiles: 1
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: 28cfd90eb196c4eeb743a80f806f581b.dir
-      size: 15679
+      md5: 600fd18e11a11ebec01b56b3a158affe.dir
+      size: 3424
       nfiles: 1
     - path: src/inference.py
       hash: md5
@@ -47,7 +47,7 @@ stages:
     params:
       params.yaml:
         experiment.data:
-        - culture
+        - poem
         inference:
           seed: 1
           model_path: models/Meta-Llama-3-8B-Instruct/
@@ -60,15 +60,14 @@ stages:
           inference_data_folder: data/inference
           prompt_token: true
           token_places: all
-          layers:
-          - 18
+          layers: all
           save_input_token: true
     outs:
     - path: data/inference
       hash: md5
-      md5: 3c77e00a6b8bddef12875846cb48fd7f.dir
-      size: 16473406076
-      nfiles: 10
+      md5: 5d36b81ca3e9ab1636ce209476451bcd.dir
+      size: 12234764903
+      nfiles: 2
   detection:
     cmd: python src/detection.py
     deps:
@@ -112,20 +111,20 @@ stages:
     deps:
     - path: data/inference/
       hash: md5
-      md5: 3c77e00a6b8bddef12875846cb48fd7f.dir
-      size: 16473406076
-      nfiles: 10
+      md5: 5d36b81ca3e9ab1636ce209476451bcd.dir
+      size: 12234764903
+      nfiles: 2
     - path: src/projection.py
       hash: md5
-      md5: 7d5cd1fd8784696cf2eed3a5b40c3b40
-      size: 8032
+      md5: 64637600aacffa124f7bb4554d004c23
+      size: 8156
     params:
       params.yaml:
         experiment.split:
           training_data:
-          - culture
+          - poem
           testing_data:
-          - culture
+          - poem
         projection:
           seed: 1
           projection_data_folder: data/projected
@@ -138,13 +137,13 @@ stages:
     outs:
     - path: data/projected
       hash: md5
-      md5: b742e4658830078aef44aa9bebc47765.dir
-      size: 241823652
+      md5: 46d565cdb4eb0d938a717e9098d2fbf0.dir
+      size: 299325061
       nfiles: 2
     - path: models/projection
       hash: md5
-      md5: 257dd39c1355fbbce62345d09a799e9d.dir
-      size: 109998
+      md5: cbdbfd64a0e798d0e897bb2682ae66e7.dir
+      size: 99167
       nfiles: 1
   evaluation:
     cmd: python src/evaluation.py

@@ -20,7 +20,7 @@ class ConfigManager:
 
     def pretty_format(self):
         # Make shortcut for selecting all layers
-        if "inference" in self.config and "layer" in self.config["inference"] :
+        if "inference" in self.config and "layers" in self.config["inference"] :
             if self.config["inference"]["layers"] == "all":
                 self.config["inference"]["layers"] = list(range(32))
 

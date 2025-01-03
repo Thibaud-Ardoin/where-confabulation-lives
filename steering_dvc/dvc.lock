@@ -5,21 +5,21 @@ stages:
     deps:
     - path: ../data/features
       hash: md5
-      md5: bf7a1783377c85038920958f7c373e6a.dir
-      size: 5006641524
-      nfiles: 15
+      md5: 4ff5907a3d88d2ac9f4ea8b3b08a0d05.dir
+      size: 5006658156
+      nfiles: 16
     - path: ../src/datas.py
       hash: md5
-      md5: dae5db681db0af5a87631dd6230f3887
-      size: 9262
+      md5: 1d03976e4b22cf0056d2bd1e0eeecd83
+      size: 9729
     - path: ../src/steering_inference.py
       hash: md5
       md5: fdc9f309521aab0761a6e84c387d0a63
       size: 5647
     - path: prompts.yaml
       hash: md5
-      md5: a8b51f26b876f13c8b5a990e9662afc1
-      size: 1934
+      md5: 6aa43a920562e4b5c5e4a6f39e55d766
+      size: 2308
     params:
       params.yaml:
         prepare:
@@ -30,31 +30,25 @@ stages:
           prompt_file: prompts.yaml
         steering:
           evaluation_set:
-          - legal
+          - poem
           output_folder: ../data/steered
-          experiment_label_name: Sparse01_noLegal->legal
+          experiment_label_name: poem_test1
           verbose: true
-          seed: 2
+          seed: 1
           model_path: ../models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: ../models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
           top_p: 0.9
-          max_seq_len: 1028
+          max_seq_len: 2048
           max_batch_size: 8
-          steeve_type: proj_mean_inv
-          vector_path: ../data/features/SparsePCA01_steeve_noLegal->legal.pkl
+          steeve_type: raw_direction
+          vector_path: ../data/features/LDA_steeve_poem_length228.pkl
           layers:
-          - 16
+          - 18
           alpha:
           - 1
           beta:
           - -9
-          - -8
-          - -5
-          - -2
-          - 2
-          - 5
-          - 8
           - 9
           clip_value:
           - 0
@@ -67,25 +61,25 @@ stages:
     outs:
     - path: ../data/steered
       hash: md5
-      md5: 3008d6205a337642637853c9d4fa8ae4.dir
-      size: 500902
+      md5: dad58eaf3faab2765d5df5b2d9dd5ecf.dir
+      size: 254548
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: 3008d6205a337642637853c9d4fa8ae4.dir
-      size: 500902
+      md5: dad58eaf3faab2765d5df5b2d9dd5ecf.dir
+      size: 254548
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
-      md5: 343f94b49798632f864c509bbb6eb0db
-      size: 14240
+      md5: bc1693c671631a9a07a187d366b590a1
+      size: 14900
     - path: expected_outputs.yaml
       hash: md5
-      md5: 0016666f634d4ee201d4576b9b628eac
-      size: 2078
+      md5: 9fb1ced0ad2f11c75f4d5f2fdb16f84e
+      size: 2104
     params:
       params.yaml:
         evaluation:
@@ -98,8 +92,8 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 118195c3ba21f646bce0856bc427982d.dir
-      size: 505593
+      md5: 3c9c7cb4da3d3570c81904717546b2f9.dir
+      size: 256908
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py

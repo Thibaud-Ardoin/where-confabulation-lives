@@ -51,6 +51,18 @@ medical:
   expected_outputs: "open_question"
   sufix: "evaluation"
 
+poem:
+  switches:         ["test"]
+  system_prompts:   [
+    "",
+  ]
+  user_prompts: [
+    "Write me a poem about {}."
+  ]
+  expected_outputs: "length"
+  sufix: "evaluation"
+
+
 protein:
   switches:         ["fake"]
   system_prompts:   [

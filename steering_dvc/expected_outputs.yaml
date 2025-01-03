@@ -12,6 +12,9 @@ true_false:
   "true": ["True", "true", "Yes", "yes", "Correct", "correct", "Right", "right"]
   "false": ["False", "false", "No", "no", "Incorrect", "incorrect", "Wrong", "wrong"]
 
+length:
+  threshold: 228
+
 # open_question:
   # "yes": ["She is a famous", "he is famous", "famous", "Yes", "I know", "I do", "Positive", "is a character from the",
   #   "was a founder", 

@@ -10,26 +10,26 @@ prepare:
 # [ Steering Inference ]
 steering:
   # Data
-  evaluation_set: ["legal"]
+  evaluation_set: ["poem"]
   output_folder: "../data/steered"
-  experiment_label_name: "Sparse01_noLegal->legal"
+  experiment_label_name: "poem2"
   verbose: True
-  seed: 2
+  seed: 1
 
   # Model Info
   model_path: "../models/Meta-Llama-3-8B-Instruct/"
   tokenizer_path: "../models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
   top_p: 0.9
-  max_seq_len: 1028
+  max_seq_len: 2048
   max_batch_size: 8
   
   # Vector Info
-  steeve_type: "proj_mean_inv" # act_mean   # proj_mean_inv
-  vector_path: "../data/features/SparsePCA01_steeve_noLegal->legal.pkl"
-  layers: [16]
+  steeve_type: "raw_direction" # act_mean   # proj_mean_inv
+  vector_path: "../data/features/PCA_handmade_length_layer3.pkl"
+  layers: [18]
   alpha: [1] #[-8, -5, -1, 1, 5, 8]
-  beta: [-9, -8, -5, -2, 2, 5, 8, 9]
+  beta: [-9, 9]
   clip_value: [0]
   clip_type: "soft_clip"
   act_space_norm: True
@@ -51,7 +51,7 @@ evaluation:
 # [ Compile Results]
 compile:
   seed: 1
-  compilation_prefix: "baseline3"
+  compilation_prefix: "length_test"
   compilation_folder: "../data/compiled"
   palette: [
     "#ee6a00",

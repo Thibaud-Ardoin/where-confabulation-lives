@@ -12,10 +12,11 @@ from probes import MMProbe, ProjectionModel, PCAProjectionModel, LDAProjectionMo
 
 class SteeVe:
     # Steering Vector
-    def __init__(self, project_model, contrastive_data, split):
+    def __init__(self, project_model, contrastive_data, split, raw_vector=None):
         self.project_model = project_model
         self.contrastive_data = contrastive_data
         self.split = split
+        self.raw_vector = raw_vector
 
 
     def project(self, data):
@@ -53,6 +54,9 @@ class SteeVe:
         act_direction = center1 - center2
 
         return act_direction
+
+    def raw_direction(self, alpha=1):
+        return self.raw_vector
     
     def reduce_norm_by_clip(self, target_norm):
         """ DONT USE THAT """
