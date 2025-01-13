@@ -57,7 +57,7 @@ poem:
     "",
   ]
   user_prompts: [
-    "Write me a poem about {}."
+    "Generate a short, clear, and simple 'How to use' instruction for {}."
   ]
   expected_outputs: "length"
   sufix: "evaluation"

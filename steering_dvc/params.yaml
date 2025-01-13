@@ -12,9 +12,9 @@ steering:
   # Data
   evaluation_set: ["poem"]
   output_folder: "../data/steered"
-  experiment_label_name: "poem2"
+  experiment_label_name: "poem_instructions2"
   verbose: True
-  seed: 1
+  seed: 0
 
   # Model Info
   model_path: "../models/Meta-Llama-3-8B-Instruct/"
@@ -27,10 +27,10 @@ steering:
   # Vector Info
   steeve_type: "raw_direction" # act_mean   # proj_mean_inv
   vector_path: "../data/features/PCA_handmade_length_layer3.pkl"
-  layers: [18]
+  layers: [3]
   alpha: [1] #[-8, -5, -1, 1, 5, 8]
-  beta: [-9, 9]
-  clip_value: [0]
+  beta: [-4, 0, 4]
+  clip_value: [1000]
   clip_type: "soft_clip"
   act_space_norm: True
   norm_before_clip: True
