@@ -8,7 +8,8 @@ Key Features:
 ✅ Lightweight and efficient—suitable for small-scale applications
 
 
-![Re-projection visualisation](data/images/re-projection.png)
+![Re-projection visualisation](data/images/re-projection.png){ width=60% }
+
 *Visualisation of the SparsePCA reprojection that enable better allignement to our features.*
 
 
@@ -54,9 +55,9 @@ With this Steering vector you might want to run the testing script that will alt
 
 # Effectiveness sumery
 
-![detection-perf](data/images/Detection-accuracy.png)
+![detection-perf](data/images/Detection-accuracy.png){ width=80% }
 *Accuracy for bluffing detection accross different data categories*
 
 
-![Plot_steering](data/images/plot_steering_performance.png)
+![Plot_steering](data/images/plot_steering_performance.png){ width=60% }
 *Bluffing mitigation for different categories with the same steering vector*
