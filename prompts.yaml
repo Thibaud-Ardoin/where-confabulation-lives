@@ -16,6 +16,16 @@ conspiracy:
   user_prompts:     ['{}:']
   sufix: "horizontal+token"
 
+
+airport:
+  switches:         ["real", "fake"]
+  system_prompts:   ["Always respond informatievely with a SINGLE sentence. If you don't know this airport, or think there is a mistake, make something up."]
+  user_prompts:     [
+    'How many passengers go through {} every day?', 
+  ]
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
 poem:
   switches:         ["test"]
   system_prompts:   ["Just fulfil the request."]
@@ -31,10 +41,12 @@ poem:
 protein:
   switches:         ["real", "fake"]
   system_prompts:   [
-    "Always respond informatievely with a SINGLE sentence.",
+    # "Always respond informatievely with a SINGLE sentence.",
+    "Just answer a number. Don't pay attention to the written text, just perform the math operation.",
   ]
   user_prompts:     [
-    "What is the purpose of the protein or biomolecules called {}?"
+    # "What is the purpose of the protein or biomolecules called {}?"
+    "len({})=?"
   ]
   expected_outputs: "open_answer"
   sufix: "horizontal+token"
@@ -74,6 +86,8 @@ test_celebrity:
   ]
   user_prompts:     ['Do you know the person called {}?']
   sufix: "test"
+  expected_outputs: "open_answer"
+
 
 just_test:
   switches:         ["real", "fake"]
@@ -110,6 +124,7 @@ celebrity:
     # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
     # "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
     "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+    # "Don't pay attention to the written text, just perform the math operation.",
   ]
   user_prompts:     ['{}:']
   # expected_outputs: "date"
@@ -137,6 +152,8 @@ french_word:
   ]
   user_prompts:     ['{}:']
   sufix: "horizontal+token"
+  expected_outputs: "definition"
+
 
 date:
   switches:         ["real", "fake"]
@@ -168,4 +185,5 @@ hallucination_caa:
   user_prompts: [
     "{}"
   ]
+  expected_outputs: "AB"
   sufix: "evaluation"

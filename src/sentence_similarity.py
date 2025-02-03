@@ -52,44 +52,10 @@ def get_anonymised_text_eval_prompt(anonyme_name, elmt_dict):
 
 
 def get_multi_shot_eval_prompt(elmt_dict, few_shots):
-
-    # system_prompt = "You are are a professor grading student's copy. They were asked to look for information about {} in the library.".format(elmt_dict.input_text)
-    # system_prompt += " You will be given their texts that answer the question: Do you found something about {}.".format(elmt_dict.input_text)
-    # system_prompt += " Grade the copy 1 if the text contain information on the person."
-    # system_prompt += " Grade the copy 0 if the text dosen't give information on the celebrity."
-    # system_prompt += " Respond ONLY with a number between 0 and 1."
-
-    # example1 = '{} is an American novelist and poet.'.format(elmt_dict.input_text)
-    # assistant_response1 = "1"
-    # example2 = 'I\'m not familiar with a specific personality named {}.'.format(elmt_dict.input_text)
-    # assistant_response2 = "0"
-    # example3 = 'No, I am unable to find any information or record of a personality or individual named {}.'.format(elmt_dict.input_text)
-    # assistant_response3 = "0"
-    # example4 = 'Yes,  {} was a renowned Persian anthropologist and scholar of the 11th.'.format(elmt_dict.input_text)
-    # assistant_response4 = "1"
-
-    # return [{
-    #                 "role": "system",
-    #                 "content": system_prompt,
-    #             },
-    #             {"role": "user", "content": example1},
-    #             {"role": "assistant", "content": assistant_response1},
-    #             {"role": "user", "content": example2},
-    #             {"role": "assistant", "content": assistant_response2},
-    #             # {"role": "user", "content": example3},
-    #             # {"role": "assistant", "content": assistant_response3},
-    #             # {"role": "user", "content": example4},
-    #             # {"role": "assistant", "content": assistant_response4},
-    #             {"role": "user", "content": elmt_dict.output_text},
-    # ]
-    
-    print(elmt_dict.original_name)
-
     # Select the right set of prompts
     prompt_dictionary = few_shots[elmt_dict.original_name]["awareness_test"]
     filling_string = eval("elmt_dict."+ prompt_dictionary["filling_string"])
 
-    print(filling_string)
     # System prompt
     dialog = [{
                 "role": "system",
@@ -103,7 +69,6 @@ def get_multi_shot_eval_prompt(elmt_dict, few_shots):
 
     # Final user prompt
     dialog.append({"role": "user", "content": elmt_dict.output_text})
-    print(dialog)
 
     return dialog
 

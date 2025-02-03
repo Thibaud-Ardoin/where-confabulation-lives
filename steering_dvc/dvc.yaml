@@ -11,6 +11,7 @@ stages:
     cmd: torchrun ../src/steering_inference.py
     deps:
     - ../src/steering_inference.py
+    - ../src/projection.py
     - ../src/datas.py
     - ../data/features
     - prompts.yaml
@@ -24,6 +25,7 @@ stages:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - ../src/sentence_similarity.py
+    - few_shot.yaml
     - ../data/steered
     - expected_outputs.yaml
     params:

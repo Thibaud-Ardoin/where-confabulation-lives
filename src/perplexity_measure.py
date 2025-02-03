@@ -10,6 +10,8 @@ import numpy as np
 import copy
 from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
+from datasets import load_dataset
+
 
 from projection import *
 
@@ -28,9 +30,25 @@ def main():
     torch.manual_seed(cfg["seed"])
 
     # Loading the input keys
-    dg = DataGenerator()
+    # dg = DataGenerator()
     # Populate the data/prepared folder
-    data_points = dg.aggregate_data_list(cfg["evaluation_set"])
+    # data_points = dg.aggregate_data_list(cfg["evaluation_set"])
+
+    hugging_face_token = "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"
+
+    # Login using e.g. `huggingface-cli login` to access this dataset
+    ds = load_dataset("lmsys/lmsys-chat-1m", token=hugging_face_token)
+
+    # print(ds.head())
+
+    desired_models =  ["llama-2-13b-chat"] #["llama-2-13b-chat", "llama-13b", "llama-2-7b-chat"]
+
+    ds_llama = ds.filter(lambda x: x["model"] in desired_models)
+    ds_llama = ds_llama.filter(lambda x: x["language"] == "English")
+
+    print(ds_llama)
+
+    print(ds_llama["train"][0]["conversation"])
 
     # Loading the generative model
     generator = Llama.build(
@@ -44,7 +62,6 @@ def main():
     # Loading the projection model
     vectors = pickle.load(open(cfg["vector_path"], "rb"))
     # proj_model = pickle.load(open(cfg["projection_path"], "rb"))
-
 
     test_results = []
 
@@ -74,19 +91,35 @@ def main():
                     "manipulation_decay": cfg["manipulation_decay"],
                 }
 
-                mini_batch_data_elmt = []
+                pplx_list = []
                 dialogs: List[Dialog] = []
                 # Loop over the data elements to feed the model
-                for data_elt in data_points:
+                for i in range(1):
+                    # Get the data element
+                    user_input = ds_llama["train"][i]["conversation"][0]["content"]
+                    assistant_input = ds_llama["train"][i]["conversation"][1]["content"]
+
+                    print("User:", user_input)
+                    print("Agent:", assistant_input)
 
                     # Create Dialog from data
-                    dialogs.append(data_elt.get_dialog())
-                    mini_batch_data_elmt.append(data_elt)
+                    dialogs.append([
+                                    {
+                                        "role": "system",
+                                        "content": "",
+                                    },
+                                    {
+                                        "role": "user",
+                                        "content": user_input,
+                                    },
+                                    {
+                                        "role": "assistant",
+                                        "content": assistant_input,
+                                    }])
 
                     # If the batch is full, feed the model
-                    if len(mini_batch_data_elmt) == cfg["max_batch_size"]:
+                    if len(dialogs) == cfg["max_batch_size"]:
                         # Create Responses from model
-                        # try:
                         results = generator.chat_completion(
                             dialogs,
                             max_gen_len=None,
@@ -96,39 +129,35 @@ def main():
                             echo = False,
                             manipulation=manipulation_element
                         )
-                        # except:
-                        #     results = [{"generation": {"content": "Error"}}] * len(mini_batch_data_elmt)
-                        #     raise Exception("Error in the generation in the LLM part. Likely mmax_seq_len too low")
+
                         # Loop over the results in the mini batch to gather the responses
-                        for i, elmt in enumerate(mini_batch_data_elmt):
+                        for i, res in enumerate(results):
+                            print("results[i]:", results[i])
                             # Gather response
                             generated_answer = results[i]['generation']['content']
                             number_gen_token = len(results[i]['tokens'])
 
-                            if cfg["verbose"]:
-                                print(" >> Name evaluated on: ", elmt.input_text)
-                                print("> ", generated_answer)
-                                print()
-
-                            copy_data_elt = copy.deepcopy(elmt)
-
                             # Compile the answer in dictionary
-                            copy_data_elt.update({
-                                'output_text': results[i]['generation']['content'],
-                                'number_gen_token': number_gen_token,
-                                'beta': beta,
-                                'alpha': alpha,
-                                'clip_val': clip_val,
-                                'steeve': steeve,
-                                'steeve_type': cfg["steeve_type"],
-                                'act_space_norm': cfg["act_space_norm"],
-                                'norm_before_clip': cfg["norm_before_clip"],
-                                'amnt_clipped': len(steeve[steeve == 0]),
-                                "experiment_label_name": cfg["experiment_label_name"]
-                            })
+                            # copy_data_elt.update({
+                            #     'output_text': results[i]['generation']['content'],
+                            #     'number_gen_token': number_gen_token,
+                            #     'beta': beta,
+                            #     'alpha': alpha,
+                            #     'clip_val': clip_val,
+                            #     'steeve': steeve,
+                            #     'steeve_type': cfg["steeve_type"],
+                            #     'act_space_norm': cfg["act_space_norm"],
+                            #     'norm_before_clip': cfg["norm_before_clip"],
+                            #     'amnt_clipped': len(steeve[steeve == 0]),
+                            #     "experiment_label_name": cfg["experiment_label_name"]
+                            # })
 
+                            print(results[i]['logprobs'])
+                            print(len(results[i]['logprobs']))
+
+                            pplx = np.exp(np.sum(results[i]['logprobs']) / number_gen_token)
                             
-                            test_results.append(copy_data_elt)
+                            pplx_list.append(pplx)
 
                         # Free the memorry of the previous minibatch
                         mini_batch_data_elmt = []

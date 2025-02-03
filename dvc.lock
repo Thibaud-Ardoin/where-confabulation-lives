@@ -5,13 +5,13 @@ stages:
     deps:
     - path: data/text/
       hash: md5
-      md5: b607a93b28efbe52ae7dc2244325cad9.dir
-      size: 1013455
-      nfiles: 44
+      md5: 9ea332771181aca04930e896183d2fa5.dir
+      size: 250418306
+      nfiles: 52
     - path: prompts.yaml
       hash: md5
-      md5: df49cf93c6b31a6b3b81edb00ff5aff4
-      size: 5315
+      md5: 61a70c8a784ec7c2a63a8a0dfafcb41c
+      size: 5962
     - path: src/prepare.py
       hash: md5
       md5: 76bfd956399452be1529fd2ac83b377e
@@ -19,9 +19,16 @@ stages:
     params:
       params.yaml:
         experiment.data:
-        - poem
+        - english_word
+        - french_word
+        - celebrity
+        - airport
+        - medical
+        - protein
+        - culture
+        - legal
         prepare:
-          seed: 1
+          seed: 0
           text_data_folder: data/text
           prepared_data_folder: data/prepared
           output_file_name: inference
@@ -29,27 +36,34 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: 600fd18e11a11ebec01b56b3a158affe.dir
-      size: 3424
-      nfiles: 1
+      md5: a3cc7923211b35bcda3b1bd67c60e2be.dir
+      size: 156520
+      nfiles: 8
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: 600fd18e11a11ebec01b56b3a158affe.dir
-      size: 3424
-      nfiles: 1
+      md5: a3cc7923211b35bcda3b1bd67c60e2be.dir
+      size: 156520
+      nfiles: 8
     - path: src/inference.py
       hash: md5
-      md5: 651bdb1858c3ccbddad7df8db0f594e0
-      size: 7669
+      md5: 831deb50a7d472053b6a376518603bb2
+      size: 8023
     params:
       params.yaml:
         experiment.data:
-        - poem
+        - english_word
+        - french_word
+        - celebrity
+        - airport
+        - medical
+        - protein
+        - culture
+        - legal
         inference:
-          seed: 1
+          seed: 0
           model_path: models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
@@ -60,26 +74,21 @@ stages:
           inference_data_folder: data/inference
           prompt_token: true
           token_places: all
-          layers: all
+          layers:
+          - 16
           save_input_token: true
-    outs:
-    - path: data/inference
-      hash: md5
-      md5: 5d36b81ca3e9ab1636ce209476451bcd.dir
-      size: 12234764903
-      nfiles: 2
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: b742e4658830078aef44aa9bebc47765.dir
-      size: 241823652
-      nfiles: 2
+      md5: 9ebeb127db64cfed9716f489a519ff48.dir
+      size: 3141515727
+      nfiles: 12
     - path: src/detection.py
       hash: md5
-      md5: 5860917a2d473c1ead16ed3e87e3fb96
-      size: 4479
+      md5: 3075d9806f574dac9fc8635dcd32e3cb
+      size: 5686
     params:
       params.yaml:
         detection:
@@ -92,76 +101,71 @@ stages:
               probability: true
         experiment.split:
           training_data:
-          - culture
+          - english_word
           testing_data:
-          - culture
+          - protein
     outs:
     - path: data/detection
       hash: md5
-      md5: 73398b3869b74a6bed7b6c70aad40425.dir
-      size: 236205126
-      nfiles: 1
+      md5: 744dee00095bf97694e4bda0e854cb28.dir
+      size: 203674009
+      nfiles: 2
     - path: models/detection
       hash: md5
-      md5: 22dbe3904a2e0313752525edb26b361d.dir
-      size: 4456
+      md5: 95e1c9a158a7272e171cfab402246a18.dir
+      size: 1888
       nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: 5d36b81ca3e9ab1636ce209476451bcd.dir
-      size: 12234764903
-      nfiles: 2
+      md5: bb59dc7d8ff9bb680c9aa4220e4ea133.dir
+      size: 48170007058
+      nfiles: 9
+    - path: src/probes.py
+      hash: md5
+      md5: 3a526b8a2b836242a6051dce9a565a02
+      size: 5855
     - path: src/projection.py
       hash: md5
-      md5: 64637600aacffa124f7bb4554d004c23
-      size: 8156
+      md5: 1776dc031ebeff416b66555934a44b70
+      size: 14695
     params:
       params.yaml:
         experiment.split:
           training_data:
-          - poem
+          - english_word
           testing_data:
-          - poem
+          - protein
         projection:
           seed: 1
           projection_data_folder: data/projected
           projection_model_path: models/projection/
           zero_centered: true
+          slerp_interpolation: false
+          first_gen: true
           projections:
             SparsePCAProjectionModel:
               n_components: 2
-              alpha: 0.1
-    outs:
-    - path: data/projected
-      hash: md5
-      md5: 46d565cdb4eb0d938a717e9098d2fbf0.dir
-      size: 299325061
-      nfiles: 2
-    - path: models/projection
-      hash: md5
-      md5: cbdbfd64a0e798d0e897bb2682ae66e7.dir
-      size: 99167
-      nfiles: 1
+              alpha: 0.2
   evaluation:
     cmd: python src/evaluation.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: b742e4658830078aef44aa9bebc47765.dir
-      size: 241823652
-      nfiles: 2
+      md5: 9ebeb127db64cfed9716f489a519ff48.dir
+      size: 3141515727
+      nfiles: 12
     - path: models/detection
       hash: md5
-      md5: 22dbe3904a2e0313752525edb26b361d.dir
-      size: 4456
+      md5: 95e1c9a158a7272e171cfab402246a18.dir
+      size: 1888
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
-      md5: 364c2b3f0bffca03c94e2886bb8f9a4a
-      size: 7093
+      md5: 543f0983d62dd2a05573de7e2fc7dfb4
+      size: 8655
     params:
       params.yaml:
         evaluation:
@@ -169,12 +173,12 @@ stages:
           seed: 1
         experiment.split:
           training_data:
-          - culture
+          - english_word
           testing_data:
-          - culture
+          - protein
     outs:
     - path: eval
       hash: md5
-      md5: 7b1c2e45e49ee60e012504ebe88adf4d.dir
-      size: 3736853
+      md5: 6b5b34edade792865d51b5a41087c68f.dir
+      size: 3726495
       nfiles: 10

@@ -17,24 +17,59 @@ def data_to_numpy(some_data):
     Y = np.array([data_elt.label for data_elt in some_data])
     return X, Y
 
+def get_metrics(Y, class_predictions, prediction_proba):
+    if len(prediction_proba[0]) == 1:
+        prediction_proba = prediction_proba
+    else :
+        prediction_proba = prediction_proba[:, 1]
+    # Compile 2nd order metrics with sklearn
+    avg_prec = ["Average Precision", metrics.average_precision_score(Y, prediction_proba)]
+    roc_auc = ["Roc AUC", metrics.roc_auc_score(Y, prediction_proba)]
+
+    # Binary Class predictions
+    # accuracy
+    acc = ["Accuracy", metrics.accuracy_score(Y, class_predictions)]
+    f1 = ["F1", metrics.f1_score(Y, class_predictions)]
+
+    return acc, f1, avg_prec, roc_auc
+
+
+
 def calculate_mterics(live, trained_models, data, split="test"):
     X, Y = data_to_numpy(data)
 
     for model in trained_models:
-        # prediction results
+        # prediction results probabilities
         predictions_by_class = model.predict_proba(X)
-        predictions = predictions_by_class[:, 1]
-        # Compile 2nd order metrics with sklearn
-        avg_prec = ["Average Precision", metrics.average_precision_score(Y, predictions)]
-        roc_auc = ["Roc AUC", metrics.roc_auc_score(Y, predictions)]
+        # Binary Class predictions
+        class_predictions = model.predict(X)
 
-        # accuracy
-        acc = ["Accuracy", model.evaluate(data)]
-    
-        log_metrics(live, [acc, avg_prec, roc_auc] , model.model_type, split)
-    
-    live.log_sklearn_plot("roc", Y, predictions, name=f"roc/{split}")
+        metrics = get_metrics(Y, class_predictions, predictions_by_class)
+        
+        log_metrics(live, metrics , model.model_type, split)
 
+    if split == "test":
+        # Split data according to original cathegory for test.
+        cathegories = {}
+        for i, d in enumerate(data):
+            if d.original_name not in cathegories:
+                cathegories[d.original_name] = []
+            cathegories[d.original_name].append(d)
+
+        for cathegory in cathegories:
+            print(" > Cathegory: ", cathegory)
+            X, Y = data_to_numpy(cathegories[cathegory])
+            for model in trained_models:
+                # prediction results probabilities
+                predictions_by_class = model.predict_proba(X)
+                # Binary Class predictions
+                class_predictions = model.predict(X)
+
+                metrics = get_metrics(Y, class_predictions, predictions_by_class)    
+        
+                log_metrics(live, metrics , model.model_type, split)
+            print(" < End ", cathegory)
+            
 
 def extract_hover_text(data):
     return {"hover_text": ["Data_type: {}\n Input key: {}\n Label: {}\n Sufix: {}\n Output: {}".format(
@@ -163,7 +198,13 @@ def main():
     # Import the projected data and trained models from the previous stages
     train_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["training_data"])
     test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["testing_data"])
-    directions = load_data(cfgg["projection"]["projection_data_folder"], [projection_name + "_vectors" for projection_name in cfgg["projection"]["projections"]])
+
+    train_data_name = "_".join(cfgg["experiment"]["split"]["training_data"])
+
+    vector_name = [projection_name + "_trained_on_" + train_data_name + "_vectors" for projection_name in cfgg["projection"]["projections"]]
+    directions = load_data(cfgg["projection"]["projection_data_folder"], vector_name)
+
+    # model_names = [projection_name + "_trained_on_" + train_data_name for projection_name in cfgg["projection"]["projections"]]
     trained_models = load_models(cfgg["detection"]["detection_model_path"])
 
     # cfg = cfgg["evaluation"]

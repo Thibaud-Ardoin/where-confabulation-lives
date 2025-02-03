@@ -2,7 +2,7 @@ celebrity:
   switches:         ["fake"]
   system_prompts:   [
     # "Answer in a SINGLE word."
-    "Answer in a SINGLE sntence."
+    "Answer in a SINGLE sentence."
     # "Just answer with 'A' or 'B'.", #AB
     # "Always respond with a SINGLE sentence.",
   ]
@@ -19,7 +19,8 @@ celebrity:
   #   # "Are you unfamiliar with the name {}? Answer 'No' or 'Yes'."
   # ] 
   user_prompts: [ # open_question
-    "Do you know a personality called {}?"
+    # "Do you know a personality called {}?"
+    "Provide a description of the celebrity named {}"
   ]
   #['Do you know the person called {}?']
   # expected_outputs: "AB"
@@ -28,11 +29,36 @@ celebrity:
   sufix: "evaluation"
 
 
+english_word:
+  switches:         ["fake"]
+  system_prompts:   [
+    "Provide an informative response in a SINGLE sentence."
+  ]
+  user_prompts: [ # open_question
+    "Give me the definition of the following english word: '{}'"
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"
+
+
+french_word:
+  switches:         ["fake"]
+  system_prompts:   [
+    "Répondrez de manière informative par une phrase courte."
+  ]
+  user_prompts: [ # open_question
+    "Donnez-moi une définition du mot '{}'."
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"
+
+
+
 # 
 hallucination_caa:
   switches:         ["subset"]
   system_prompts:   [
-    "Just answer with '(A)' or '(B)'.", #AB
+    "ONLY answer with '(A)' or '(B)', nothing else.", #AB
   ]
   user_prompts: [
     "{}"
@@ -54,10 +80,10 @@ medical:
 poem:
   switches:         ["test"]
   system_prompts:   [
-    "",
+    "Just write the requested text.",
   ]
   user_prompts: [
-    "Generate a short, clear, and simple 'How to use' instruction for {}."
+    "Write me a simple and quite short story about {}."
   ]
   expected_outputs: "length"
   sufix: "evaluation"
@@ -85,13 +111,21 @@ legal:
   expected_outputs: "open_question"
   sufix: "evaluation"
 
-legal:
-  switches:         ["fake"]
+
+culture:
+  switches:         ["real", "fake"]
   system_prompts:   [
-    "Always respond with a SINGLE sentence.",
+    "Always respond informatievely with a SINGLE sentence.",
   ]
-  user_prompts: [
-    "{}"
+  user_prompts:     ['{}']
+  expected_outputs: "open_question"
+  sufix: "horizontal+token"
+
+airport:
+  switches:         ["fake"]
+  system_prompts:   ["Always respond informatievely with a SINGLE sentence."]
+  user_prompts:     [
+    'How many passengers go through {} every day?', 
   ]
   expected_outputs: "open_question"
-  sufix: "evaluation"
+  sufix: "horizontal+token"

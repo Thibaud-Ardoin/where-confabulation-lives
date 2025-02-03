@@ -5,21 +5,25 @@ stages:
     deps:
     - path: ../data/features
       hash: md5
-      md5: 21489726fce4f6a2dce31f510a4c1a09.dir
-      size: 5006741005
-      nfiles: 17
+      md5: 3cb98fc537604bbdd5f7c66c65de61a3.dir
+      size: 3669828859
+      nfiles: 9
     - path: ../src/datas.py
       hash: md5
-      md5: 1d03976e4b22cf0056d2bd1e0eeecd83
-      size: 9729
+      md5: 8d6481de38ef7bfc63381d024a68473e
+      size: 9931
+    - path: ../src/projection.py
+      hash: md5
+      md5: 1776dc031ebeff416b66555934a44b70
+      size: 14695
     - path: ../src/steering_inference.py
       hash: md5
-      md5: fdc9f309521aab0761a6e84c387d0a63
-      size: 5647
+      md5: 156ddd756d3bbf07199b2ec072bd9c09
+      size: 5690
     - path: prompts.yaml
       hash: md5
-      md5: 3b9068909b0d80b4b3082bdf098ec09c
-      size: 2324
+      md5: ea94923c21c71e989ad2283068b9fab7
+      size: 3289
     params:
       params.yaml:
         prepare:
@@ -30,57 +34,60 @@ stages:
           prompt_file: prompts.yaml
         steering:
           evaluation_set:
-          - poem
+          - protein
           output_folder: ../data/steered
-          experiment_label_name: poem_instructions2
+          experiment_label_name: protein
           verbose: true
-          seed: 0
+          seed: 1
           model_path: ../models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: ../models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
           top_p: 0.9
-          max_seq_len: 2048
+          max_seq_len: 512
           max_batch_size: 8
-          steeve_type: raw_direction
-          vector_path: ../data/features/PCA_handmade_length_layer3.pkl
+          steeve_type: proj_mean_inv
+          vector_path: ../data/projected/SparsePCAProjectionModel_trained_on_english_word_vectors.pkl
           layers:
-          - 3
+          - 16
           alpha:
           - 1
           beta:
-          - -4
-          - 0
-          - 4
+          - 8
           clip_value:
-          - 2000
+          - 0
           clip_type: soft_clip
           act_space_norm: true
           norm_before_clip: true
           on_prompt: true
+          slerp: false
           one_time_steer: false
           manipulation_decay: 1.0
     outs:
     - path: ../data/steered
       hash: md5
-      md5: d9ac4b8e21879e502651e9ceeca25dc0.dir
-      size: 439916
+      md5: 867c08d81b876a53a6d888bba0b06db0.dir
+      size: 81391
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: d9ac4b8e21879e502651e9ceeca25dc0.dir
-      size: 439916
+      md5: 867c08d81b876a53a6d888bba0b06db0.dir
+      size: 81391
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
-      md5: bc1693c671631a9a07a187d366b590a1
-      size: 14900
+      md5: 77bf8a6ba1472caf1db07336b65ee3aa
+      size: 12937
     - path: expected_outputs.yaml
       hash: md5
       md5: 9fb1ced0ad2f11c75f4d5f2fdb16f84e
       size: 2104
+    - path: few_shot.yaml
+      hash: md5
+      md5: c392a48ac670b2275215df74cb542844
+      size: 7296
     params:
       params.yaml:
         evaluation:
@@ -93,16 +100,16 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 43ef7f7a6b00295b64ab468730a28821.dir
-      size: 443431
+      md5: 5ba3ab5fe68414d10e4d775eac8347e8.dir
+      size: 83148
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py
     deps:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 43ef7f7a6b00295b64ab468730a28821.dir
-      size: 443431
+      md5: 5ba3ab5fe68414d10e4d775eac8347e8.dir
+      size: 83148
       nfiles: 1
     - path: ../src/compile_results.py
       hash: md5
@@ -111,13 +118,16 @@ stages:
     params:
       params.yaml:
         compile:
-          seed: 1
-          compilation_prefix: length_test
+          seed: 0s
+          compilation_prefix: Redo SPCA english
           compilation_folder: ../data/compiled
           palette:
           - '#ee6a00'
-          - '#eeff41'
+          - '#a1e8d9'
+          - '#695d46'
           - '#009667'
           - '#cd92d7'
           - '#b3a77d'
-          - '#a1e8d9'
+          - '#eeff41'
+          - '#ef6c00'
+          - '#4db6ac'

@@ -92,6 +92,24 @@ class PCAProjectionModel(ProjectionModel):
     def inverse(self, data):
         return self.model.inverse_transform(data)
     
+class NoProjectionModel(ProjectionModel):
+    """
+        No Projection
+    """
+    def train(self, train_data):
+        pass
+
+    def project(self, data, raw=False):
+        if raw:
+            return data
+        return self.data_to_numpy(data)
+
+    def inverse(self, data):
+        return data
+
+    def fwd(self, data):
+        return np.array([data.activations])[0]
+    
 class LDAProjectionModel(ProjectionModel):
     """
         LDA Projection

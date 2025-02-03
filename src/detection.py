@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA, FactorAnalysis
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.svm import SVC
 from sklearn.linear_model import SGDClassifier
+from sklearn.metrics.pairwise import cosine_similarity
 import xgboost as xgb
 
 import pickle
@@ -41,6 +42,45 @@ class DetectionModel:
     def eval(self, X, Y):
         self.score = self.model.score(X, Y)
         # sys.stderr.write(f"Model {self.model_type} trained with score {self.score}\n")
+
+
+class SimilarityDetectionModel(DetectionModel):
+    """
+        Cosine Similarity Detection Model
+    """
+    def __init__(self, conf):
+        super().__init__(conf)
+        self.steeve = None
+
+    def train(self, train_data):
+        X, Y = self.data_to_numpy(train_data, labels=True)
+        center_0 = np.mean(X[Y == 0], axis=0)
+        center_1 = np.mean(X[Y == 1], axis=0)
+        self.steeve = center_1 - center_0
+        self.eval(X, Y)
+
+    def eval(self, X, Y):
+        X_pred = self.predict(X)
+        # Compute the accuracy of the model
+        self.score = np.mean(X_pred == Y)
+
+    def fwd(self, data):
+        return self.predict([data.activations])[0]
+    
+    def predict_proba(self, X):
+        return self.predict(X)
+    
+    def evaluate(self, some_data):
+        X, Y = self.data_to_numpy(some_data, labels=True)
+        X_pred = self.predict(X)
+        return np.mean(X_pred == Y)
+
+    def predict(self, X):
+        # Compute the cosine similarity between the data and the steeve
+        sim = cosine_similarity(X, [self.steeve])
+        # Convert the similarity in a binary prediction
+        return (sim > 0).astype(int)
+    
 
 class SVCDetectionModel(DetectionModel):
     """

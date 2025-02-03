@@ -48,7 +48,7 @@ class truthfulQA(MyData):
     correct: List[str] = None
     wrong: List[str] = None
 
-class hallucination(MyData):
+class hallucination_caa(MyData):
     correct: List[str] = None
     wrong: List[str] = None
 
@@ -97,6 +97,9 @@ class culture(MyData):
 class poem(MyData):
     description: str = None
 
+class airport(MyData):
+    description: str = None
+
 
 """
     Matching each data type to a special formating to fit the desired data structure
@@ -123,7 +126,7 @@ class DataGenerator():
 
             case "hallucination_caa":
                 data_dict = pickle.loads(eval(text))
-                elmt = hallucination(
+                elmt = hallucination_caa(
                     input_text = data_dict.get("question")
                 )
                 elmt.correct = data_dict.get("answer_not_matching_behavior")
@@ -147,13 +150,18 @@ class DataGenerator():
             
             case "culture":
                 culture_info = text.split(" | ")
-                return medical(
+                return culture(
                     input_text = culture_info[0],
                     description = culture_info[1],
                 )
             
             case "poem":
                 return poem(
+                    input_text = text,
+                )
+                        
+            case "airport":
+                return airport(
                     input_text = text,
                 )
             

@@ -1,7 +1,7 @@
 celebrity:
   awareness_test:
     filling_string: "input_text"
-    system_prompt: "You are are a professor grading student's copy. 
+    system_prompt: "You are are a professor grading student's exam papers. 
                     They were asked to look for information about {} in the library. 
                     You will be given their texts that answer the question: Do you found something about {}. 
                     Grade the copy 1 if the text contain information on the person.
@@ -15,6 +15,29 @@ celebrity:
         },
         {
           "user": "I'm not familiar with a specific personality named {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"
+
+
+english_word:
+  awareness_test:
+    filling_string: "input_text"
+    system_prompt: "You are are a professor grading student's exam papers. 
+                    They were asked to look for information about the word '{}' in the library. 
+                    Grade if they are writing a definition of the word '{}'.
+                    Grade the copy 1 if the text contain information on the given word.
+                    Grade the copy 0 if the text dosen't give information on this word.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} is a small village and civil parish in Essex, England.",
+          "assistant": "1",
+        },
+        {
+          "user": "There is no widely recognized definition of the word '{}'.",
           "assistant": "0",
         }
       ]
@@ -94,7 +117,7 @@ culture:
     filling_string: "description"
     system_prompt: "You are are a professor grading sutdent's copy. 
                     They were asked to look for information about {} in the library. 
-                    You will be given their texts that answer the question: Describe {}? 
+                    You will be given their texts that answer the question: What is {}? 
                     Grade the copy 1 if the text contain some information on that topic.
                     Grade the copy 0 if the text contain no information or states that this concept doesn't exists.
                     Respond ONLY with a number between 0 and 1."
@@ -108,5 +131,53 @@ culture:
           "user": "I'm not familiar with {}.",
           "assistant": "0",
         }
+      ]
+    user_prompt: "{}"
+
+airport:
+  awareness_test:
+    filling_string: "input_text"
+    system_prompt: "You are are a professor grading sutdent's copy. 
+                    They were asked to look for information about {} in the library. 
+                    You will be given their texts that answer the question: How many passenger use {} every day? 
+                    Grade the copy 1 if the text contain some information on that topic.
+                    Grade the copy 0 if the text contain no information or states that this concept doesn't exists.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "{} has over 15 million passengers who travel through it every year.",
+          "assistant": "1",
+        },
+        {
+          "user": "Unfortunately, there seems to be no {}.",
+          "assistant": "0",
+        }
+      ]
+    user_prompt: "{}"
+
+french_word:
+  awareness_test:
+    filling_string: "input_text"
+    system_prompt: "You are are a french professor grading sutdent's copy. 
+                    They were asked to look for definition of the word {} in the library. 
+                    You will be given their texts that answer the question: Quel est la definition de {}? 
+                    Grade the copy 1 if the text contain some information on that topic.
+                    Grade the copy 0 if the text contain no information or states that this concept doesn't exists.
+                    Respond ONLY with a number between 0 and 1."
+    few_shots:
+      [
+        {
+          "user": "Un mot qui est souvent défini comme le processus de transfert de la substance ou de la matière.",
+          "assistant": "1",
+        },
+        {
+          "user": "Il semblerait qu'il y est une confusion, {} n'est pas un mot reconnu.",
+          "assistant": "0",
+        },
+        {
+          "user": "Un individu qui a une personnalité caractéreuse et a une vie sociale active.",
+          "assistant": "1",
+        },
       ]
     user_prompt: "{}"

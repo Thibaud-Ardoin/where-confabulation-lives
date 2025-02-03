@@ -7,14 +7,42 @@ system:
 experiment:
   type: "discrimination"
   name: "exp_ActAdd1"
-  data: ["poem"] #["medical", "celebrity", "english_word", "protein"] #["emotion", "test_sentiment"]
+  data: [
+    "english_word", 
+    "french_word", 
+    "celebrity", 
+    "airport", 
+    "medical", 
+    "protein", 
+    "culture", 
+    "legal",
+    # "hallucination_caa",
+  ]
   split:
-    training_data: ["poem"] #["protein", "celebrity", "english_word"]
-    testing_data: ["poem"]
+    training_data: [
+      "english_word", 
+      # "french_word", 
+      # "celebrity", 
+      # "airport", 
+      # "medical", 
+      # "protein", 
+      # "culture", 
+      # "legal"
+  ]
+    testing_data: [
+      # "english_word", 
+      # "french_word",
+      # "celebrity", 
+      # "airport", 
+      # "medical", 
+      "protein", 
+      # "culture", 
+      # "legal"
+    ]
 
 # [ Data ]
 prepare:
-  seed: 1
+  seed: 0
   text_data_folder: "data/text"
   prepared_data_folder: "data/prepared"
   output_file_name: "inference"
@@ -22,7 +50,7 @@ prepare:
 
 # [ Inference ]
 inference:
-  seed: 1
+  seed: 0
   model_path: "models/Meta-Llama-3-8B-Instruct/"
   tokenizer_path: "models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
@@ -34,7 +62,7 @@ inference:
   inference_data_folder: "data/inference"
   prompt_token: True
   token_places: "all" #[-1]
-  layers: "all"
+  layers: [16]
   save_input_token: True
 
 
@@ -44,14 +72,18 @@ projection:
   projection_data_folder: "data/projected"
   projection_model_path: "models/projection/"
   zero_centered: True # Substract the mean of each data name
+  slerp_interpolation: False
+  first_gen: True
   projections:
     # PCAProjectionModel:
     #   n_components: 2
     SparsePCAProjectionModel:
       n_components: 2
-      alpha: 0.1
+      alpha: 0.2
     # LDAProjectionModel:
     #   n_components: 2
+    # NoProjectionModel:
+    #   n_components: 4096
   # steeve_type: "proj+mean+inv"
   # steering_vector:
   #   ["proj+mean+inv"]
@@ -64,6 +96,8 @@ detection:
   detection_data_folder: "data/detection"
   detection_model_path: "models/detection/"
   detection_models:
+    # SimilarityDetectionModel:
+    #   threshold: 0
     SVCDetectionModel:
       max_iter: 100
       probability: True
@@ -71,7 +105,7 @@ detection:
     #   max_iter: 5
     #   loss: "log_loss"
     # XGBDetectionModel:
-    #   n_estimators: 100
+    #   n_estimators: 10
     #   max_depth: 3
     #   learning_rate: 0.1
     #   subsample: 0.5

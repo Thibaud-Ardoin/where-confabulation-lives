@@ -179,31 +179,38 @@ def main():
 
     # Process inference of prompts and gather activations to populate the prepared data
     for prepared_type in prepared_data_list:
-        for data_elt in prepared_type:
-            act_dict = gather_inference_dict(generator, 
-                                sys_prompt=data_elt.system_prompt,
-                                usr_prompt=data_elt.user_prompt.format(data_elt.input_text),
-                                token_places=cfg["token_places"],
-                                take_promt_act=cfg["prompt_token"],
-                                layers = cfg["layers"],
-                                verbose=cfg["generation_verbose"],
-            )
+        output_file_name = os.path.join(cfg["inference_data_folder"], "{}.pkl".format(prepared_type[0].__class__.__name__))
 
-            # Put the gathered activation and output in the data element
-            layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in cfg["layers"]]
-            data_elt.activations = layer_list
-            data_elt.output_text = act_dict["output"]
-            data_elt.input_token_length = act_dict["input_token_length"]
-            data_elt.input_token_length = act_dict["prompt_token_length"]
-            data_elt.prompt_token_emb = act_dict["prompt_token_emb"]
-            data_elt.gen_token_emb = act_dict["gen_token_emb"]
+        if os.path.exists(output_file_name):
+            print("The file {} already exists, skipping the inference".format(output_file_name))
+        else:
+            for data_elt in prepared_type:
 
-        # save as pickle file the prepared type data lists
-        with open(os.path.join(cfg["inference_data_folder"], "{}.pkl".format(data_elt.original_name)), "wb") as fp:
-            pickle.dump(prepared_type, fp)
-            fp.close()
+                # Prepare the output file name
+                act_dict = gather_inference_dict(generator, 
+                                    sys_prompt=data_elt.system_prompt,
+                                    usr_prompt=data_elt.user_prompt.format(data_elt.input_text),
+                                    token_places=cfg["token_places"],
+                                    take_promt_act=cfg["prompt_token"],
+                                    layers = cfg["layers"],
+                                    verbose=cfg["generation_verbose"],
+                )
+
+                # Put the gathered activation and output in the data element
+                layer_list = [act_dict["hook"][layer_nb]["normalized"] for layer_nb in cfg["layers"]]
+                data_elt.activations = layer_list
+                data_elt.output_text = act_dict["output"]
+                data_elt.input_token_length = act_dict["input_token_length"]
+                data_elt.input_token_length = act_dict["prompt_token_length"]
+                data_elt.prompt_token_emb = act_dict["prompt_token_emb"]
+                data_elt.gen_token_emb = act_dict["gen_token_emb"]
+
+            # save as pickle file the prepared type data lists
+            with open(output_file_name, "wb") as fp:
+                pickle.dump(prepared_type, fp)
+                fp.close()
         msg = "The Key type {}, with {} different entries is saved with inference\n"
-        sys.stderr.write(msg.format(data_elt.__class__.__name__, len(prepared_type)))
+        sys.stderr.write(msg.format(prepared_type[0].__class__.__name__, len(prepared_type)))
 
     del generator
 

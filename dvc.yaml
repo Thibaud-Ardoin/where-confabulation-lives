@@ -23,20 +23,16 @@ stages:
     params:
     - inference
     - experiment.data
-    outs:
-    - data/inference
 
   projection:
     cmd: python src/projection.py
     deps:
     - src/projection.py
+    - src/probes.py
     - data/inference/
     params:
     - projection
     - experiment.split
-    outs:
-    - data/projected
-    - models/projection
 
   detection:
     cmd: python src/detection.py
