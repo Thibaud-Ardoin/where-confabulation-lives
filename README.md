@@ -1,8 +1,25 @@
+# Steering LLMs Away from the Bluff
+
+> This repository provides the implementation for our method to detect and mitigate bluffing in LLMs. _Bluffing_ refers to cases where the model generates confident yet ungrounded responses. Our approach leverages sparse behavioral feature extraction from small, handcrafted interactions—eliminating the need for extensive data collection or retraining. 
+
+Key Features:  
+✅  High-accuracy bluff detection (up to 95%)  
+✅  Behavioral steering to reduce bluffing by up to 99%  
+✅ Lightweight and efficient—suitable for small-scale applications
+
+
+![Re-projection visualisation](data/images/re-projection.png)
+*Visualisation of the SparsePCA reprojection that enable better allignement to our features.*
+
+
 # How to install
 
-Get the Llama3 model in ´Meta-Llama-3-8B´ folder. Should contain checklist.chk, consolidated.00.pth, params.json, tokenizer.model
+Get the _Llama3_ model in ´Meta-Llama-3-8B´ folder. It should contain checklist.chk, consolidated.00.pth, params.json, tokenizer.model. 
+> Note: you can get an any other model and hack your activation hook and update into it.
 
-To install the required packages, run:
+
+
+To install the rest of the required packages, run:
 
 ```bash
 pip install -r requirements.txt
@@ -12,21 +29,34 @@ pip install -r requirements.txt
 
 The configuration file is ´params.yaml´. To use the dvc pipeline controller, use:
 
+
+### For detection and Vector extraction
 ```bash
 dvc repro dvc.yaml
 ```
 
 This will load the data files from text form until the generation of the detection models and the steering vectors.
 
-With this Steering vector you might want to run the testing script that will alterate the generation process:
+### For Steering evaluation on dataset
+
+```bash
+dvc repro steering_dvc/dvc.yaml
+```
+
+### For steering of the fly
 
 ```bash
 torchrun --nproc_per_node 1 model_test.py
 ```
 
+With this Steering vector you might want to run the testing script that will alterate the generation process.
 
-For a simple forward pass that generates a dataset of activation according to a .yaml file:
 
-```bash
-torchrun --nproc_per_node 1 forward_pass.py
-```
+# Effectiveness sumery
+
+![detection-perf](data/images/Detection-accuracy.png)
+*Accuracy for bluffing detection accross different data categories*
+
+
+![Plot_steering](data/images/plot_steering_performance.png)
+*Bluffing mitigation for different categories with the same steering vector*
