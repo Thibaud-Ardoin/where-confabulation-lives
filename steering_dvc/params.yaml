@@ -12,15 +12,16 @@ steering:
   # Data
   evaluation_set: [
     "protein",
-    # "celebrity",
-    # "airport",
-    # "medical",
-    # "culture",
-    # "legal",
-    # "french_word",
+    "celebrity",
+    "airport",
+    "medical",
+    "english_word",
+    "culture",
+    "legal",
+    "french_word",
   ]
   output_folder: "../data/steered"
-  experiment_label_name: "protein" #"PCA_softclip1000" #"real_act_mean_more" #"SparsePCA02_more" #"SparsePCA02"
+  experiment_label_name: "wreal_longer" #"protein" #"PCA_softclip1000" #"real_act_mean_more" #"SparsePCA02_more" #"SparsePCA02"
   verbose: True
   seed: 1
 
@@ -33,14 +34,17 @@ steering:
   max_batch_size: 8
   
   # Vector Info
-  steeve_type: "proj_mean_inv" # act_mean   # proj_mean_inv #raw_direction
+  steeve_type: "proj_mean_inv" #"proj_mean_inv" # act_mean   # proj_mean_inv #raw_direction
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_french_word_celebrity_airport_medical_protein_culture_legal_vectors.pkl"
-  vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_vectors.pkl"
+  # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_vectors.pkl"
+  # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_airport_vectors.pkl"
+  # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_pokemon_idk_vectors.pkl"
+  vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_pokemon_bluff_vectors.pkl"
   # vector_path: "../data/projected/PCAProjectionModel_trained_on_english_word_vectors.pkl"
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_celebrity_vectors.pkl"
   layers: [16]
   alpha: [1] #[-8, -5, -1, 1, 5, 8]
-  beta: [8] #[-13, -12, -10, -9, -8, -7] # [-8, -5, -2, 0, 2, 5, 8] #[-13, -12, -11, -10, -9, -8, -7] # [-11, -10, -9, -8] #-12, -10, -8]
+  beta: [-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8] #[-7, -6, -4, -3, -1, 1, 3, 4, 6, 7] #[-13, -12, -10, -9, -8, -7] # [-8, -5, -2, 0, 2, 5, 8] #[-13, -12, -11, -10, -9, -8, -7] # [-11, -10, -9, -8] #-12, -10, -8]
   clip_value: [0]
   clip_type: "soft_clip"
   act_space_norm: True
@@ -63,16 +67,16 @@ evaluation:
 # [ Compile Results]
 compile:
   seed: 0s
-  compilation_prefix: "Redo SPCA english" #"Redo SPCA english" #"robustness all" #"robustness_en2med"
+  compilation_prefix: "Revival_SPCA_pokemon_BLUFF" #"Redo SPCA english" #"robustness all" #"robustness_en2med"
   compilation_folder: "../data/compiled"
   palette: [
-    "#ee6a00",
-    "#a1e8d9",
-    "#695d46",
-    "#009667",
-    "#cd92d7",
-    "#b3a77d",
-    "#eeff41",
-    "#ef6c00",
-    "#4db6ac",
+    "#f8c091",  #// Pastel orange (from #ee6a00)
+    "#d0f2ea",  #// Lighter pastel teal (from #a1e8d9)
+    "#b5ad98",  #// Pastel taupe (from #695d46)
+    "#99d5b9",  #// Pastel green (from #009667)
+    "#e7c7e9",  #// Pastel lavender (from #cd92d7)
+    "#d6cfb8",  #// Pastel beige (from #b3a77d)
+    "#f5ffb3",  #// Pastel yellow (from #eeff41)
+    "#ffbd91",  #// Pastel coral (from #ef6c00)
+    "#a9ded8",   #// Pastel aqua (from #4db6ac)
   ]

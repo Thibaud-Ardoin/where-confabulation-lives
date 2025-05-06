@@ -109,18 +109,22 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
     input_tokens = generator.tokenizer.encode(" ".join([sys_prompt, usr_prompt]), bos=True, eos=False)
     input_token_length = len(input_tokens) + 2
 
-    # Adjust the selected token positions
-    if token_places == "all":
-        token_places = list(range(len(acts[layers[0]][0])))
-    elif take_promt_act :
-        token_places.append(0)
-
     data = {}
     data["output"] = results[0]['generation']['content']
     data["input_token_length"] = input_token_length
     data["prompt_token_emb"] = generator.model.norm(generator.model.tok_embeddings(torch.tensor(results[0]['prompt_token_id'])))
     data["gen_token_emb"] = generator.model.norm(generator.model.tok_embeddings(torch.tensor(results[0]['gen_token_id'])))
     data["hook"] = {}
+
+    # Adjust the selected token positions
+    if token_places == "all":
+        token_places = list(range(len(acts[layers[0]][0])))
+    elif token_places == "first_gen":
+        token_places = [1]
+        data["prompt_token_length"] = 0
+    elif take_promt_act :
+        token_places.append(0)
+
     with torch.no_grad():
         for layer_nb in layers:     # Loop through 32 layer at max
             data["hook"][layer_nb] = {}
@@ -211,6 +215,9 @@ def main():
                 fp.close()
         msg = "The Key type {}, with {} different entries is saved with inference\n"
         sys.stderr.write(msg.format(prepared_type[0].__class__.__name__, len(prepared_type)))
+
+        # Clean up the prepared type
+        del prepared_type
 
     del generator
 

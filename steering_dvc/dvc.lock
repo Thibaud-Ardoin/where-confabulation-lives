@@ -5,13 +5,13 @@ stages:
     deps:
     - path: ../data/features
       hash: md5
-      md5: 3cb98fc537604bbdd5f7c66c65de61a3.dir
-      size: 3669828859
-      nfiles: 9
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
     - path: ../src/datas.py
       hash: md5
-      md5: 8d6481de38ef7bfc63381d024a68473e
-      size: 9931
+      md5: 583cf81a900543244c32dc1f336870d3
+      size: 10445
     - path: ../src/projection.py
       hash: md5
       md5: 1776dc031ebeff416b66555934a44b70
@@ -22,8 +22,8 @@ stages:
       size: 5690
     - path: prompts.yaml
       hash: md5
-      md5: ea94923c21c71e989ad2283068b9fab7
-      size: 3289
+      md5: 24f6f759b7f54867a8b01c1a2e419bb2
+      size: 3629
     params:
       params.yaml:
         prepare:
@@ -35,8 +35,15 @@ stages:
         steering:
           evaluation_set:
           - protein
+          - celebrity
+          - airport
+          - medical
+          - english_word
+          - culture
+          - legal
+          - french_word
           output_folder: ../data/steered
-          experiment_label_name: protein
+          experiment_label_name: wreal_little
           verbose: true
           seed: 1
           model_path: ../models/Meta-Llama-3-8B-Instruct/
@@ -46,12 +53,28 @@ stages:
           max_seq_len: 512
           max_batch_size: 8
           steeve_type: proj_mean_inv
-          vector_path: ../data/projected/SparsePCAProjectionModel_trained_on_english_word_vectors.pkl
+          vector_path: ../data/projected/SparsePCAProjectionModel_trained_on_pokemon_idk_vectors.pkl
           layers:
           - 16
           alpha:
           - 1
           beta:
+          - -8
+          - -7
+          - -6
+          - -5
+          - -4
+          - -3
+          - -2
+          - -1
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
           - 8
           clip_value:
           - 0
@@ -65,16 +88,16 @@ stages:
     outs:
     - path: ../data/steered
       hash: md5
-      md5: 867c08d81b876a53a6d888bba0b06db0.dir
-      size: 81391
+      md5: 41baabe1a73286275ee6550e853f74d6.dir
+      size: 8806383
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: 867c08d81b876a53a6d888bba0b06db0.dir
-      size: 81391
+      md5: 41baabe1a73286275ee6550e853f74d6.dir
+      size: 8806383
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
@@ -100,16 +123,16 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 5ba3ab5fe68414d10e4d775eac8347e8.dir
-      size: 83148
+      md5: 7eb64dde0c9ba9ce63808bf4a51f3da2.dir
+      size: 9098729
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py
     deps:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 5ba3ab5fe68414d10e4d775eac8347e8.dir
-      size: 83148
+      md5: 7eb64dde0c9ba9ce63808bf4a51f3da2.dir
+      size: 9098729
       nfiles: 1
     - path: ../src/compile_results.py
       hash: md5
@@ -119,15 +142,15 @@ stages:
       params.yaml:
         compile:
           seed: 0s
-          compilation_prefix: Redo SPCA english
+          compilation_prefix: Revival_SPCA_pokemon_IDK
           compilation_folder: ../data/compiled
           palette:
-          - '#ee6a00'
-          - '#a1e8d9'
-          - '#695d46'
-          - '#009667'
-          - '#cd92d7'
-          - '#b3a77d'
-          - '#eeff41'
-          - '#ef6c00'
-          - '#4db6ac'
+          - '#f8c091'
+          - '#d0f2ea'
+          - '#b5ad98'
+          - '#99d5b9'
+          - '#e7c7e9'
+          - '#d6cfb8'
+          - '#f5ffb3'
+          - '#ffbd91'
+          - '#a9ded8'

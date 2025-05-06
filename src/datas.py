@@ -71,6 +71,9 @@ class english_word(MyData):
 class french_word(MyData):
     synonym: str = None
 
+class pokemon(MyData):
+    description: str = None
+
 class date(MyData):
     date : datetime = None 
 
@@ -227,6 +230,12 @@ class DataGenerator():
                 return french_word(
                     input_text = word
                 )
+            
+            case "pokemon":
+                name = text
+                return pokemon(
+                    input_text = name
+                )
 
             case "date":
                 d = text.split(" ")[-1]
@@ -301,6 +310,15 @@ class DataGenerator():
 
     def load_from_type(self, file_name):
         return self.aggregate_type_data(file_name)
+    
+def df_to_list(df, class_type="MyData"):
+    generated_data = []
+    for i, row in df.iterrows():
+        data_elmt = eval(class_type)()                
+        for key in row.keys():
+            data_elmt.__setattr__(key, row[key])
+        generated_data.append(data_elmt)
+    return generated_data
 
 
 if __name__ == "__main__": 

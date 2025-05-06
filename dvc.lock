@@ -5,13 +5,13 @@ stages:
     deps:
     - path: data/text/
       hash: md5
-      md5: 9ea332771181aca04930e896183d2fa5.dir
-      size: 250418306
+      md5: fcb14780274b0c4ad22861f8551fadcd.dir
+      size: 250422806
       nfiles: 52
     - path: prompts.yaml
       hash: md5
-      md5: 61a70c8a784ec7c2a63a8a0dfafcb41c
-      size: 5962
+      md5: 0d5754b93fdad09cea7cf5685539a6e2
+      size: 6244
     - path: src/prepare.py
       hash: md5
       md5: 76bfd956399452be1529fd2ac83b377e
@@ -36,21 +36,21 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: a3cc7923211b35bcda3b1bd67c60e2be.dir
-      size: 156520
+      md5: ecb15e3b86377ad174caf3232784e767.dir
+      size: 165643
       nfiles: 8
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: a3cc7923211b35bcda3b1bd67c60e2be.dir
-      size: 156520
+      md5: ecb15e3b86377ad174caf3232784e767.dir
+      size: 165643
       nfiles: 8
     - path: src/inference.py
       hash: md5
-      md5: 831deb50a7d472053b6a376518603bb2
-      size: 8023
+      md5: edc51b890a4999ed93ef3d0cc76b6fb9
+      size: 8193
     params:
       params.yaml:
         experiment.data:
@@ -63,7 +63,7 @@ stages:
         - culture
         - legal
         inference:
-          seed: 0
+          seed: 1
           model_path: models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
@@ -75,16 +75,16 @@ stages:
           prompt_token: true
           token_places: all
           layers:
-          - 16
+          - 14
           save_input_token: true
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 9ebeb127db64cfed9716f489a519ff48.dir
-      size: 3141515727
-      nfiles: 12
+      md5: cef626b996cbb5efb465d168df5e6e0c.dir
+      size: 4742452897
+      nfiles: 13
     - path: src/detection.py
       hash: md5
       md5: 3075d9806f574dac9fc8635dcd32e3cb
@@ -101,43 +101,55 @@ stages:
               probability: true
         experiment.split:
           training_data:
-          - english_word
+          - celebrity
           testing_data:
+          - english_word
+          - french_word
+          - airport
+          - medical
           - protein
+          - culture
+          - legal
     outs:
     - path: data/detection
       hash: md5
-      md5: 744dee00095bf97694e4bda0e854cb28.dir
-      size: 203674009
-      nfiles: 2
+      md5: 23155e1442b53d4a521212e610c8fafa.dir
+      size: 897877124
+      nfiles: 8
     - path: models/detection
       hash: md5
-      md5: 95e1c9a158a7272e171cfab402246a18.dir
-      size: 1888
+      md5: 4c701df3451e894277cce0bba04605db.dir
+      size: 1780
       nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: bb59dc7d8ff9bb680c9aa4220e4ea133.dir
-      size: 48170007058
-      nfiles: 9
+      md5: 9614e9e33cefb68bf434f64e6d62a6ed.dir
+      size: 30526291449
+      nfiles: 8
     - path: src/probes.py
       hash: md5
       md5: 3a526b8a2b836242a6051dce9a565a02
       size: 5855
     - path: src/projection.py
       hash: md5
-      md5: 1776dc031ebeff416b66555934a44b70
-      size: 14695
+      md5: dede8cbc6e68dc66fcfce1d8125368a8
+      size: 14821
     params:
       params.yaml:
         experiment.split:
           training_data:
-          - english_word
+          - celebrity
           testing_data:
+          - english_word
+          - french_word
+          - airport
+          - medical
           - protein
+          - culture
+          - legal
         projection:
           seed: 1
           projection_data_folder: data/projected
@@ -154,13 +166,13 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: 9ebeb127db64cfed9716f489a519ff48.dir
-      size: 3141515727
-      nfiles: 12
+      md5: cef626b996cbb5efb465d168df5e6e0c.dir
+      size: 4742452897
+      nfiles: 13
     - path: models/detection
       hash: md5
-      md5: 95e1c9a158a7272e171cfab402246a18.dir
-      size: 1888
+      md5: 4c701df3451e894277cce0bba04605db.dir
+      size: 1780
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
@@ -173,12 +185,18 @@ stages:
           seed: 1
         experiment.split:
           training_data:
-          - english_word
+          - celebrity
           testing_data:
+          - english_word
+          - french_word
+          - airport
+          - medical
           - protein
+          - culture
+          - legal
     outs:
     - path: eval
       hash: md5
-      md5: 6b5b34edade792865d51b5a41087c68f.dir
-      size: 3726495
+      md5: 9c1cb0af29ec97d578b88eebe66e5248.dir
+      size: 3928731
       nfiles: 10

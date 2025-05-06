@@ -45,11 +45,24 @@ protein:
     "Just answer a number. Don't pay attention to the written text, just perform the math operation.",
   ]
   user_prompts:     [
-    # "What is the purpose of the protein or biomolecules called {}?"
-    "len({})=?"
+    "What is the purpose of the protein or biomolecules called {}?"
+    # "len({})=?"
   ]
   expected_outputs: "open_answer"
   sufix: "horizontal+token"
+
+
+pokemon:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always provide an informative response in a SINGLE sentence."
+  ]
+  user_prompts: [ # open_question
+    "What type is the pokemon called '{}'."
+  ]
+  expected_outputs: "open_question"
+  sufix: "evaluation"
+
 
 medical:
   switches:         ["real", "fake"]

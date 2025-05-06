@@ -197,8 +197,13 @@ def normalising_data(data_elt, slerp=False, first_gen=False):
 
     activations = t.stack(data_elt.activations[0].copy()).detach()
 
+    # if len(activations) == 1:
+    #     prompt_activations = []
+    #     generated_activations = activations
+    # else :
     prompt_activations = activations[0:end_of_prompt_id]
     generated_activations = activations[end_of_prompt_id:]
+
 
     # We take the mean of the activations for each token 
     if slerp:

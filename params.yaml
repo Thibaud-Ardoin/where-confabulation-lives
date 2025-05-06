@@ -16,28 +16,31 @@ experiment:
     "protein", 
     "culture", 
     "legal",
+    # "pokemon",
     # "hallucination_caa",
   ]
   split:
     training_data: [
-      "english_word", 
+      # "english_word", 
       # "french_word", 
-      # "celebrity", 
+      "celebrity", 
       # "airport", 
       # "medical", 
       # "protein", 
       # "culture", 
       # "legal"
-  ]
+
+      # "pokemon"
+    ]
     testing_data: [
-      # "english_word", 
-      # "french_word",
+      "english_word", 
+      "french_word",
       # "celebrity", 
-      # "airport", 
-      # "medical", 
+      "airport", 
+      "medical", 
       "protein", 
-      # "culture", 
-      # "legal"
+      "culture", 
+      "legal"
     ]
 
 # [ Data ]
@@ -50,7 +53,7 @@ prepare:
 
 # [ Inference ]
 inference:
-  seed: 0
+  seed: 1
   model_path: "models/Meta-Llama-3-8B-Instruct/"
   tokenizer_path: "models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
@@ -61,8 +64,8 @@ inference:
 
   inference_data_folder: "data/inference"
   prompt_token: True
-  token_places: "all" #[-1]
-  layers: [16]
+  token_places: "all" #"first_gen" #[0] #"all" #[-1]
+  layers: [14]
   save_input_token: True
 
 
@@ -73,7 +76,7 @@ projection:
   projection_model_path: "models/projection/"
   zero_centered: True # Substract the mean of each data name
   slerp_interpolation: False
-  first_gen: True
+  first_gen: True             # ? Should be changed if we harvest alreaddy only the first token in inference
   projections:
     # PCAProjectionModel:
     #   n_components: 2
@@ -122,7 +125,7 @@ manipulation:
   switch: False
   additive_vector_path: "LLMs/mri_llm/inference_data/proj.pkl" 
   PCA_projection_path: "LLMs/mri_llm/inference_data/unit_delta.pkl" 
-  layer: 16
+  layer: 14
 
 
 
