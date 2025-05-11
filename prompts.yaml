@@ -1,3 +1,97 @@
+###########################
+#   The 8 Base prompts    #
+###########################
+
+#
+airport:
+  switches:         ["real", "fake"]
+  system_prompts:   ["Always respond informatively with a SINGLE sentence. If you don't know this airport, or think there is a mistake, make something up."]
+  user_prompts:     [
+    'How many passengers go through {} every day?', 
+  ]
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+#
+protein:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatively with a SINGLE sentence.",
+  ]
+  user_prompts:     [
+    "What is the purpose of the protein or biomolecules called {}?"
+  ]
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+#
+medical:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatively with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+#
+culture:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatively with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+#
+legal:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond informatively with a SINGLE sentence.",
+  ]
+  user_prompts:     ['{}']
+  expected_outputs: "open_answer"
+  sufix: "horizontal+token"
+
+#
+celebrity:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
+    # "Anser ONLY with a yes or no.",
+  ]
+  # user_prompts:     ['Does {} rhyme with Morning?']
+  user_prompts:     ['{}:']
+  expected_outputs: "bio"
+  sufix: "horizontal+token"
+
+#
+english_word:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
+    # "Always respond with a SINGLE word. You are given an word, if you know it, give me a synonym, otherwise invent something.",
+  ]
+  user_prompts:     ['{}:']
+  expected_outputs: "definition"
+  sufix: "horizontal+token"
+
+french_word:
+  switches:         ["real", "fake"]
+  system_prompts:   [
+    "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet \n Outillage: Meteriel",
+  ]
+  user_prompts:     ['{}:']
+  sufix: "horizontal+token"
+  expected_outputs: "definition"
+
+
+############################################################
+######################### OTHERS ###########################
+############################################################
+
+
 emotion:
   switches:         ["positive", "negative"]
   system_prompts:   ["Given a concept, respond with the corresponding name of emotion."]
@@ -17,15 +111,6 @@ conspiracy:
   sufix: "horizontal+token"
 
 
-airport:
-  switches:         ["real", "fake"]
-  system_prompts:   ["Always respond informatievely with a SINGLE sentence. If you don't know this airport, or think there is a mistake, make something up."]
-  user_prompts:     [
-    'How many passengers go through {} every day?', 
-  ]
-  expected_outputs: "open_answer"
-  sufix: "horizontal+token"
-
 poem:
   switches:         ["test"]
   system_prompts:   ["Just fulfil the request."]
@@ -38,20 +123,6 @@ poem:
   expected_outputs: "open_answer"
   sufix: "horizontal+token"
 
-protein:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    # "Always respond informatievely with a SINGLE sentence.",
-    "Just answer a number. Don't pay attention to the written text, just perform the math operation.",
-  ]
-  user_prompts:     [
-    "What is the purpose of the protein or biomolecules called {}?"
-    # "len({})=?"
-  ]
-  expected_outputs: "open_answer"
-  sufix: "horizontal+token"
-
-
 pokemon:
   switches:         ["real", "fake"]
   system_prompts:   [
@@ -63,34 +134,6 @@ pokemon:
   expected_outputs: "open_question"
   sufix: "evaluation"
 
-
-medical:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    "Always respond informatievely with a SINGLE sentence.",
-  ]
-  user_prompts:     ['{}']
-  expected_outputs: "open_answer"
-  sufix: "horizontal+token"
-
-culture:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    "Always respond informatievely with a SINGLE sentence.",
-  ]
-  user_prompts:     ['{}']
-  expected_outputs: "open_answer"
-  sufix: "horizontal+token"
-
-
-legal:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    "Always respond informatievely with a SINGLE sentence.",
-  ]
-  user_prompts:     ['{}']
-  expected_outputs: "open_answer"
-  sufix: "horizontal+token"
 
 test_celebrity:
   switches:         ["real", "fake"]
@@ -131,42 +174,6 @@ test_celebrity2:
   user_prompts:     ['Do you know the person called {}?']
   sufix: "test"
 
-celebrity:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    # "Always respond with a SINGLE year date. You are given the name of a personality, give me an unrelated fully random date based on that."
-    # "Always respond with a SINGLE date. You are given the name of a personality, give me it's date of birth. \n Nicolaus Copernicus: 1473 \n Ed Sheeran: 1991 \n Angela Merkel: 1954 \n Victor Hugo: 1802",
-    "Always respond with a SINGLE sentence. You are given the name of a personality, give me a short description.",
-    # "Don't pay attention to the written text, just perform the math operation.",
-  ]
-  user_prompts:     ['{}:']
-  # expected_outputs: "date"
-  expected_outputs: "bio"
-#   # sufix: "random"
-  sufix: "horizontal+token"
-
-english_word:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-    "Always respond with a SINGLE sentence. You are given an english word, give me a short definition.",
-  ]
-  user_prompts:     ['{}:']
-  # expected_outputs: "single_word"
-  expected_outputs: "definition"
-  sufix: "horizontal+token"
-
-french_word:
-  switches:         ["real", "fake"]
-  system_prompts:   [
-    # "Always respond with a SINGLE word. You are given an english word, give me a Synonym. \n Cloud: Nebula \n Bridge: Span \n Cup: Mug \n Service: Assistance",
-    "Repond toujours avec UN SEUL mot. A partir d'un mot français, donne moi un synonyme. \n Nuage: Cumulus \n Pont: Arche \n Tasse: Gobelet \n Outillage: Meteriel",
-    # "Repond toujours en une SEULE phrase. A partir d'un mot français, donne moi une courte definition.",
-  ]
-  user_prompts:     ['{}:']
-  sufix: "horizontal+token"
-  expected_outputs: "definition"
-
 
 date:
   switches:         ["real", "fake"]
@@ -200,3 +207,4 @@ hallucination_caa:
   ]
   expected_outputs: "AB"
   sufix: "evaluation"
+

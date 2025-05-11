@@ -14,8 +14,8 @@ stages:
       size: 10445
     - path: ../src/projection.py
       hash: md5
-      md5: 1776dc031ebeff416b66555934a44b70
-      size: 14695
+      md5: dede8cbc6e68dc66fcfce1d8125368a8
+      size: 14821
     - path: ../src/steering_inference.py
       hash: md5
       md5: 156ddd756d3bbf07199b2ec072bd9c09
@@ -43,7 +43,7 @@ stages:
           - legal
           - french_word
           output_folder: ../data/steered
-          experiment_label_name: wreal_little
+          experiment_label_name: wreal_mainAnchors8.5.2.0_clean_ly14
           verbose: true
           seed: 1
           model_path: ../models/Meta-Llama-3-8B-Instruct/
@@ -53,28 +53,18 @@ stages:
           max_seq_len: 512
           max_batch_size: 8
           steeve_type: proj_mean_inv
-          vector_path: ../data/projected/SparsePCAProjectionModel_trained_on_pokemon_idk_vectors.pkl
+          vector_path: ../data/projected/SparsePCAProjectionModel_trained_on_celebrity_vectors.pkl
           layers:
-          - 16
+          - 14
           alpha:
           - 1
           beta:
           - -8
-          - -7
-          - -6
           - -5
-          - -4
-          - -3
           - -2
-          - -1
           - 0
-          - 1
           - 2
-          - 3
-          - 4
           - 5
-          - 6
-          - 7
           - 8
           clip_value:
           - 0
@@ -88,8 +78,8 @@ stages:
     outs:
     - path: ../data/steered
       hash: md5
-      md5: 41baabe1a73286275ee6550e853f74d6.dir
-      size: 8806383
+      md5: 0126dfafc4bd967fd8dbd10ee1fe5ba5.dir
+      size: 4700872
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py

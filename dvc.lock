@@ -10,8 +10,8 @@ stages:
       nfiles: 52
     - path: prompts.yaml
       hash: md5
-      md5: 0d5754b93fdad09cea7cf5685539a6e2
-      size: 6244
+      md5: fae3e87e55e856b410c80553d1471541
+      size: 5672
     - path: src/prepare.py
       hash: md5
       md5: 76bfd956399452be1529fd2ac83b377e
@@ -36,21 +36,21 @@ stages:
     outs:
     - path: data/prepared
       hash: md5
-      md5: ecb15e3b86377ad174caf3232784e767.dir
-      size: 165643
+      md5: e89eb64a2bfa6eca2ce5ca27e4b2e154.dir
+      size: 165596
       nfiles: 8
   inference:
     cmd: torchrun src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
-      md5: ecb15e3b86377ad174caf3232784e767.dir
-      size: 165643
+      md5: e89eb64a2bfa6eca2ce5ca27e4b2e154.dir
+      size: 165596
       nfiles: 8
     - path: src/inference.py
       hash: md5
-      md5: edc51b890a4999ed93ef3d0cc76b6fb9
-      size: 8193
+      md5: 25f8931474c80d106151c55e65744692
+      size: 9530
     params:
       params.yaml:
         experiment.data:
@@ -82,9 +82,9 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: cef626b996cbb5efb465d168df5e6e0c.dir
-      size: 4742452897
-      nfiles: 13
+      md5: ff24fae366704c8f37c48230a916d5ae.dir
+      size: 3063262469
+      nfiles: 10
     - path: src/detection.py
       hash: md5
       md5: 3075d9806f574dac9fc8635dcd32e3cb
@@ -113,12 +113,12 @@ stages:
     outs:
     - path: data/detection
       hash: md5
-      md5: 23155e1442b53d4a521212e610c8fafa.dir
-      size: 897877124
+      md5: 001762cff75455fc2be1c954fe0a4dec.dir
+      size: 992144234
       nfiles: 8
     - path: models/detection
       hash: md5
-      md5: 4c701df3451e894277cce0bba04605db.dir
+      md5: 10bb810d44b23348125693c72f57a89a.dir
       size: 1780
       nfiles: 1
   projection:
@@ -126,8 +126,8 @@ stages:
     deps:
     - path: data/inference/
       hash: md5
-      md5: 9614e9e33cefb68bf434f64e6d62a6ed.dir
-      size: 30526291449
+      md5: 4fe6fe76fd36ce012217f2e0bea15d8f.dir
+      size: 28221956795
       nfiles: 8
     - path: src/probes.py
       hash: md5
@@ -166,12 +166,12 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: cef626b996cbb5efb465d168df5e6e0c.dir
-      size: 4742452897
-      nfiles: 13
+      md5: ff24fae366704c8f37c48230a916d5ae.dir
+      size: 3063262469
+      nfiles: 10
     - path: models/detection
       hash: md5
-      md5: 4c701df3451e894277cce0bba04605db.dir
+      md5: 10bb810d44b23348125693c72f57a89a.dir
       size: 1780
       nfiles: 1
     - path: src/evaluation.py
@@ -197,6 +197,6 @@ stages:
     outs:
     - path: eval
       hash: md5
-      md5: 9c1cb0af29ec97d578b88eebe66e5248.dir
-      size: 3928731
+      md5: d966facaf7a637996ddf99ce65e961cb.dir
+      size: 3933850
       nfiles: 10

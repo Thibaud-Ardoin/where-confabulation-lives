@@ -112,6 +112,18 @@ def gather_inference_dict(generator, sys_prompt, usr_prompt, token_places, take_
     data = {}
     data["output"] = results[0]['generation']['content']
     data["input_token_length"] = input_token_length
+    # Tokens as ids
+    data["input_tokens_user"] = input_tokens[len(sys_prompt):]
+    data["input_tokens_system"] = input_tokens[:len(sys_prompt)]
+    data["input_tokens"] = input_tokens
+    data["output_tokens"] = generator.tokenizer.encode(results[0]['generation']['content'], bos=True, eos=False)
+
+    # Tokens as strings
+    data["input_tokens_user_str"] = [generator.tokenizer.decode([t]) for t in data["input_tokens_user"]]
+    data["input_tokens_system_str"] = [generator.tokenizer.decode([t]) for t in data["input_tokens_system"]]
+    data["input_tokens_str"] = [generator.tokenizer.decode([t]) for t in data["input_tokens"]]
+    data["output_tokens_str"] = [generator.tokenizer.decode([t]) for t in data["output_tokens"]]
+
     data["prompt_token_emb"] = generator.model.norm(generator.model.tok_embeddings(torch.tensor(results[0]['prompt_token_id'])))
     data["gen_token_emb"] = generator.model.norm(generator.model.tok_embeddings(torch.tensor(results[0]['gen_token_id'])))
     data["hook"] = {}
@@ -208,6 +220,14 @@ def main():
                 data_elt.input_token_length = act_dict["prompt_token_length"]
                 data_elt.prompt_token_emb = act_dict["prompt_token_emb"]
                 data_elt.gen_token_emb = act_dict["gen_token_emb"]
+                data_elt.input_tokens = act_dict["input_tokens"]
+                data_elt.input_tokens_user = act_dict["input_tokens_user"]
+                data_elt.input_tokens_system = act_dict["input_tokens_system"]
+                data_elt.input_tokens_str = act_dict["input_tokens_str"]
+                data_elt.input_tokens_user_str = act_dict["input_tokens_user_str"]
+                data_elt.input_tokens_system_str = act_dict["input_tokens_system_str"]
+                data_elt.output_tokens = act_dict["output_tokens"]
+                data_elt.output_tokens_str = act_dict["output_tokens_str"]
 
             # save as pickle file the prepared type data lists
             with open(output_file_name, "wb") as fp:
