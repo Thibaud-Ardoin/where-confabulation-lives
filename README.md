@@ -1,11 +1,11 @@
-# Steering LLMs Away from the Bluff
+# Where Confabulation Lives: Latent Feature Discovery in LLMs
 
-> This repository provides the implementation for our method to detect and mitigate bluffing in LLMs. _Bluffing_ refers to cases where the model generates confident yet ungrounded responses. Our approach leverages sparse behavioral feature extraction from small, handcrafted interactions—eliminating the need for extensive data collection or retraining. 
+> This repository provides the implementation for our method to detect and manipulate LLMs. _Confabulation_ refers to cases where the model generates confident yet ungrounded responses. Our approach leverages sparse behavioral feature extraction from small, handcrafted interaction. 
 
 Key Features:  
-✅  High-accuracy bluff detection (up to 95%)  
-✅  Behavioral steering to reduce bluffing by up to 99%  
-✅ Lightweight and efficient—suitable for small-scale applications
+✅  Tutorial for discovery of latent direction in LLMs
+✅  Behavioral steering to reduce Confabulation  
+✅  Lightweight and efficient—suitable for small-scale applications
 
 <div style="display: flex; justify-content: center;">
     <img src="data/images/re-projection.png" alt="Description" style="width: 60%;">
