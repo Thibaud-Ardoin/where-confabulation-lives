@@ -22,25 +22,25 @@ experiment:
   split:
     training_data: [
       # "english_word", 
-      # "french_word", 
+      "french_word", 
       "celebrity", 
-      # "airport", 
-      # "medical", 
-      # "protein", 
-      # "culture", 
-      # "legal"
-
-      # "pokemon"
-    ]
-    testing_data: [
-      "english_word", 
-      "french_word",
-      # "celebrity", 
       "airport", 
       "medical", 
       "protein", 
       "culture", 
       "legal"
+
+      # "pokemon"
+    ]
+    testing_data: [
+      "english_word", 
+      # "french_word",
+      # "celebrity", 
+      # "airport", 
+      # "medical", 
+      # "protein", 
+      # "culture", 
+      # "legal"
     ]
 
 # [ Data ]
@@ -54,6 +54,7 @@ prepare:
 # [ Inference ]
 inference:
   seed: 1
+  model_name: "Meta-Llama-3-8B-Instruct" # "Meta-Llama-3-8B-Instruct" #"gpt2-small" #"Meta-Llama-3-8B-Instruct"
   model_path: "models/Meta-Llama-3-8B-Instruct/"
   tokenizer_path: "models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
@@ -71,7 +72,7 @@ inference:
 
 # [ Projection ]
 projection:
-  seed: 1
+  seed: 0
   projection_data_folder: "data/projected"
   projection_model_path: "models/projection/"
   zero_centered: True # Substract the mean of each data name

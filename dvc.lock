@@ -49,8 +49,8 @@ stages:
       nfiles: 8
     - path: src/inference.py
       hash: md5
-      md5: 25f8931474c80d106151c55e65744692
-      size: 9530
+      md5: 74d59f52b747c76dd6c5e8570dad2dac
+      size: 10601
     params:
       params.yaml:
         experiment.data:
@@ -64,6 +64,7 @@ stages:
         - legal
         inference:
           seed: 1
+          model_name: Meta-Llama-3-8B-Instruct
           model_path: models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
@@ -82,9 +83,9 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: ff24fae366704c8f37c48230a916d5ae.dir
-      size: 3063262469
-      nfiles: 10
+      md5: 8c4d4a7041db36a85204dcfad4a3229b.dir
+      size: 7243878206
+      nfiles: 14
     - path: src/detection.py
       hash: md5
       md5: 3075d9806f574dac9fc8635dcd32e3cb
@@ -101,25 +102,25 @@ stages:
               probability: true
         experiment.split:
           training_data:
-          - celebrity
-          testing_data:
-          - english_word
           - french_word
+          - celebrity
           - airport
           - medical
           - protein
           - culture
           - legal
+          testing_data:
+          - english_word
     outs:
     - path: data/detection
       hash: md5
-      md5: 001762cff75455fc2be1c954fe0a4dec.dir
+      md5: c29c50ade62abb513fec062ebb7803d5.dir
       size: 992144234
       nfiles: 8
     - path: models/detection
       hash: md5
-      md5: 10bb810d44b23348125693c72f57a89a.dir
-      size: 1780
+      md5: f83531145c14d52c8da68f1b72cb0e8a.dir
+      size: 7553
       nfiles: 1
   projection:
     cmd: python src/projection.py
@@ -141,17 +142,17 @@ stages:
       params.yaml:
         experiment.split:
           training_data:
-          - celebrity
-          testing_data:
-          - english_word
           - french_word
+          - celebrity
           - airport
           - medical
           - protein
           - culture
           - legal
+          testing_data:
+          - english_word
         projection:
-          seed: 1
+          seed: 0
           projection_data_folder: data/projected
           projection_model_path: models/projection/
           zero_centered: true
@@ -166,13 +167,13 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: ff24fae366704c8f37c48230a916d5ae.dir
-      size: 3063262469
-      nfiles: 10
+      md5: 8c4d4a7041db36a85204dcfad4a3229b.dir
+      size: 7243878206
+      nfiles: 14
     - path: models/detection
       hash: md5
-      md5: 10bb810d44b23348125693c72f57a89a.dir
-      size: 1780
+      md5: f83531145c14d52c8da68f1b72cb0e8a.dir
+      size: 7553
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
@@ -185,18 +186,18 @@ stages:
           seed: 1
         experiment.split:
           training_data:
-          - celebrity
-          testing_data:
-          - english_word
           - french_word
+          - celebrity
           - airport
           - medical
           - protein
           - culture
           - legal
+          testing_data:
+          - english_word
     outs:
     - path: eval
       hash: md5
-      md5: d966facaf7a637996ddf99ce65e961cb.dir
-      size: 3933850
+      md5: 7905c7c0104b34e862696234097dfd34.dir
+      size: 3930497
       nfiles: 10

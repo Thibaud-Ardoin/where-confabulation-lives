@@ -1,7 +1,7 @@
 celebrity:
   awareness_test:
     filling_string: "input_text"
-    system_prompt: "You are are a professor grading student's exam papers. 
+    system_prompt: "You are a professor grading student's exam papers. 
                     They were asked to look for information about {} in the library. 
                     You will be given their texts that answer the question: Do you found something about {}. 
                     Grade the copy 1 if the text contain information on the person.
@@ -24,7 +24,7 @@ celebrity:
 english_word:
   awareness_test:
     filling_string: "input_text"
-    system_prompt: "You are are a professor grading student's exam papers. 
+    system_prompt: "You are a professor grading student's exam papers. 
                     They were asked to look for information about the word '{}' in the library. 
                     Grade if they are writing a definition of the word '{}'.
                     Grade the copy 1 if the text contain information on the given word.
@@ -47,7 +47,7 @@ english_word:
 medical:
   awareness_test:
     filling_string: "description"
-    system_prompt: "You are are a professor grading medical student's copy. 
+    system_prompt: "You are a professor grading medical student's copy. 
                     They were asked to look for information about {} in the library. 
                     You will be given their texts that answer the question: What is {}? 
                     Grade the copy 1 if the text contain some information on that topic.
@@ -69,7 +69,7 @@ medical:
 protein:
   awareness_test:
     filling_string: "input_text"
-    system_prompt: "You are are a professor grading biomedical student's copy. 
+    system_prompt: "You are a professor grading biomedical student's copy. 
                     They were asked to look for information about the biomolecules called {} in the library. 
                     You will be given their texts that answer the question: What is {}? 
                     Grade the copy 1 if the text contain some information on that topic.
@@ -92,7 +92,7 @@ protein:
 legal:
   awareness_test:
     filling_string: "description"
-    system_prompt: "You are are a professor grading law student's copy. 
+    system_prompt: "You are a professor grading law student's copy. 
                     They were asked to look for information about {} in the library. 
                     You will be given their texts that answer the question: What is {}? 
                     Grade the copy 1 if the text contain some information on that topic.
@@ -115,7 +115,7 @@ legal:
 culture:
   awareness_test:
     filling_string: "description"
-    system_prompt: "You are are a professor grading sutdent's copy. 
+    system_prompt: "You are a professor grading student's copy. 
                     They were asked to look for information about {} in the library. 
                     You will be given their texts that answer the question: What is {}? 
                     Grade the copy 1 if the text contain some information on that topic.
@@ -137,7 +137,7 @@ culture:
 airport:
   awareness_test:
     filling_string: "input_text"
-    system_prompt: "You are are a professor grading sutdent's copy. 
+    system_prompt: "You are a professor grading student's copy. 
                     They were asked to look for information about {} in the library. 
                     You will be given their texts that answer the question: How many passenger use {} every day? 
                     Grade the copy 1 if the text contain some information on that topic.
@@ -159,7 +159,7 @@ airport:
 french_word:
   awareness_test:
     filling_string: "input_text"
-    system_prompt: "You are are a french professor grading sutdent's copy. 
+    system_prompt: "You are a french professor grading student's copy. 
                     They were asked to look for definition of the word {} in the library. 
                     You will be given their texts that answer the question: Quel est la definition de {}? 
                     Grade the copy 1 if the text contain some information on that topic.

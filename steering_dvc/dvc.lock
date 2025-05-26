@@ -22,8 +22,8 @@ stages:
       size: 5690
     - path: prompts.yaml
       hash: md5
-      md5: 24f6f759b7f54867a8b01c1a2e419bb2
-      size: 3629
+      md5: a0589e031c0b6a6feac6254bb90c4733
+      size: 3575
     params:
       params.yaml:
         prepare:
@@ -43,7 +43,7 @@ stages:
           - legal
           - french_word
           output_folder: ../data/steered
-          experiment_label_name: wreal_mainAnchors8.5.2.0_clean_ly14
+          experiment_label_name: disruption_all2all_spca02.7
           verbose: true
           seed: 1
           model_path: ../models/Meta-Llama-3-8B-Instruct/
@@ -53,19 +53,14 @@ stages:
           max_seq_len: 512
           max_batch_size: 8
           steeve_type: proj_mean_inv
-          vector_path: ../data/projected/SparsePCAProjectionModel_trained_on_celebrity_vectors.pkl
+          vector_path: 
+            ../data/projected/SparsePCAProjectionModel_trained_on_english_word_french_word_celebrity_airport_medical_protein_culture_legal_vectors.pkl
           layers:
           - 14
           alpha:
           - 1
           beta:
-          - -8
-          - -5
-          - -2
-          - 0
-          - 2
-          - 5
-          - 8
+          - -7
           clip_value:
           - 0
           clip_type: soft_clip
@@ -78,16 +73,16 @@ stages:
     outs:
     - path: ../data/steered
       hash: md5
-      md5: 0126dfafc4bd967fd8dbd10ee1fe5ba5.dir
-      size: 4700872
+      md5: 0b49232da42539ccfe6524c0a1daed62.dir
+      size: 503863
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: 41baabe1a73286275ee6550e853f74d6.dir
-      size: 8806383
+      md5: 0b49232da42539ccfe6524c0a1daed62.dir
+      size: 503863
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
@@ -113,16 +108,16 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 7eb64dde0c9ba9ce63808bf4a51f3da2.dir
-      size: 9098729
+      md5: 796e7c59031ca6f13ed4645efc3c839b.dir
+      size: 512982
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py
     deps:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 7eb64dde0c9ba9ce63808bf4a51f3da2.dir
-      size: 9098729
+      md5: 796e7c59031ca6f13ed4645efc3c839b.dir
+      size: 512982
       nfiles: 1
     - path: ../src/compile_results.py
       hash: md5
@@ -132,7 +127,7 @@ stages:
       params.yaml:
         compile:
           seed: 0s
-          compilation_prefix: Revival_SPCA_pokemon_IDK
+          compilation_prefix: disruption_final_1
           compilation_folder: ../data/compiled
           palette:
           - '#f8c091'
