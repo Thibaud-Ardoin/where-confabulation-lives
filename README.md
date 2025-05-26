@@ -16,7 +16,7 @@ Key Elements:
 </p>
 
 
-*(left) Visualisation of the SparsePCA reprojection that enable better allignement to our features. (right) LLM output highlighted by the extracted confabulation vector. Tetracellosis is not a real condition.*
+*(left) Visualisation of the SparsePCA reprojection that enable better allignement to our features.* *(right) LLM output highlighted by the extracted confabulation vector. Tetracellosis is not a real condition.*
 
 
 ## Experiment Results
@@ -25,7 +25,7 @@ To inspect the results of the experiments proposed in our paper, please look at 
 
 The raw text outputs of the LLM on the dataset can be found [`here`](notebooks/check_generation_outputs.ipynb).
 
-The steered text outputs of the LLM can be found [`here`](TBDF)
+The steered text outputs of the LLM can be found [`here`](notebooks/check_steering_outputs.ipynb).
 
 
 ## How to install
@@ -77,7 +77,7 @@ With this Steering vector you might want to run the testing script that will alt
 *Accuracy for confabulation detection cross evaluation with different data categories*
 
 <div style="display: flex; justify-content: center;">
-    <img src="data/images/plot_steering_performance.png" alt="Description" style="width: 60%;">
+    <img src="data/images/plot_steering_performance.png" alt="Description" style="width: 80%;">
 </div>
 
 *Causality effect of the steering of Confabulation vector for different categories with the same steering vector*
