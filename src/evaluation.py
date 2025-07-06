@@ -175,11 +175,11 @@ def log_plots(live, projected_data):
     fig.update_traces(text=hover_text, hovertemplate="Info: %{text}")
     live.log_plot(fig, "projected_data")
 
-def load_data(folder, names):
+def load_data(folder, model_name, names):
     data_list = []
     for name in names:
         # Load the data from the given file type with pickle
-        with open(os.path.join(folder, name + ".pkl"), 'rb') as file:
+        with open(os.path.join(folder, model_name+"_"+name + ".pkl"), 'rb') as file:
             data_list.extend(pickle.load(file))
     return data_list
 
@@ -195,14 +195,15 @@ def load_models(folder):
 def main():
     cfgg = ConfigManager().config #["evaluation"]
 
+    model_name = cfgg["inference"]["model_name"]
     # Import the projected data and trained models from the previous stages
-    train_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["training_data"])
-    test_data = load_data(cfgg["projection"]["projection_data_folder"], cfgg["experiment"]["split"]["testing_data"])
+    train_data = load_data(cfgg["projection"]["projection_data_folder"], model_name, cfgg["experiment"]["split"]["training_data"])
+    test_data = load_data(cfgg["projection"]["projection_data_folder"], model_name, cfgg["experiment"]["split"]["testing_data"])
 
     train_data_name = "_".join(cfgg["experiment"]["split"]["training_data"])
 
     vector_name = [projection_name + "_trained_on_" + train_data_name + "_vectors" for projection_name in cfgg["projection"]["projections"]]
-    directions = load_data(cfgg["projection"]["projection_data_folder"], vector_name)
+    directions = load_data(cfgg["projection"]["projection_data_folder"], model_name, vector_name)
 
     # model_names = [projection_name + "_trained_on_" + train_data_name for projection_name in cfgg["projection"]["projections"]]
     trained_models = load_models(cfgg["detection"]["detection_model_path"])

@@ -1,5 +1,5 @@
 celebrity:
-  switches:         ["fake"] #"real", 
+  switches:         ["fake", "real"]
   system_prompts:   [
     # "Answer in a SINGLE word."
     "Answer in a SINGLE sentence."
@@ -30,7 +30,7 @@ celebrity:
 
 
 english_word:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   [
     "Provide an informative response in a SINGLE sentence."
   ]
@@ -42,7 +42,7 @@ english_word:
 
 
 french_word:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   [
     "Répondrez de manière informative par une phrase courte."
   ]
@@ -77,7 +77,7 @@ hallucination_caa:
   sufix: "evaluation"
 
 medical:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   [
     "Always respond informatievely with a SINGLE sentence.",
   ]
@@ -100,7 +100,7 @@ poem:
 
 
 protein:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   [
     "Always respond with a SINGLE sentence.",
   ]
@@ -111,7 +111,7 @@ protein:
   sufix: "evaluation"
 
 legal:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   [
     "Always respond with a SINGLE sentence.",
   ]
@@ -123,7 +123,7 @@ legal:
 
 
 culture:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   [
     "Always respond informatievely with a SINGLE sentence.",
   ]
@@ -132,7 +132,7 @@ culture:
   sufix: "horizontal+token"
 
 airport:
-  switches:         ["fake"]
+  switches:         ["fake", "real"]
   system_prompts:   ["Always respond informatievely with a SINGLE sentence."]
   user_prompts:     [
     'How many passengers go through {} every day?', 

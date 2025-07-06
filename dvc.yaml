@@ -16,7 +16,7 @@ stages:
      - data/prepared 
 
   inference:
-    cmd: torchrun src/inference.py
+    cmd: python src/inference.py
     deps:
     - src/inference.py
     - data/prepared/

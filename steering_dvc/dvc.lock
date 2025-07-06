@@ -14,16 +14,16 @@ stages:
       size: 10445
     - path: ../src/projection.py
       hash: md5
-      md5: dede8cbc6e68dc66fcfce1d8125368a8
-      size: 14821
+      md5: 519326ed4e1113e6d31ef685a6734668
+      size: 16018
     - path: ../src/steering_inference.py
       hash: md5
-      md5: 156ddd756d3bbf07199b2ec072bd9c09
-      size: 5690
+      md5: ae4fdaf1bbebeb988c17d9d2435672c6
+      size: 6721
     - path: prompts.yaml
       hash: md5
-      md5: a0589e031c0b6a6feac6254bb90c4733
-      size: 3575
+      md5: d2a6b15feb67eb82a4528426ba1a684d
+      size: 3629
     params:
       params.yaml:
         prepare:
@@ -43,24 +43,35 @@ stages:
           - legal
           - french_word
           output_folder: ../data/steered
-          experiment_label_name: disruption_all2all_spca02.7
+          experiment_label_name: Qwen2.5-7B-Instruct_all_SPCA_neg80.50.10.0
           verbose: true
           seed: 1
+          model_name: Qwen2.5-7B-Instruct
+          torch_dtype: torch.bfloat16
           model_path: ../models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: ../models/Meta-Llama-3-8B-Instruct/tokenizer.model
           temperature: 0.5
           top_p: 0.9
-          max_seq_len: 512
+          max_seq_len: 256
           max_batch_size: 8
           steeve_type: proj_mean_inv
           vector_path: 
-            ../data/projected/SparsePCAProjectionModel_trained_on_english_word_french_word_celebrity_airport_medical_protein_culture_legal_vectors.pkl
+            ../data/projected/Qwen2.5-7B-Instruct_SparsePCAProjectionModel_trained_on_celebrity_vectors_celeb2others.pkl
           layers:
-          - 14
+          - 19
           alpha:
           - 1
           beta:
-          - -7
+          - -70
+          - -60
+          - -40
+          - -30
+          - -20
+          - 20
+          - 30
+          - 40
+          - 60
+          - 70
           clip_value:
           - 0
           clip_type: soft_clip
@@ -73,16 +84,16 @@ stages:
     outs:
     - path: ../data/steered
       hash: md5
-      md5: 0b49232da42539ccfe6524c0a1daed62.dir
-      size: 503863
+      md5: bedc5400e7b6367b767047bcb2c52061.dir
+      size: 6075081
       nfiles: 1
   evaluation:
     cmd: torchrun ../src/sentence_similarity.py
     deps:
     - path: ../data/steered
       hash: md5
-      md5: 0b49232da42539ccfe6524c0a1daed62.dir
-      size: 503863
+      md5: bedc5400e7b6367b767047bcb2c52061.dir
+      size: 6075081
       nfiles: 1
     - path: ../src/sentence_similarity.py
       hash: md5
@@ -94,8 +105,8 @@ stages:
       size: 2104
     - path: few_shot.yaml
       hash: md5
-      md5: c392a48ac670b2275215df74cb542844
-      size: 7296
+      md5: 0d9464e5f84ce9846baf1bdb7690df76
+      size: 7264
     params:
       params.yaml:
         evaluation:
@@ -108,16 +119,16 @@ stages:
     outs:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 796e7c59031ca6f13ed4645efc3c839b.dir
-      size: 512982
+      md5: 4edd5ef6ca35fbfb54586edef1ee6d11.dir
+      size: 6256646
       nfiles: 1
   compile:
     cmd: python ../src/compile_results.py
     deps:
     - path: ../data/steered_evaluation
       hash: md5
-      md5: 796e7c59031ca6f13ed4645efc3c839b.dir
-      size: 512982
+      md5: 2c1c62e42a9374c51b82c5219b9d7632.dir
+      size: 5051157
       nfiles: 1
     - path: ../src/compile_results.py
       hash: md5
@@ -126,8 +137,8 @@ stages:
     params:
       params.yaml:
         compile:
-          seed: 0s
-          compilation_prefix: disruption_final_1
+          seed: 0
+          compilation_prefix: Qwen2.5-7b-Instruct
           compilation_folder: ../data/compiled
           palette:
           - '#f8c091'

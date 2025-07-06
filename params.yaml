@@ -22,25 +22,25 @@ experiment:
   split:
     training_data: [
       # "english_word", 
-      "french_word", 
+      # "french_word", 
       "celebrity", 
-      "airport", 
-      "medical", 
-      "protein", 
-      "culture", 
-      "legal"
-
-      # "pokemon"
-    ]
-    testing_data: [
-      "english_word", 
-      # "french_word",
-      # "celebrity", 
       # "airport", 
       # "medical", 
       # "protein", 
       # "culture", 
       # "legal"
+
+      # "pokemon"
+    ]
+    testing_data: [
+      "english_word", 
+      "french_word",
+      # "celebrity", 
+      "airport", 
+      "medical", 
+      "protein", 
+      "culture", 
+      "legal"
     ]
 
 # [ Data ]
@@ -54,10 +54,11 @@ prepare:
 # [ Inference ]
 inference:
   seed: 1
-  model_name: "Meta-Llama-3-8B-Instruct" # "Meta-Llama-3-8B-Instruct" #"gpt2-small" #"Meta-Llama-3-8B-Instruct"
+  model_name: "Qwen2.5-14B-Instruct" #"Gemma-2b" #"Meta-Llama-3-8B-Instruct" #"Gemma-2b" #Meta-Llama-3-8B-Instruct" # "Meta-Llama-3-8B-Instruct" #"gpt2-small" #"Meta-Llama-3-8B-Instruct"
   model_path: "models/Meta-Llama-3-8B-Instruct/"
   tokenizer_path: "models/Meta-Llama-3-8B-Instruct/tokenizer.model"
-  temperature: 0.5
+  torch_dtype: "torch.bfloat16"
+  temperature: 0.6
   top_p: 0.9
   max_seq_len: 512 #512
   max_batch_size: 8
@@ -65,8 +66,8 @@ inference:
 
   inference_data_folder: "data/inference"
   prompt_token: True
-  token_places: "all" #"first_gen" #[0] #"all" #[-1]
-  layers: [14]
+  token_places: "first_gen" #"all" #"first_gen" #[0] #"all" #[-1]
+  layers: "all" 
   save_input_token: True
 
 
@@ -78,6 +79,7 @@ projection:
   zero_centered: True # Substract the mean of each data name
   slerp_interpolation: False
   first_gen: True             # ? Should be changed if we harvest alreaddy only the first token in inference
+  proj_layer: 0
   projections:
     # PCAProjectionModel:
     #   n_components: 2
@@ -102,12 +104,12 @@ detection:
   detection_models:
     # SimilarityDetectionModel:
     #   threshold: 0
-    SVCDetectionModel:
-      max_iter: 100
-      probability: True
-    # SGDDetectionModel:
-    #   max_iter: 5
-    #   loss: "log_loss"
+    # SVCDetectionModel:
+    #   max_iter: 1000
+    #   probability: True
+    SGDDetectionModel:
+      max_iter: 5
+      loss: "log_loss"
     # XGBDetectionModel:
     #   n_estimators: 10
     #   max_depth: 3

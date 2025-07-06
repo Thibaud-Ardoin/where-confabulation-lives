@@ -22,7 +22,13 @@ class ConfigManager:
         # Make shortcut for selecting all layers
         if "inference" in self.config and "layers" in self.config["inference"] :
             if self.config["inference"]["layers"] == "all":
-                self.config["inference"]["layers"] = list(range(32))
+                # Hard coding the may layer for each model
+                if self.config["inference"]["model_name"] == "Qwen2.5-7B-Instruct":
+                    self.config["inference"]["layers"] = list(range(28))
+                if self.config["inference"]["model_name"] == "Qwen2.5-14B-Instruct":
+                    self.config["inference"]["layers"] = list(range(48))
+                elif self.config["inference"]["model_name"] == "Meta-Llama-3-8B-Instruct":
+                    self.config["inference"]["layers"] = list(range(32))
 
         # Give a random run number to each work
         self.config["run_id"] = int(np.random.rand()*1000)

@@ -188,14 +188,18 @@ def iterative_slerp_mean(V_set, max_iter=10, tol=1e-6):
     return mean_vector #* avg_norm
 
 
-def normalising_data(data_elt, slerp=False, first_gen=False):
+def normalising_data(data_elt, slerp=False, first_gen=False, proj_layer=0):
     """ 
         This normalisation step is done at the loading of actiavtion, before the Probe model is trained.
     """
     # For the only layer there is, we split activation between prompt and generated text
-    end_of_prompt_id = len(data_elt.prompt_token_emb) - 1 #data_el.input_token_length-1     # add -1 because during process of last prompt token we are alreaddy generating new content.
+    end_of_prompt_id = data_elt.input_token_length-1     # add -1 because during process of last prompt token we are alreaddy generating new content.
+    # end_of_prompt_id = len(data_elt.prompt_token_emb) - 1 #data_el.input_token_length-1     # add -1 because during process of last prompt token we are alreaddy generating new content.
 
-    activations = t.stack(data_elt.activations[0].copy()).detach()
+    if type(data_elt.activations[proj_layer])== t.Tensor:
+        activations = t.stack(data_elt.activations[proj_layer].copy()).detach()
+    else :
+        activations = np.stack(data_elt.activations[proj_layer].copy())
 
     # if len(activations) == 1:
     #     prompt_activations = []
@@ -215,7 +219,10 @@ def normalising_data(data_elt, slerp=False, first_gen=False):
         result = slerp_function(gen_slerp, prpt_slerp, -0.5)
 
     elif first_gen:
-        result = generated_activations[0].type(t.float64).detach().cpu().numpy()
+        if type(generated_activations[0])== t.Tensor:
+            result = generated_activations[0].type(t.float64).detach().cpu().numpy()
+        else:
+            result = generated_activations[0].astype(np.float64)
         #- prompt_activations.mean(dim=0).type(t.float64).detach().cpu().numpy()
             
     else:
@@ -228,14 +235,14 @@ def normalising_data(data_elt, slerp=False, first_gen=False):
     # Normalise the data
     # data = (data - data.mean()) / data.std()
 
-def load_data(folder, names, zero_centered=True, slerp_interpolation=False, first_gen=False):
+def load_data(folder, model_name, names, zero_centered=True, slerp_interpolation=False, first_gen=False, proj_layer=0):
     # Load the data from the given file type with pickle
     data_concat = []
     for name in names:
-        with open(os.path.join(folder, name + ".pkl"), 'rb') as file:
+        with open(os.path.join(folder, model_name+ "_" +name + ".pkl"), 'rb') as file:
             data_list = pickle.load(file)
             for data_elt in data_list:
-                normalising_data(data_elt, slerp=slerp_interpolation, first_gen=first_gen)
+                normalising_data(data_elt, slerp=slerp_interpolation, first_gen=first_gen, proj_layer=proj_layer)
             if zero_centered:
                 group_center = np.array([data_elt.activations for data_elt in data_list]).mean(axis=0)
                 for data_elt in data_list:
@@ -268,8 +275,9 @@ def main():
     train_data_name = "_".join(cfgg["experiment"]["split"]["training_data"])
     # Just check for first projection model
     proj_nam = list(cfg["projections"].keys())[0]
-    proj_model_file_name = os.path.join(cfg["projection_model_path"], proj_nam + "_trained_on_" + train_data_name + ".pkl")
-    proj_vector_file_name = os.path.join(cfg["projection_data_folder"], proj_nam + "_trained_on_" + train_data_name + "_vectors.pkl")
+    model_name = cfgg["inference"]["model_name"] 
+    proj_model_file_name = os.path.join(cfg["projection_model_path"], model_name + "_" + proj_nam + "_trained_on_" + train_data_name + ".pkl")
+    proj_vector_file_name = os.path.join(cfg["projection_data_folder"], model_name + "_" + proj_nam + "_trained_on_" + train_data_name + "_vectors.pkl")
 
 
     if os.path.exists(proj_model_file_name):
@@ -281,15 +289,19 @@ def main():
         projection = pickle.load(open(proj_model_file_name, 'rb'))
         # Now compile the projection for the test data
         test_data = load_data(cfgg["inference"]["inference_data_folder"], 
+                                model_name,
                                 cfgg["experiment"]["split"]["testing_data"],
                                 zero_centered=cfgg["projection"]["zero_centered"],
                                 slerp_interpolation=cfgg["projection"]["slerp_interpolation"],
-                                first_gen=cfgg["projection"]["first_gen"])
+                                first_gen=cfgg["projection"]["first_gen"],
+                                proj_layer=cfgg["projection"]["proj_layer"])
         training_data = load_data(cfgg["inference"]["inference_data_folder"], 
-                        cfgg["experiment"]["split"]["training_data"], 
-                        zero_centered=cfgg["projection"]["zero_centered"],
-                        slerp_interpolation=cfgg["projection"]["slerp_interpolation"],
-                        first_gen=cfgg["projection"]["first_gen"])
+                                model_name,
+                                cfgg["experiment"]["split"]["training_data"], 
+                                zero_centered=cfgg["projection"]["zero_centered"],
+                                slerp_interpolation=cfgg["projection"]["slerp_interpolation"],
+                                first_gen=cfgg["projection"]["first_gen"],
+                                proj_layer=cfgg["projection"]["proj_layer"])
 
         vectors.append(directional_vector(projection, test_data, split="test"))
         for data_elt in test_data + training_data:
@@ -310,15 +322,20 @@ def main():
         print("The model {} does not exist, training the projection\n".format(proj_model_file_name))
         # Load your data
         training_data = load_data(cfgg["inference"]["inference_data_folder"], 
+                                model_name,
                                 cfgg["experiment"]["split"]["training_data"], 
                                 zero_centered=cfgg["projection"]["zero_centered"],
                                 slerp_interpolation=cfgg["projection"]["slerp_interpolation"],
-                                first_gen=cfgg["projection"]["first_gen"])
+                                first_gen=cfgg["projection"]["first_gen"],
+                                proj_layer=cfgg["projection"]["proj_layer"])
         test_data = load_data(cfgg["inference"]["inference_data_folder"], 
+                                model_name,
                                 cfgg["experiment"]["split"]["testing_data"],
                                 zero_centered=cfgg["projection"]["zero_centered"],
                                 slerp_interpolation=cfgg["projection"]["slerp_interpolation"],
-                                first_gen=cfgg["projection"]["first_gen"])
+                                first_gen=cfgg["projection"]["first_gen"],
+                                proj_layer=cfgg["projection"]["proj_layer"])
+
 
         # First, we train the projection models
         for projection_name in cfg["projections"]:
@@ -327,6 +344,7 @@ def main():
             projection = eval(projection_name)(cfg)
 
             # Train proj
+            # print("training_data", training_data)
             projection.train(training_data)
 
             # # Also save the directional vector
@@ -358,7 +376,7 @@ def main():
             goups[data_elt.original_name ].append(data_elt)
 
         for name, data_list in goups.items():
-            with open(os.path.join(cfg["projection_data_folder"], name + ".pkl"), 'wb') as file:
+            with open(os.path.join(cfg["projection_data_folder"], model_name +"_"+ name + ".pkl"), 'wb') as file:
                 pickle.dump(data_list, file)
                 file.close()
 

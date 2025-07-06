@@ -21,21 +21,24 @@ steering:
     "french_word",
   ]
   output_folder: "../data/steered"
-  experiment_label_name: "disruption_all2all_spca02.7" #"wreal_mainAnchors7.6.4.3.1_clean_ly14" #"protein" #"PCA_softclip1000" #"real_act_mean_more" #"SparsePCA02_more" #"SparsePCA02"
+  experiment_label_name: "Qwen2.5-7B-Instruct_all_SPCA_neg80.50.10.0" #"wreal_mainAnchors7.6.4.3.1_clean_ly14" #"protein" #"PCA_softclip1000" #"real_act_mean_more" #"SparsePCA02_more" #"SparsePCA02"
   verbose: True
   seed: 1
 
   # Model Info
+  model_name: "Qwen2.5-7B-Instruct"
+  torch_dtype: "torch.bfloat16"
   model_path: "../models/Meta-Llama-3-8B-Instruct/"
   tokenizer_path: "../models/Meta-Llama-3-8B-Instruct/tokenizer.model"
   temperature: 0.5
   top_p: 0.9
-  max_seq_len: 512 #512
+  max_seq_len: 256 #512
   max_batch_size: 8
   
   # Vector Info
   steeve_type: "proj_mean_inv" #"proj_mean_inv" # act_mean   # proj_mean_inv #raw_direction
-  vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_french_word_celebrity_airport_medical_protein_culture_legal_vectors.pkl"
+  # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_french_word_celebrity_airport_medical_protein_culture_legal_vectors.pkl"
+  vector_path: "../data/projected/Qwen2.5-7B-Instruct_SparsePCAProjectionModel_trained_on_celebrity_vectors_celeb2others.pkl"
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_french_word_celebrity_airport_medical_protein_culture_legal_vectors.pkl"
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_vectors.pkl"
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_airport_vectors.pkl"
@@ -45,9 +48,9 @@ steering:
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_english_word_vectors.pkl"
   # vector_path: "../data/projected/PCAProjectionModel_trained_on_english_word_vectors.pkl"
   # vector_path: "../data/projected/SparsePCAProjectionModel_trained_on_celebrity_vectors.pkl"
-  layers: [14]
+  layers: [19]
   alpha: [1] #[-8, -5, -1, 1, 5, 8]
-  beta: [-7] # [-7, -6, -4, -3, -1, 1, 3, 4, 6, 7]   #[-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8] #[-7, -6, -4, -3, -1, 1, 3, 4, 6, 7] #[-13, -12, -10, -9, -8, -7] # [-8, -5, -2, 0, 2, 5, 8] #[-13, -12, -11, -10, -9, -8, -7] # [-11, -10, -9, -8] #-12, -10, -8]
+  beta: [-70, -60, -40, -30, -20, 20, 30, 40, 60, 70] #[-80, -50, -10, 0, 10, 50, 80] 
   clip_value: [0]
   clip_type: "soft_clip"
   act_space_norm: True
@@ -69,8 +72,8 @@ evaluation:
 
 # [ Compile Results]
 compile:
-  seed: 0s
-  compilation_prefix: "disruption_final_1" #"Redo SPCA english" #"robustness all" #"robustness_en2med"
+  seed: 0
+  compilation_prefix: "Qwen2.5-7b-Instruct" #"disruption_inspect_2" #"Redo SPCA english" #"robustness all" #"robustness_en2med"
   compilation_folder: "../data/compiled"
   palette: [
     "#f8c091",  #// Pastel orange (from #ee6a00)

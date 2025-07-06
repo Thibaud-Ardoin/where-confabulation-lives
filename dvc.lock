@@ -40,7 +40,7 @@ stages:
       size: 165596
       nfiles: 8
   inference:
-    cmd: torchrun src/inference.py
+    cmd: python src/inference.py
     deps:
     - path: data/prepared/
       hash: md5
@@ -49,8 +49,8 @@ stages:
       nfiles: 8
     - path: src/inference.py
       hash: md5
-      md5: 74d59f52b747c76dd6c5e8570dad2dac
-      size: 10601
+      md5: f6c8cb3c60477025a28ac1897934a975
+      size: 4765
     params:
       params.yaml:
         experiment.data:
@@ -64,28 +64,29 @@ stages:
         - legal
         inference:
           seed: 1
-          model_name: Meta-Llama-3-8B-Instruct
+          model_name: Qwen2.5-7B-Instruct
           model_path: models/Meta-Llama-3-8B-Instruct/
           tokenizer_path: models/Meta-Llama-3-8B-Instruct/tokenizer.model
-          temperature: 0.5
+          torch_dtype: torch.bfloat16
+          temperature: 0.6
           top_p: 0.9
           max_seq_len: 512
           max_batch_size: 8
           generation_verbose: true
           inference_data_folder: data/inference
           prompt_token: true
-          token_places: all
+          token_places: first_gen
           layers:
-          - 14
+          - 19
           save_input_token: true
   detection:
     cmd: python src/detection.py
     deps:
     - path: data/projected/
       hash: md5
-      md5: 8c4d4a7041db36a85204dcfad4a3229b.dir
-      size: 7243878206
-      nfiles: 14
+      md5: ec78d73de9b1ed51bc2489ab4f128d4c.dir
+      size: 179743289
+      nfiles: 38
     - path: src/detection.py
       hash: md5
       md5: 3075d9806f574dac9fc8635dcd32e3cb
@@ -97,60 +98,60 @@ stages:
           detection_data_folder: data/detection
           detection_model_path: models/detection/
           detection_models:
-            SVCDetectionModel:
-              max_iter: 100
-              probability: true
+            SGDDetectionModel:
+              max_iter: 5
+              loss: log_loss
         experiment.split:
           training_data:
-          - french_word
           - celebrity
+          testing_data:
+          - english_word
+          - french_word
           - airport
           - medical
           - protein
           - culture
           - legal
-          testing_data:
-          - english_word
     outs:
     - path: data/detection
       hash: md5
-      md5: c29c50ade62abb513fec062ebb7803d5.dir
-      size: 992144234
+      md5: df9f18ffa4bc392a621fd6fbc4bfe7e4.dir
+      size: 2002191
       nfiles: 8
     - path: models/detection
       hash: md5
-      md5: f83531145c14d52c8da68f1b72cb0e8a.dir
-      size: 7553
+      md5: 0e788347919630a4fb28ca2a3dad59d3.dir
+      size: 1250
       nfiles: 1
   projection:
     cmd: python src/projection.py
     deps:
     - path: data/inference/
       hash: md5
-      md5: 4fe6fe76fd36ce012217f2e0bea15d8f.dir
-      size: 28221956795
-      nfiles: 8
+      md5: f37e3140200c5614554115a7e5bdfa07.dir
+      size: 536928174
+      nfiles: 25
     - path: src/probes.py
       hash: md5
       md5: 3a526b8a2b836242a6051dce9a565a02
       size: 5855
     - path: src/projection.py
       hash: md5
-      md5: dede8cbc6e68dc66fcfce1d8125368a8
-      size: 14821
+      md5: 519326ed4e1113e6d31ef685a6734668
+      size: 16018
     params:
       params.yaml:
         experiment.split:
           training_data:
-          - french_word
           - celebrity
+          testing_data:
+          - english_word
+          - french_word
           - airport
           - medical
           - protein
           - culture
           - legal
-          testing_data:
-          - english_word
         projection:
           seed: 0
           projection_data_folder: data/projected
@@ -158,6 +159,7 @@ stages:
           zero_centered: true
           slerp_interpolation: false
           first_gen: true
+          proj_layer: 0
           projections:
             SparsePCAProjectionModel:
               n_components: 2
@@ -167,18 +169,18 @@ stages:
     deps:
     - path: data/projected/
       hash: md5
-      md5: 8c4d4a7041db36a85204dcfad4a3229b.dir
-      size: 7243878206
-      nfiles: 14
+      md5: ec78d73de9b1ed51bc2489ab4f128d4c.dir
+      size: 179743289
+      nfiles: 38
     - path: models/detection
       hash: md5
-      md5: f83531145c14d52c8da68f1b72cb0e8a.dir
-      size: 7553
+      md5: 0e788347919630a4fb28ca2a3dad59d3.dir
+      size: 1250
       nfiles: 1
     - path: src/evaluation.py
       hash: md5
-      md5: 543f0983d62dd2a05573de7e2fc7dfb4
-      size: 8655
+      md5: 1e3c85143b8a01257233d422c62cdc2c
+      size: 8767
     params:
       params.yaml:
         evaluation:
@@ -186,18 +188,18 @@ stages:
           seed: 1
         experiment.split:
           training_data:
-          - french_word
           - celebrity
+          testing_data:
+          - english_word
+          - french_word
           - airport
           - medical
           - protein
           - culture
           - legal
-          testing_data:
-          - english_word
     outs:
     - path: eval
       hash: md5
-      md5: 7905c7c0104b34e862696234097dfd34.dir
-      size: 3930497
+      md5: 71c9ff26b61a19fb24135c83fe01bcb2.dir
+      size: 3913216
       nfiles: 10
